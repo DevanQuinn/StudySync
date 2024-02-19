@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import React from 'react';
 
 const Navbar = () => {
-	const pages = [{ title: 'Study Room', path: '/studyroom' }];
+	const pages = [{ title: 'Study Room', path: '/studyroom' }, { title: 'Leaderboard', path: '/leaderboard'}];
 	return (
 		<AppBar position='fixed' color='secondary'>
 			<Toolbar>
