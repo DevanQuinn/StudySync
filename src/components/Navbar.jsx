@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import React from 'react';
 
 const Navbar = () => {
-	const pages = [{ title: 'Study Room', path: '/studyroom' }, { title: 'Leaderboard', path: '/leaderboard'}];
+	const pages = [{ title: 'Study Room', path: '/studyroom' }, 
+				{ title: 'Leaderboard', path: '/leaderboard'},
+				{title: 'Dashboard', path: '/dashboard'}];
 	return (
 		<AppBar position='fixed' color='secondary'>
 			<Toolbar>
@@ -14,7 +16,7 @@ const Navbar = () => {
 				{pages.map(page => (
 					<Typography>
 						<Link to={page.path} key={page.title}>
-							{page.title}
+							&nbsp; &nbsp; {page.title} &nbsp; &nbsp;    
 						</Link>
 					</Typography>
 				))}
