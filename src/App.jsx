@@ -5,13 +5,20 @@ import PlaylistItem from './PlaylistItem';
 const App = () => {
   const [accessToken, setAccessToken] = useState(null);
 
+  // Sample playlist data
+  const playlistData = [
+    { id: 1, title: 'Song 1', artist: 'Artist 1' },
+    { id: 2, title: 'Song 2', artist: 'Artist 2' },
+    // Add more songs as needed
+  ];
+
   // Function to handle the login with Spotify
   const handleLogin = () => {
     // Redirect users to the Spotify authorization page
     window.location.href = 'https://accounts.spotify.com/authorize' +
       '?response_type=token' +
-      '&client_id=YOUR_SPOTIFY_CLIENT_ID' + // Replace with your client ID
-      '&redirect_uri=YOUR_REDIRECT_URI' + // Specify your redirect URI
+      '&client_id=e28c33e4105c463e92a7fe625cbd507a' + // Replace with your client ID
+      '&redirect_uri=http://localhost:5173/callback' + // Specify your redirect URI
       '&scope=user-read-private%20user-read-email'; // Add the necessary scopes
   };
 
