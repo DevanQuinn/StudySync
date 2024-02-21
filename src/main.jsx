@@ -23,7 +23,6 @@ const theme = createTheme({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 	<React.StrictMode>
-		<FirebaseProvider />
 		<ThemeProvider theme={theme}>
 			<BrowserRouter>
 				<Navbar />
