@@ -2,6 +2,12 @@ import { AppBar, Container, Toolbar, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import React from 'react';
 
+/*
+TODO LIST:
+	* navbar should have a profile button with a drop down menu
+		- profile button should display pfp where applicable
+		- drop down should have links to profile page, or if not logged in, sign in page
+*/
 const Navbar = () => {
 	const pages = [{ title: 'Study Room', path: '/studyroom' }, 
 				{ title: 'Leaderboard', path: '/leaderboard'},

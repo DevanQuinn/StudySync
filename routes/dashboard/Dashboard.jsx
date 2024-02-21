@@ -23,10 +23,13 @@ function Dashboard() {
 	}
 
 	return (
+		
 		<div>
-			<Button onClick={addTasklistButtonClick}>Add new task list</Button>
-			<>There are currently {tasklistsList.length} active tasklists</>
-				{tasklistsList}
+			<>{tasklistsList}</>
+			<div>
+				<Button onClick={addTasklistButtonClick}>Add new task list</Button>
+				<h2>There are currently {tasklistsList.length} active tasklists</h2>
+			</div>
 		</div>
 	);
 }
