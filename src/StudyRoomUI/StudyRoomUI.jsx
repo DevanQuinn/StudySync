@@ -3,6 +3,7 @@ import Header from "./Header";
 import Carousel from "./ImageSlider";
 
 
+
 function StudyRoomUI() {
     return (
       <>
