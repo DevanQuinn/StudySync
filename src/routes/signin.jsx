@@ -9,21 +9,9 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import Copyright from '../components/Copyright.jsx';
 import { grey } from '@mui/material/colors';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.primary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="/">
-        StudySync
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
 export default function SignIn() {
   const handleSubmit = (event) => {
@@ -55,6 +43,7 @@ export default function SignIn() {
               margin="normal"
               required
               fullWidth
+              name='email'
               id="email"
               label="Email Address"
               autoComplete="email"
@@ -65,6 +54,7 @@ export default function SignIn() {
               margin="normal"
               required
               fullWidth
+              name='password'
               label="Password"
               type='password'
               id="password"

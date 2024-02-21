@@ -9,27 +9,16 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import Copyright from '../components/Copyright.jsx';
 import { grey } from '@mui/material/colors';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.primary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="/">
-        StudySync
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
 export default function SignUp() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     console.log({
+      username: data.get('username'),
       email: data.get('email'),
       password: data.get('password'),
     });
@@ -54,6 +43,7 @@ export default function SignUp() {
               margin="normal"
               required
               fullWidth
+              name='username'
               label="Username"
               type="username"
               id="username"
@@ -66,6 +56,7 @@ export default function SignUp() {
               margin="normal"
               required
               fullWidth
+              name='email'
               id="email"
               label="Email Address"
               autoComplete="email"
@@ -76,6 +67,7 @@ export default function SignUp() {
               margin="normal"
               required
               fullWidth
+              name='password'
               label="Password"
               type="password"
               id="password"
@@ -89,7 +81,7 @@ export default function SignUp() {
               fullWidth
               label="Confirm Password"
               type="password"
-              id="password"
+              id="confirm-password"
               placeholder='Confirm Password'
               color='primary'
               focused
