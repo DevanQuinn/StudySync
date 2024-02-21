@@ -9,7 +9,9 @@ import {
 import { ThemeProvider, createTheme } from '@mui/material';
 import './index.css';
 import Navbar from './components/Navbar.jsx';
-import SignIn from '../routes/signin.jsx';
+import SignIn from './routes/signin.jsx';
+import SignUp from './routes/signup.jsx';
+import ForgotPass from './routes/forgotpass.jsx';
 
 
 const theme = createTheme({
@@ -35,6 +37,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 				<Routes>
 					<Route path='/' element={<App />} />
 					<Route path='signin' element={<SignIn />} />
+					<Route path='forgotpass' element={<ForgotPass />} />
+					<Route path='signup' element={<SignUp />} />
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>
