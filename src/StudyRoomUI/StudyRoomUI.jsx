@@ -1,6 +1,7 @@
 import React from "react";
 import Header from "./Header"; 
-import Carousel from "./ImageSlider";
+import FavSlider from "./FavSlider";
+import InviteSlider from "./InviteSlider"
 
 
 
@@ -8,7 +9,8 @@ function StudyRoomUI() {
     return (
       <>
         <Header />
-        <Carousel />
+        <FavSlider />
+        <InviteSlider />
         {/* Other components or content here */}
       </>
     );
