@@ -15,7 +15,7 @@ function Dashboard() {
 
 	const addTasklistButtonClick = () => {
 		if (tasklistsList.length < 10) {
-			addTasklist(tasklistsList.concat(<Tasklist />));
+			addTasklist(tasklistsList.concat(<Tasklist title="yourmom"/>));
 		}
 		else {
 			alert("The maximum number of tasklists is 10!");
