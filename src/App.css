@@ -13,11 +13,9 @@
   will-change: filter;
   transition: filter 300ms;
 }
-
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
-
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -39,21 +37,13 @@
 
 .card {
   padding: 2em;
+  background-color: #fff; /* Adjust background color as needed */
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-top: 2em;
 }
 
 .read-the-docs {
   color: #888;
+  margin-top: 1em;
 }
-
-/* App.css */
-.playlists-container {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.playlist-item {
-  margin: 10px;
-}
-
-
-/* Add any additional styling as needed */
