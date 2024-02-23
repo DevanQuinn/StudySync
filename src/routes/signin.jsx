@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -14,16 +15,24 @@ import { grey } from '@mui/material/colors';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 export default function SignIn() {
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    event.preventDefault();
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+  const handleSubmit = event => {
+      event.preventDefault();
+      const data = new FormData(event.currentTarget);
+      const email = data.get('email');
+      const password = data.get('password');
+      signInWithEmailAndPassword(getAuth(), email, password)
+          .then(userCredential => {
+              // Signed in
+              const user = userCredential.user;
+              console.log(user);
+          })
+          .catch(error => {
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              console.error({ errorCode, errorMessage });
+          });
   };
-
+  
   return (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
