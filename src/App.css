@@ -40,3 +40,25 @@
 .read-the-docs {
   color: #888;
 }
+
+.main{ 
+  display: flex; 
+  justify-content: center; 
+  flex-direction: column; 
+} 
+
+
+.hero { 
+  background: linear-gradient(to right, #087b4b, #09cf52); 
+  color: #ffffff; 
+  padding: 20px 0; 
+  text-align: center; 
+  flex-grow: 1; 
+} 
+
+
+.heroInner { 
+  margin: 0 auto; 
+  max-width: 1200px; 
+  padding: 0 20px; 
+} 
