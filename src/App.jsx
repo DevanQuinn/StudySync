@@ -1,6 +1,5 @@
 // App.jsx
 import React, { useState, useEffect } from 'react';
-import PlaylistEmbed from './PlaylistEmbed';
 import './App.css'; // Make sure to import your CSS file
 
 const App = () => {
@@ -54,9 +53,20 @@ const App = () => {
     return (
       <>
         <h2>Your Playlists</h2>
-        <div className="playlists-container">
+        <div className="playlist-container">
           {userPlaylists.map(playlist => (
-            <PlaylistEmbed key={playlist.id} playlist={playlist} />
+            <div key={playlist.id} className="playlist-item">
+              <h3>{playlist.name}</h3>
+              <iframe
+                title={`Spotify Embed: Playlist - ${playlist.name}`}
+                src={`https://open.spotify.com/embed/playlist/${playlist.id}`}
+                width="300"
+                height="380"
+                frameBorder="0"
+                allowtransparency="true"
+                allow="encrypted-media"
+              ></iframe>
+            </div>
           ))}
         </div>
       </>
@@ -75,4 +85,3 @@ const App = () => {
 };
 
 export default App;
-
