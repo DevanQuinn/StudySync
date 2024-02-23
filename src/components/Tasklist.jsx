@@ -1,6 +1,7 @@
 import Draggable, {DraggableCore} from "react-draggable";
 import React, {useEffect, useState} from 'react';
 import Button from "./Button.jsx";
+import Task from "./Task.jsx";
 
 /*
 TODO LIST:
@@ -17,7 +18,7 @@ TODO LIST:
     * tasklists should be savable to a file in the database
 */
 
-const Tasklist = ({title}) => {
+const Tasklist = ({title}) => { //we want the Task component to have a button that sends the index of that task to the parent (TaskList) and removes it from the tasks array
     const [currTitle, updateTitle] = React.useState("");
     const [tasks, updateTasks] = React.useState([]);
     
@@ -26,7 +27,7 @@ const Tasklist = ({title}) => {
     });
 
     const addTask = () => {
-        updateTasks(tasks.concat(<>dummy task</>))
+        updateTasks(tasks.concat(<div><Task /></div>))
     }
 
     return (
