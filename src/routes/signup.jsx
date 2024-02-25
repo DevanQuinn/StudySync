@@ -11,6 +11,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Copyright from '../components/Copyright.jsx';
+import { useNavigate } from 'react-router-dom';
 import { grey } from '@mui/material/colors';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
@@ -21,7 +22,6 @@ export default function SignUp() {
       const email = data.get('email');
       const password = data.get('password');
       createUserWithEmailAndPassword(getAuth(), email, password)
-      createUserWithUserAndPassword()
           .then(userCredential => {
               // Signed in
               const user = userCredential.user;

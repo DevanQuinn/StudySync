@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import React from 'react';
 
 const Navbar = () => {
-	const pages = [{ title: 'Study Room', path: '/studyroom' }];
+	const pages = [{ title: 'Study Room', path: '/studyroom' }, {title: 'Pomodoro', path: '/pomodoro'}];
 	return (
 		<AppBar position='fixed' color='secondary'>
 			<Toolbar>
@@ -11,7 +11,7 @@ const Navbar = () => {
 					<Link to='/'>StudySync</Link>
 				</Typography>			
 				{pages.map(page => (
-					<Typography>
+					<Typography sx={{ mr: 5}}>
 						<Link to={page.path} key={page.title}>
 							{page.title}
 						</Link>
