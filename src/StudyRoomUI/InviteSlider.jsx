@@ -3,8 +3,10 @@ import Slider from "react-slick";
 import "../../node_modules/slick-carousel/slick/slick.css";
 import "../../node_modules/slick-carousel/slick/slick-theme.css";
 import "./Slider.css"; // Ensure this file is linked to your component
+import { useNavigate } from 'react-router-dom';
 
 function InviteSlider() {
+    const navigate = useNavigate();
     const settings = {
         dots: true,
         infinite: true,
@@ -13,6 +15,11 @@ function InviteSlider() {
         slidesToScroll: 2,
         // Additional settings as needed
     };
+    
+    const handleEnterRoom = (roomData) => {
+        navigate(`/room/${encodeURIComponent(roomData.name)}`, { state: { ...roomData } });
+    };
+    
 
     return (
         <div className="image-slider-container">
@@ -31,7 +38,7 @@ function InviteSlider() {
                             <div className="slider-item-content">
                                 <p className="slider-item-name">{d.name}</p>
                                 <p className="slider-item-description">{d.description}</p>
-                                <button className="slider-item-button">Enter Room</button>
+                                <button className="slider-item-button" onClick={() => handleEnterRoom(d)}>Enter Room</button>
                             </div>
                         </div>
                     ))}

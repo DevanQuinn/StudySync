@@ -23,7 +23,7 @@
 .slider-header h2 {
   font-size: 24px; /* Equivalent to text-2xl */
   font-weight: 600; /* Equivalent to font-semibold */
-  color: green; 
+  color: #B0DCCD; 
 }
 
 /* Custom Slider Styles */
@@ -40,20 +40,20 @@
 
 .slick-next, .slick-prev, .slick-next::before, .slick-prev::before, .slick-next::before, .slick-next::after, .slick-prev::after {
   /* background-color: green; */
-  color: green;
+  color: #B0DCCD;
   size: 40px;
 }
 
 
 
 .slick-dots li button:before {
-  color: green; /* Change the color to make the dots visible */
+  color: #B0DCCD; /* Change the color to make the dots visible */
   font-size: 12px; /* Adjust size as needed */
   opacity: 1; /* Ensure dots are fully opaque */
 }
 
 .slick-dots li.slick-active button:before {
-  color: green; /* Highlight color for the active dot */
+  color: #B0DCCD; /* Highlight color for the active dot */
 }
 
 .slider-item {
@@ -81,7 +81,7 @@
   height: 10rem; /* Approximation of Tailwind's h-56 */
   border-top-left-radius: 0.75rem; /* Approximation of rounded-t-xl */
   border-top-right-radius: 0.75rem;
-  background-color: lightgreen; /* Approximation of bg-indigo-500 */
+  background-color: #B0DCCD; /* Approximation of bg-indigo-500 */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -121,7 +121,7 @@
 }
 
 .slider-item-button {
-  background-color: green; /* Approximation of bg-indigo-500 */
+  background-color: #B0DCCD; /* Approximation of bg-indigo-500 */
   color: white;
   font-size: 1.125rem; /* Approximation of text-lg */
   padding: 0.25rem 1.5rem; /* Approximation of px-6 py-1 */
