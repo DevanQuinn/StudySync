@@ -22,8 +22,11 @@ const App = () => {
         }
       });
 
+      console.log('API Response:', response);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('Playlist Data:', data);
         setUserPlaylists(data.items);
       } else {
         console.error('Error fetching user playlists:', response.statusText);
@@ -38,6 +41,7 @@ const App = () => {
     const token = urlParams.get('access_token');
 
     if (token) {
+      console.log('Access Token:', token);
       setAccessToken(token);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
