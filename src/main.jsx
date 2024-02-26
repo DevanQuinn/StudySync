@@ -8,6 +8,7 @@ import Navbar from './components/Navbar.jsx';
 import SignIn from './routes/signin.jsx';
 import SignUp from './routes/signup.jsx';
 import ForgotPass from './routes/forgotpass.jsx';
+import EditProfile from './routes/editprofile.jsx';
 import FirebaseProvider from './components/FirebaseProvider.jsx';
 
 const theme = createTheme({
@@ -31,6 +32,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					<Route path='signin' element={<SignIn />} />
 					<Route path='forgotpass' element={<ForgotPass />} />
 					<Route path='signup' element={<SignUp />} />
+					<Route path='editprofile' element={<EditProfile />} />
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>

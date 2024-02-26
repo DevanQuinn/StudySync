@@ -21,7 +21,10 @@ const Navbar = () => {
           		</Typography>
 				<Typography color='textPrimary'>
 				  <Link to='/signin'>Sign In</Link>
-				</Typography>		
+				</Typography>	
+				<Typography color='textPrimary'>
+    				<Link to='/editprofile'>Edit Profile</Link>
+				</Typography>
 			</Toolbar>
 		</AppBar>
 	);
