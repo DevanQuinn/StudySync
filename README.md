@@ -49,10 +49,9 @@ This will start the app in development mode and open http://localhost:3000 in yo
 ## Built With
 
 - [React](https://reactjs.org/) - Frontend framework 
-- [Node.js](https://nodejs.org/) - Backend runtime environment
-- [Express](https://expressjs.com/) - Web application framework for Node.js
+- [Material-UI](https://material-ui.com/) - React UI framework 
+- [Firebase](https://firebase.google.com/) - Backend services and hosting platform
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
-- [Supabase](https://supabase.com/) - Open source alternative to Firebase
 
 ## CS307 Spring 2024 Team 36:
 
