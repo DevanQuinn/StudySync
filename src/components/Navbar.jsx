@@ -17,8 +17,7 @@ const Navbar = () => {
 			<Toolbar>
 				<Typography sx={{ mr: 5 }} color='textPrimary'>
 					<Link to='/'>StudySync</Link>
-				</Typography>
-
+				</Typography>			
 				{pages.map(page => (
 					<Typography>
 						<Link to={page.path} key={page.title}>
@@ -26,6 +25,11 @@ const Navbar = () => {
 						</Link>
 					</Typography>
 				))}
+				<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          		</Typography>
+				<Typography color='textPrimary'>
+				  <Link to='/signin'>Sign In</Link>
+				</Typography>		
 			</Toolbar>
 		</AppBar>
 	);
