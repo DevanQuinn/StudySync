@@ -1,7 +1,6 @@
 import Draggable, {DraggableCore} from "react-draggable";
 import React, {useEffect, useState} from 'react';
 import Button from "./Button.jsx";
-import Task from "./Task.jsx";
 
 /*
 TODO LIST:
@@ -26,8 +25,13 @@ const Tasklist = ({title}) => { //we want the Task component to have a button th
         updateTitle("New Tasklist");
     });
 
+    const onTaskButtonClick = (index) => {
+        console.log("hit the button");
+        updateTasks(tasks.splice(index, 1));
+    }
+
     const addTask = () => {
-        updateTasks(tasks.concat(<div><Task /></div>))
+        updateTasks(tasks.concat(<div><Task onClick={() => onTaskButtonClick(tasks.length)} /></div>))
     }
 
     return (
@@ -39,6 +43,15 @@ const Tasklist = ({title}) => { //we want the Task component to have a button th
             </div>
         </Draggable>
     );
+}
+
+const Task = ({deleteTaskButton}) => {
+    return(
+        <>
+            <>This is a task with index</>
+            <Button onClick={deleteTaskButton}> Mark Complete </ Button>
+        </>
+    )
 }
 
 export default Tasklist;
