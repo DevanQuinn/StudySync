@@ -1,5 +1,5 @@
-import Tasklist from '../../src/components/Tasklist.jsx'
-import Button from '../../src/components/Button.jsx';
+import Tasklist from '../components/Tasklist.jsx'
+import Button from '../components/Button.jsx';
 import React, {useState} from 'react'
 
 /*
