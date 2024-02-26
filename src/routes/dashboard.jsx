@@ -1,6 +1,8 @@
 import Tasklist from '../components/Tasklist.jsx'
 import Button from '../components/Button.jsx';
 import React, {useState} from 'react'
+import { Task } from '@mui/icons-material';
+import { nanoid } from 'nanoid'
 
 /*
 TODO LIST:
@@ -11,19 +13,24 @@ TODO LIST:
 */
 
 function Dashboard() {
-	const [tasklistsList, addTasklist] = React.useState([]);
+	const [tasklistsList, setTasklists] = React.useState([]);
 
 	const addTasklistButtonClick = () => {
 		if (tasklistsList.length < 10) {
-			addTasklist(tasklistsList.concat(<Tasklist title="yourmom"/>));
+			setTasklists(tasklistsList.concat(<Tasklist title="yourmom" deleteFunc={() => deleteById} id={nanoid()} />));
 		}
 		else {
 			alert("The maximum number of tasklists is 10!");
 		}
 	}
 
+	const deleteById = id => { //something is amiss here, not deleting tasklists properly
+		setFruits(oldValues => {
+		  return oldValues.filter(Tasklist => Tasklist.id !== id)
+		})
+	  }
+
 	return (
-		
 		<div>
 			<>{tasklistsList}</>
 			<div>

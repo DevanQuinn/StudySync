@@ -1,57 +1,103 @@
-import Draggable, {DraggableCore} from "react-draggable";
-import React, {useEffect, useState} from 'react';
-import Button from "./Button.jsx";
+import React, { useState } from 'react';
+import './Tasklist.css';
+import Draggable from 'react-draggable';
+import { Button } from '@mui/material';
 
-/*
-TODO LIST:
-    * tasklists should be have editable fields:
-        - Title
-        - Brief description
-        - Tasklist color
-    * tasklists should be able to store tasks
-    * tasks should be ordered
-    * tasklists should be resizable
-    * tasks should be markable as complete, and ALSO deletable. completing a task shouldn't complete it. <<This is next step, create a Task component
-    * tasklists should have a large maximum number of tasks
-    * tasklists should be collapsable, and users should be able to scroll through their tasks
-    * tasklists should be savable to a file in the database
-*/
+function Task({ task, index, completeTask, removeTask }) {
+    return (
+        <div
+            className="task"
+            style={{ textDecoration: task.completed ? "line-through" : "" }}
+        >
+            {task.title}
+            <button style={{ background: "red" }} onClick={() => removeTask(index)}>x</button>
+            <button onClick={() => completeTask(index)}>Complete</button>
+        </div>
+    );
+}
 
-const Tasklist = ({title}) => { //we want the Task component to have a button that sends the index of that task to the parent (TaskList) and removes it from the tasks array
-    const [currTitle, updateTitle] = React.useState("");
-    const [tasks, updateTasks] = React.useState([]);
-    
-    useEffect(() => {
-        updateTitle("New Tasklist");
-    });
 
-    const onTaskButtonClick = (index) => {
-        console.log("hit the button");
-        updateTasks(tasks.splice(index, 1));
-    }
 
-    const addTask = () => {
-        updateTasks(tasks.concat(<div><Task onClick={() => onTaskButtonClick(tasks.length)} /></div>))
-    }
+function Tasklist({title, deleteFunc, id}) {
+    const [tasks, setTasks] = useState([
+        {
+            title: "Grab some Pizza",
+            completed: true
+        },
+        {
+            title: "Do your workout",
+            completed: true
+        },
+        {
+            title: "Hangout with friends",
+            completed: false
+        }
+    ]);
+
+    const addTask = title => {
+        const newTasks = [...tasks, { title, completed: false }];
+        setTasks(newTasks);
+    };
+
+    const completeTask = index => {
+        const newTasks = [...tasks];
+        newTasks[index].completed = true;
+        setTasks(newTasks);
+    };
+
+    const removeTask = index => {
+        const newTasks = [...tasks];
+        newTasks.splice(index, 1);
+        setTasks(newTasks);
+    };
 
     return (
-        <Draggable handle=".handle">
-            <div>
-                <div className="handle">{currTitle}</div>
-                <div>{tasks}</div>
-                <div><Button onClick={addTask}>New Task</Button></div>
+        <Draggable>
+            <div className="todo-container">
+                <div className="header">TODO - ITEMS</div>
+                <div className="tasks">
+                    {tasks.map((task, index) => (
+                        <Task
+                        task={task}
+                        index={index}
+                        completeTask={completeTask}
+                        removeTask={removeTask}
+                        key={index}
+                        />
+                    ))}
+                </div>
+                <div className="create-task" >
+                    <CreateTask addTask={addTask} />
+                </div>
+                <Button onClick={() => deleteFunc(id)}>Delete Tasklist</Button>
             </div>
         </Draggable>
     );
 }
 
-const Task = ({deleteTaskButton}) => {
-    return(
-        <>
-            <>This is a task with index</>
-            <Button onClick={deleteTaskButton}> Mark Complete </ Button>
-        </>
-    )
+
+function CreateTask({ addTask }) {
+    const [value, setValue] = useState("");
+
+    const handleSubmit = e => {
+        e.preventDefault();
+        if (!value) return;
+        
+        addTask(value);
+        setValue("");
+    }
+    
+    return (
+        <form onSubmit={handleSubmit}>
+            <input
+                type="text"
+                className="input"
+                value={value}
+                placeholder="Add a new task"
+                onChange={e => setValue(e.target.value)}
+            />
+        </form>
+    );
 }
 
 export default Tasklist;
