@@ -17,18 +17,19 @@ function Dashboard() {
 
 	const addTasklistButtonClick = () => {
 		if (tasklistsList.length < 10) {
-			setTasklists(tasklistsList.concat(<Tasklist title="yourmom" deleteFunc={() => deleteById} id={nanoid()} />));
+			const tempid=nanoid();
+			setTasklists(tasklistsList.concat(<Tasklist title="yourmom" deleteFunc={deleteById} id={tempid}/>));
 		}
 		else {
 			alert("The maximum number of tasklists is 10!");
 		}
 	}
 
-	const deleteById = id => { //something is amiss here, not deleting tasklists properly
-		setFruits(oldValues => {
-		  return oldValues.filter(Tasklist => Tasklist.id !== id)
-		})
-	  }
+	const deleteById = id => {
+		console.log("deleting id " + id);
+		const newTasklistsList = tasklistsList.filter((tasklistsList) => tasklistsList.id = id); //This line specifically
+		setTasklists(newTasklistsList);
+	}
 
 	return (
 		<div>

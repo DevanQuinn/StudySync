@@ -51,6 +51,10 @@ function Tasklist({title, deleteFunc, id}) {
         setTasks(newTasks);
     };
 
+    const removeTasklist = () => {
+        deleteFunc(id);
+    }
+
     return (
         <Draggable>
             <div className="todo-container">
@@ -69,7 +73,7 @@ function Tasklist({title, deleteFunc, id}) {
                 <div className="create-task" >
                     <CreateTask addTask={addTask} />
                 </div>
-                <Button onClick={() => deleteFunc(id)}>Delete Tasklist</Button>
+                <Button onClick={removeTasklist}>Delete Tasklist</Button>
             </div>
         </Draggable>
     );
