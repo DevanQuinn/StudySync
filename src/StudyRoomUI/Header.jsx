@@ -9,9 +9,12 @@ import InputLabel from '@mui/material/InputLabel';
 import Input from '@mui/material/Input';
 import FormHelperText from '@mui/material/FormHelperText';
 import TextField from '@mui/material/TextField'; // For multiline input
+import { getStorage, ref, uploadBytes } from "firebase/storage";
 
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
+//import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getDownloadURL } from "firebase/storage"; // Import getDownloadURLimport { getDownloadURL } from "firebase/storage"; // Import getDownloadURL
 
 const Header = () => {
   const [open, setOpen] = useState(false);
@@ -34,6 +37,7 @@ const Header = () => {
 
   const app = initializeApp(firebaseConfig); // Initialize Firebase
   const db = getFirestore(); // Get Firestore instance
+  const storage = getStorage(app);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -57,22 +61,52 @@ const Header = () => {
   };
 
   const handleFormSubmit = async () => {
-    handleClose(); // Close the dialog
-
-    const studyRoomData = {
-      name,
-      description,
-      time: parseInt(time, 10), // Ensure time is stored as a number
-      backgroundImage, // Store image as a base64 string or URL
-      friendInvites: friendInvites.split(',').map(invite => invite.trim()), // Split string into array
-    };
-
-    try {
-      await addDoc(collection(db, "studyrooms"), studyRoomData);
-      console.log("Document written with ID: ");
-    } catch (e) {
-      console.error("Error adding document: ", e);
+    // Check if a file was selected
+    if (backgroundImage) {
+      // Define the file path and name in your storage
+      // Assuming `backgroundImage` is now a File object
+      const storageRef = ref(storage, `studyrooms/${backgroundImage.name}`);
+  
+      try {
+        // Upload the file to Firebase Storage
+        const snapshot = await uploadBytes(storageRef, backgroundImage);
+        // After successful upload, get the download URL
+        const downloadURL = await getDownloadURL(snapshot.ref);
+  
+        // Prepare your study room data, including the image URL
+        const studyRoomData = {
+          name,
+          description,
+          time: parseInt(time, 10), // Ensure time is stored as a number
+          backgroundImage: downloadURL, // Save the URL of the uploaded image
+          friendInvites: friendInvites.split(',').map(invite => invite.trim()), // Split string into array
+        };
+  
+        // Save study room data in Firestore
+        const docRef = await addDoc(collection(db, "studyrooms"), studyRoomData);
+        console.log("Document written with ID: ", docRef.id);
+      } catch (error) {
+        console.error("Error uploading image or adding document: ", error);
+      }
+    } else {
+      // Handle the case where no image is uploaded
+      const studyRoomDataWithoutImage = {
+        name,
+        description,
+        time: parseInt(time, 10),
+        friendInvites: friendInvites.split(',').map(invite => invite.trim()),
+        // Optionally handle backgroundImage differently if not uploaded
+      };
+  
+      try {
+        const docRef = await addDoc(collection(db, "studyrooms"), studyRoomDataWithoutImage);
+        console.log("Document written with ID: ", docRef.id);
+      } catch (error) {
+        console.error("Error adding document without an image: ", error);
+      }
     }
+  
+    handleClose(); // Close the dialog
   };
 
   return (

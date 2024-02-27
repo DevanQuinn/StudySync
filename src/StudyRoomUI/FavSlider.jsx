@@ -1,64 +1,69 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
+import { useNavigate } from 'react-router-dom';
+import { collection, getDocs, getFirestore } from 'firebase/firestore';
 import "../../node_modules/slick-carousel/slick/slick.css";
 import "../../node_modules/slick-carousel/slick/slick-theme.css";
-import "./Slider.css"; // Ensure this file is linked to your component
-import { useNavigate } from 'react-router-dom';
+import "./Slider.css";
 
 function FavSlider() {
+    const [favRooms, setFavRooms] = useState([]);
     const navigate = useNavigate();
-    const settings = {
+    // Initialize settings state with default values
+    const [sliderSettings, setSliderSettings] = useState({
         dots: true,
         infinite: true,
         speed: 500,
         slidesToShow: 2,
         slidesToScroll: 2,
-        // Additional settings as needed
-    };
+    });
 
     const handleEnterRoom = (roomData) => {
         navigate(`/room/${encodeURIComponent(roomData.name)}`, { state: { ...roomData } });
     };
 
+    useEffect(() => {
+        const fetchFavRooms = async () => {
+            const db = getFirestore();
+            const querySnapshot = await getDocs(collection(db, "favstudyroom"));
+            const rooms = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setFavRooms(rooms);
+
+            // Update slidesToShow and slidesToScroll based on fetched rooms
+            const visibleSlides = Math.min(rooms.length, 2); // Assuming you want up to 2 slides visible at most
+            setSliderSettings(prevSettings => ({
+                ...prevSettings,
+                slidesToShow: visibleSlides,
+                slidesToScroll: visibleSlides > 1 ? 2 : 1 // Scroll by 2 if more than 1 slide, else scroll by 1
+            }));
+        };
+
+        fetchFavRooms().catch(console.error);
+    }, []);
+
     return (
         <div className="image-slider-container">
-            {/* Header Text */}
             <div className="slider-header">
                 <h2>Favorite Rooms</h2>
             </div>
-
             <div className="slider-wrapper">
-                <Slider {...settings} className="custom-slider">
-                    {data.map((d,idx) => (
+                <Slider {...sliderSettings} className="custom-slider">
+                    {favRooms.map((room, idx) => (
                         <div className="slider-item" key={idx}>
                             <div className="slider-item-top">
-                                <img src={d.img} className="slider-item-image"/>
+                                <img src={room.img} alt="Room" className="slider-item-image"/>
                             </div>
                             <div className="slider-item-content">
-                                <p className="slider-item-name">{d.name}</p>
-                                <p className="slider-item-description">{d.description}</p>
-                                <button className="slider-item-button" onClick={() => handleEnterRoom(d)}>Restart Room</button>
+                                <p className="slider-item-name">{room.name}</p>
+                                <p className="slider-item-description">{room.description}</p>
+                                <button className="slider-item-button" onClick={() => handleEnterRoom(room)}>Restart Room</button>
                             </div>
                         </div>
                     ))}
                 </Slider>
             </div>
         </div>
-        
     );
 }
-
-const data = [
-    {
-        name: 'Sophie Konger',
-        img: '../assets/carouselPrev.jpg',
-        description: 'Math Study Room',
-    },
-    {
-        name: 'Sophie Konger',
-        img: '../assets/carouselPrev.jpg',
-        description: 'English Study Room adkjohfoahn;iefhaoidfhnisdfoidfhadfhoefholaefholfhoueiefhoaefhiaefhowf',
-    }
-]
 
 export default FavSlider;
