@@ -23,4 +23,5 @@ const FirebaseProvider = ({ children }) => {
 	return children;
 };
 
+
 export default FirebaseProvider;
