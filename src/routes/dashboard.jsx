@@ -17,23 +17,35 @@ function Dashboard() {
 
 	const addTasklistButtonClick = () => {
 		if (tasklistsList.length < 10) {
-			const tempid=nanoid();
-			setTasklists(tasklistsList.concat(<Tasklist title="yourmom" deleteFunc={deleteById} id={tempid}/>));
+			let newTasklistsList = [...tasklistsList, {title:"yourmom"}];
+			setTasklists(newTasklistsList);
 		}
 		else {
 			alert("The maximum number of tasklists is 10!");
 		}
 	}
 
-	const deleteById = id => {
-		console.log("deleting id " + id);
-		const newTasklistsList = tasklistsList.filter((tasklistsList) => tasklistsList.id = id); //This line specifically
+	const deleteByIndex = index => { //curiously, the old and new tasklistlists have the right length 
+		console.log(tasklistsList); //however, regardless of how something is deleted, the tasklistlist is truncated to one tasklist
+		console.log("deleting index " + index); //could be because splice mutates, whereas filter does not. look into this?
+		let newTasklistsList = [...tasklistsList];
+		newTasklistsList = tasklistsList.splice(index, 1);
 		setTasklists(newTasklistsList);
+		console.log(tasklistsList);
 	}
 
 	return (
 		<div>
-			<>{tasklistsList}</>
+			<>{tasklistsList.map((tasklist, index) => (
+                        <Tasklist
+						id={nanoid()}
+                        title={tasklist.title}
+                        index={index}
+                        deletefunc={deleteByIndex}
+                        tasklistlength={tasklistsList.length}
+                        key={index}
+                        />
+                    ))}</>
 			<div>
 				<Button onClick={addTasklistButtonClick}>Add new task list</Button>
 				<h2>There are currently {tasklistsList.length} active tasklists</h2>

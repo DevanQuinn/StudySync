@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Tasklist.css';
 import Draggable from 'react-draggable';
 import { Button } from '@mui/material';
@@ -18,7 +18,7 @@ function Task({ task, index, completeTask, removeTask }) {
 
 
 
-function Tasklist({title, deleteFunc, id}) {
+function Tasklist({title, deletefunc, index, tasklistlength, id}) {
     const [tasks, setTasks] = useState([
         {
             title: "Grab some Pizza",
@@ -33,6 +33,10 @@ function Tasklist({title, deleteFunc, id}) {
             completed: false
         }
     ]);
+
+    useEffect(() => {
+        console.log("child with index " + index + "updated their tasklistlength to " + tasklistlength);
+    }, [tasklistlength]);
 
     const addTask = title => {
         const newTasks = [...tasks, { title, completed: false }];
@@ -51,14 +55,10 @@ function Tasklist({title, deleteFunc, id}) {
         setTasks(newTasks);
     };
 
-    const removeTasklist = () => {
-        deleteFunc(id);
-    }
-
     return (
         <Draggable>
             <div className="todo-container">
-                <div className="header">TODO - ITEMS</div>
+                <div className="header">{title}</div>
                 <div className="tasks">
                     {tasks.map((task, index) => (
                         <Task
@@ -73,7 +73,7 @@ function Tasklist({title, deleteFunc, id}) {
                 <div className="create-task" >
                     <CreateTask addTask={addTask} />
                 </div>
-                <Button onClick={removeTasklist}>Delete Tasklist</Button>
+                <Button onClick={() => deletefunc(index)}>Delete Tasklist</Button>
             </div>
         </Draggable>
     );
