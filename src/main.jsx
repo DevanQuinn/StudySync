@@ -8,7 +8,6 @@ import Navbar from './components/Navbar.jsx';
 import SignIn from './routes/signin.jsx';
 import SignUp from './routes/signup.jsx';
 import ForgotPass from './routes/forgotpass.jsx';
-import FirebaseProvider from './components/FirebaseProvider.jsx';
 
 const theme = createTheme({
 	palette: {
@@ -23,7 +22,6 @@ const theme = createTheme({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 	<React.StrictMode>
-		<FirebaseProvider />
 		<ThemeProvider theme={theme}>
 			<BrowserRouter>
 				<Navbar />
