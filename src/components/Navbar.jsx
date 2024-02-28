@@ -32,6 +32,9 @@ const Navbar = () => {
 				<Typography color='textPrimary'>
     				<Link to='/editprofile'>Edit Profile</Link>
 				</Typography>
+				<Typography color='textPrimary'>
+                    <Link to='/flashcard'>Flashcards</Link>
+                </Typography>
 			</Toolbar>
 		</AppBar>
 	);
