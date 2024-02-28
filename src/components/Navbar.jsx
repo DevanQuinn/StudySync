@@ -27,14 +27,14 @@ const Navbar = () => {
 					sx={{ flexGrow: 1 }}
 				></Typography>
 				<Typography sx={{ mr: 2 }} color='textPrimary'>
-				  <Link to='/signin'>Sign In</Link>
-				</Typography>	
+					<Link to='/signin'>Sign In</Link>
+				</Typography>
 				<Typography sx={{ mr: 2 }} color='textPrimary'>
-    				<Link to='/editprofile'>Edit Profile</Link>
+					<Link to='/editprofile'>Edit Profile</Link>
 				</Typography>
 				<Typography color='textPrimary'>
-                    <Link to='/flashcards'>Flashcards</Link>
-                </Typography>
+					<Link to='/flashcards'>Flashcards</Link>
+				</Typography>
 			</Toolbar>
 		</AppBar>
 	);
