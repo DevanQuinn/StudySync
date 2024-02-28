@@ -3,56 +3,38 @@ import './Tasklist.css';
 import Draggable from 'react-draggable';
 import { Button } from '@mui/material';
 
-function Task({ task, index, completeTask, removeTask }) {
+function Task({ task, taskID, tasklistID, completeTask, removeTask }) {
     return (
         <div
             className="task"
             style={{ textDecoration: task.completed ? "line-through" : "" }}
         >
             {task.title}
-            <button style={{ background: "red" }} onClick={() => removeTask(index)}>x</button>
-            <button onClick={() => completeTask(index)}>Complete</button>
+            <button style={{ background: "red" }} onClick={() => removeTask(tasklistID, taskID)}>x</button>
+            <button onClick={() => completeTask(tasklistID, taskID)}>Complete</button>
         </div>
     );
 }
 
 
 
-function Tasklist({title, deletefunc, index, tasklistlength, id}) {
-    const [tasks, setTasks] = useState([
-        {
-            title: "Grab some Pizza",
-            completed: true
-        },
-        {
-            title: "Do your workout",
-            completed: true
-        },
-        {
-            title: "Hangout with friends",
-            completed: false
-        }
-    ]);
-
+function Tasklist({title, deletefunc, id, tasksProp, addtaskfunc, deletetaskfunc}) { //not updating on tasksProp updating. or maybe tasksProp isnt updating?
     useEffect(() => {
-        console.log("child with index " + index + "updated their tasklistlength to " + tasklistlength);
-    }, [tasklistlength]);
+        console.log(tasksProp);
+        setTasks(tasksProp[id]);
+        console.log(tasks);
+    }, [JSON.stringify(tasksProp)]);
 
     const addTask = title => {
-        const newTasks = [...tasks, { title, completed: false }];
-        setTasks(newTasks);
+        addtaskfunc(id, title);
     };
 
-    const completeTask = index => {
-        const newTasks = [...tasks];
-        newTasks[index].completed = true;
-        setTasks(newTasks);
+    const completeTask = (tasklistID, taskID) => {
+        completetaskfunc(tasklistID, taskID);
     };
 
-    const removeTask = index => {
-        const newTasks = [...tasks];
-        newTasks.splice(index, 1);
-        setTasks(newTasks);
+    const removeTask = (tasklistID, taskID) => {
+        deletetaskfunc(tasklistID, taskID);
     };
 
     return (
@@ -60,20 +42,22 @@ function Tasklist({title, deletefunc, index, tasklistlength, id}) {
             <div className="todo-container">
                 <div className="header">{title}</div>
                 <div className="tasks">
-                    {tasks.map((task, index) => (
+                    {tasks.map((task, index, taskID) => (
                         <Task
                         task={task}
-                        index={index}
+                        taskID={taskID}
+                        tasklistID={id}
                         completeTask={completeTask}
                         removeTask={removeTask}
                         key={index}
                         />
                     ))}
                 </div>
+                <>{tasks.length} tasks left!</>
                 <div className="create-task" >
                     <CreateTask addTask={addTask} />
                 </div>
-                <Button onClick={() => deletefunc(index)}>Delete Tasklist</Button>
+                <Button onClick={() => deletefunc(id)}>Delete Tasklist</Button>
             </div>
         </Draggable>
     );

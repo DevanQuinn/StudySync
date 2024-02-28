@@ -6,48 +6,90 @@ import { nanoid } from 'nanoid'
 
 /*
 TODO LIST:
-	* Tasklists should be saved to the database automatically and be per-user
-	* on loading the page, the tasklistsList should load from the database all previous tasklists
-	* Users should be able to choose a wallpaper and have it persist
-	* The addTasklistButton should not move when adding a new tasklist
+	* store all tasks in the dashboard component and pass as props the relevant tasks to the tasklist
+	* debug the above procedure
 */
 
 function Dashboard() {
 	const [tasklistsList, setTasklists] = React.useState([]);
+	const [tasks, setTasks] = React.useState({})
 
-	const addTasklistButtonClick = () => {
+	const addTasklistButtonClick = (title) => {
 		if (tasklistsList.length < 10) {
-			let newTasklistsList = [...tasklistsList, {title:"yourmom"}];
+			let id = nanoid();
+			let newTasklistsList = [...tasklistsList, {title:title + id, id:id}];
 			setTasklists(newTasklistsList);
+			let newTasks = tasks;
+			newTasks[id] = []
+			console.log(newTasks);
+			setTasks(newTasks);
 		}
 		else {
 			alert("The maximum number of tasklists is 10!");
 		}
 	}
 
-	const deleteByIndex = index => { //curiously, the old and new tasklistlists have the right length 
-		console.log(tasklistsList); //however, regardless of how something is deleted, the tasklistlist is truncated to one tasklist
-		console.log("deleting index " + index); //could be because splice mutates, whereas filter does not. look into this?
-		let newTasklistsList = [...tasklistsList];
-		newTasklistsList = tasklistsList.splice(index, 1);
-		setTasklists(newTasklistsList);
+	const deleteByIndex = id => {
 		console.log(tasklistsList);
+		console.log("deleting index " + id);
+		const newTasklistsList = tasklistsList.filter((tasklist) => {
+		if (tasklist.id != id) {
+			console.log("tasklist passed. ID: " + tasklist.id);
+			return true;
+		}
+		console.log("tasklist failed. ID: " + tasklist.id);
+		return false;
+		});
+		console.log(newTasklistsList);
+		setTasklists(newTasklistsList);
+	}
+
+	const addTaskToTasklist = (tasklistID, title) => {
+		let tempid = nanoid();
+		let newTasks = tasks; //newtasks is a dictionary where key is tasklistID and value is an array of dictionaries, where each dict is a task
+		console.log(tasks[tasklistID]);
+		const newTasksArray = tasks[tasklistID] //newTasksArray is an array of dicts, where each dict is a task, with the new task appended
+		newTasksArray.push({title:title, taskID:tempid, completed:false}); 
+		newTasks[tasklistID] = newTasksArray; //setting the array that corresponds with the tasklistID to the updated array
+		setTasks(newTasks); //saving to the state
+		
+	}
+
+	const completeTask = (tasklistID, taskID) => {
+		let newTasks = tasks;
+		newTasks = newTasks[tasklistID].filter((task) => {
+			if (task.taskID = taskID) {
+				task.completed = true;
+			}
+			return true;
+		})
+		setTasks(newTasks);
+	}
+
+	const deleteTaskFromTasklist = (tasklistID, taskID) => {
+		let newTasks = tasks;
+		let newTasksArray = tasks[tasklistID].filter((task) => task.taskID != taskID);
+		newTasks[tasklistID] = newTasksArray;
+		setTasks(newTasks);
 	}
 
 	return (
 		<div>
 			<>{tasklistsList.map((tasklist, index) => (
                         <Tasklist
-						id={nanoid()}
+						id={tasklist.id}
                         title={tasklist.title}
-                        index={index}
                         deletefunc={deleteByIndex}
                         tasklistlength={tasklistsList.length}
                         key={index}
+						tasksProp={tasks}
+						addtaskfunc={addTaskToTasklist}
+						deletetaskfunc={deleteTaskFromTasklist}
+						completetaskfunc={completeTask}
                         />
                     ))}</>
 			<div>
-				<Button onClick={addTasklistButtonClick}>Add new task list</Button>
+				<Button onClick={() => {addTasklistButtonClick("dummytitle")}}>Add new task list</Button>
 				<h2>There are currently {tasklistsList.length} active tasklists</h2>
 			</div>
 		</div>
