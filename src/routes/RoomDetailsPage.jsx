@@ -1,6 +1,5 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import '../StudyRoomUI/RoomDetailsPage.css'
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
 
@@ -53,7 +52,7 @@ function RoomDetailsPage() {
 
    
     return (
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100vw', height: '100vh', backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div style={{ position: 'fixed', top: 60, left: 0, width: '100vw', height: '100vh', backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
             <div style={{ padding: '20px' }}>
                 <h1 style={textStyle}>{name}</h1>
                 <p style={textStyle}>{description}</p>
