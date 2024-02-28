@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -15,6 +16,7 @@ import { grey } from '@mui/material/colors';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 export default function SignIn() {
+  const [showPassword, setShowPassword] = useState(false);
   const handleSubmit = event => {
       event.preventDefault();
       const data = new FormData(event.currentTarget);
@@ -29,7 +31,7 @@ export default function SignIn() {
           .catch(error => {
               const errorCode = error.code;
               const errorMessage = error.message;
-              console.error({ errorCode, errorMessage });
+              alert(error.message);
           });
   };
   
@@ -57,7 +59,6 @@ export default function SignIn() {
               label="Email Address"
               autoComplete="email"
               placeholder='Email Address'
-              focused
             />
             <TextField
               margin="normal"
@@ -65,12 +66,11 @@ export default function SignIn() {
               fullWidth
               name='password'
               label="Password"
-              type='password'
+              type={showPassword ? 'text' : 'password'}
               id="password"
               placeholder='Password'
               autoComplete="current-password"
               color='primary'
-              focused
             />
             <FormControlLabel
               control={<Checkbox value="remember" sx={{
@@ -80,6 +80,19 @@ export default function SignIn() {
                 },
               }} />}
               label="Remember me"
+              variant="filled"
+            />
+            <FormControlLabel
+              control={<Checkbox value="showPass" sx={{
+                color: grey[900],
+                '&Mui.checked': {
+                  color: grey[900],
+                },
+              }} />}
+              label="Show Password"
+              onChange={() =>
+                setShowPassword((prev) => !prev)
+            }
               variant="filled"
             />
             <Button

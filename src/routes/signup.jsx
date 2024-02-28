@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -11,28 +12,33 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Copyright from '../components/Copyright.jsx';
-import { useNavigate } from 'react-router-dom';
 import { grey } from '@mui/material/colors';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 export default function SignUp() {
+  const [showPassword, setShowPassword] = useState(false);
   const handleSubmit = event => {
       event.preventDefault();
       const data = new FormData(event.currentTarget);
       const email = data.get('email');
       const password = data.get('password');
-      createUserWithEmailAndPassword(getAuth(), email, password)
-          .then(userCredential => {
-              // Signed in
-              const user = userCredential.user;
-              console.log(user);
-              // ...
-          })
-          .catch(error => {
-              const errorCode = error.code;
-              const errorMessage = error.message;
-              console.error({ errorCode, errorMessage });
-          });
+      if(password != data.get('confirm-password')){
+        alert("Error: Passwords must match")
+      }
+      else{
+        createUserWithEmailAndPassword(getAuth(), email, password)
+            .then(userCredential => {
+                // Signed in
+                const user = userCredential.user;
+                console.log(user);
+                // ...
+            })
+            .catch(error => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                alert(errorMessage)
+            });
+        }
   };
 
   return (
@@ -61,7 +67,6 @@ export default function SignUp() {
               placeholder='Username'
               autoComplete="current-username"
               color='primary'
-              focused
             />
             <TextField
               margin="normal"
@@ -72,7 +77,6 @@ export default function SignUp() {
               label="Email Address"
               autoComplete="email"
               placeholder='Email Address'
-              focused
             />
             <TextField
               margin="normal"
@@ -80,22 +84,34 @@ export default function SignUp() {
               fullWidth
               name='password'
               label="Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               id="password"
               placeholder='Password'
               color='primary'
-              focused
             />
             <TextField
               margin="normal"
               required
               fullWidth
+              name="confirm-password"
               label="Confirm Password"
               type="password"
               id="confirm-password"
               placeholder='Confirm Password'
               color='primary'
-              focused
+            />
+             <FormControlLabel
+              control={<Checkbox value="showPass" sx={{
+                color: grey[900],
+                '&Mui.checked': {
+                  color: grey[900],
+                },
+              }} />}
+              label="Show Password"
+              onChange={() =>
+                setShowPassword((prev) => !prev)
+            }
+              variant="filled"
             />
             <Button
               type="submit"
