@@ -10,6 +10,7 @@ import SignUp from './routes/signup.jsx';
 import ForgotPass from './routes/forgotpass.jsx';
 import EditProfile from './routes/editprofile.jsx';
 import FirebaseProvider from './components/FirebaseProvider.jsx';
+import Flashcards from './routes/flashcards.jsx';
 
 const theme = createTheme({
 	palette: {
@@ -34,6 +35,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					<Route path='forgotpass' element={<ForgotPass />} />
 					<Route path='signup' element={<SignUp />} />
 					<Route path='editprofile' element={<EditProfile />} />
+					<Route path='flashcards' element={<Flashcards />} />
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>
