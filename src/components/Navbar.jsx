@@ -26,8 +26,14 @@ const Navbar = () => {
 					component='div'
 					sx={{ flexGrow: 1 }}
 				></Typography>
-				<Typography color='textPrimary'>
+				<Typography sx={{ mr: 2 }} color='textPrimary'>
 					<Link to='/signin'>Sign In</Link>
+				</Typography>
+				<Typography sx={{ mr: 2 }} color='textPrimary'>
+					<Link to='/editprofile'>Edit Profile</Link>
+				</Typography>
+				<Typography color='textPrimary'>
+					<Link to='/flashcards'>Flashcards</Link>
 				</Typography>
 			</Toolbar>
 		</AppBar>
