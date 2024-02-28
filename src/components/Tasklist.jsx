@@ -18,12 +18,12 @@ function Task({ task, taskID, tasklistID, completeTask, removeTask }) {
 
 
 
-function Tasklist({title, deletefunc, id, tasksProp, addtaskfunc, deletetaskfunc}) { //not updating on tasksProp updating. or maybe tasksProp isnt updating?
+function Tasklist({title, deletefunc, id, tasksProp, addtaskfunc, deletetaskfunc, completetaskfunc}) { //not updating on tasksProp updating. or maybe tasksProp isnt updating?
     useEffect(() => {
         console.log(tasksProp);
         setTasks(tasksProp[id]);
         console.log(tasks);
-    }, [JSON.stringify(tasksProp)]);
+    }, [JSON.stringify(tasksProp[id])]);
 
     const addTask = title => {
         addtaskfunc(id, title);
