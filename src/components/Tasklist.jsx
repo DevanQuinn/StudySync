@@ -10,8 +10,8 @@ function Task({ task, taskID, tasklistID, completeTask, removeTask }) {
             style={{ textDecoration: task.completed ? "line-through" : "" }}
         >
             {task.title}
-            <button style={{ background: "red" }} onClick={() => removeTask(tasklistID, taskID)}>x</button>
-            <button onClick={() => completeTask(tasklistID, taskID)}>Complete</button>
+            <button style={{ background: "red" }} onClick={removeTask}>x</button>
+            <button onClick={completeTask}>Complete</button>
         </div>
     );
 }
@@ -20,21 +20,11 @@ function Task({ task, taskID, tasklistID, completeTask, removeTask }) {
 
 function Tasklist({title, deletefunc, id, tasksProp, addtaskfunc, deletetaskfunc, completetaskfunc}) { //not updating on tasksProp updating. or maybe tasksProp isnt updating?
     useEffect(() => {
-        console.log(tasksProp);
-        setTasks(tasksProp[id]);
-        console.log(tasks);
-    }, [JSON.stringify(tasksProp[id])]);
+        console.log("props updated. tasklist rerendering");
+    }, [JSON.stringify(tasksProp)]);
 
-    const addTask = title => {
-        addtaskfunc(id, title);
-    };
-
-    const completeTask = (tasklistID, taskID) => {
-        completetaskfunc(tasklistID, taskID);
-    };
-
-    const removeTask = (tasklistID, taskID) => {
-        deletetaskfunc(tasklistID, taskID);
+    const addTask = taskTitle => {
+        addtaskfunc(id, taskTitle);
     };
 
     return (
@@ -42,18 +32,21 @@ function Tasklist({title, deletefunc, id, tasksProp, addtaskfunc, deletetaskfunc
             <div className="todo-container">
                 <div className="header">{title}</div>
                 <div className="tasks">
-                    {tasks.map((task, index, taskID) => (
+                    {tasksProp.map((task) => { //not properly mapping
+                        console.log("mapping task: ");
+                        console.log(task);
+                        return (
                         <Task
                         task={task}
-                        taskID={taskID}
                         tasklistID={id}
-                        completeTask={completeTask}
-                        removeTask={removeTask}
-                        key={index}
+                        completeTask={() => completetaskfunc(id, task.taskID)}
+                        removeTask={() => deletetaskfunc(id, task.taskID)}
+                        key={task.taskID}
                         />
-                    ))}
+                    )}
+                    )}
                 </div>
-                <>{tasks.length} tasks left!</>
+                <>{tasksProp.length} tasks left!</>
                 <div className="create-task" >
                     <CreateTask addTask={addTask} />
                 </div>

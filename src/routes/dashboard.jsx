@@ -1,6 +1,6 @@
 import Tasklist from '../components/Tasklist.jsx'
 import Button from '../components/Button.jsx';
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { Task } from '@mui/icons-material';
 import { nanoid } from 'nanoid'
 
@@ -13,6 +13,11 @@ TODO LIST:
 function Dashboard() {
 	const [tasklistsList, setTasklists] = React.useState([]);
 	const [tasks, setTasks] = React.useState({})
+
+	useEffect(() => {
+		console.log("props updated. rerendering dashboard.");
+		console.log(tasks);
+	}, [JSON.stringify(tasks)]);
 
 	const addTasklistButtonClick = (title) => {
 		if (tasklistsList.length < 10) {
@@ -27,7 +32,7 @@ function Dashboard() {
 		else {
 			alert("The maximum number of tasklists is 10!");
 		}
-	}
+	};
 
 	const deleteByIndex = id => {
 		console.log(tasklistsList);
@@ -47,30 +52,31 @@ function Dashboard() {
 	const addTaskToTasklist = (tasklistID, title) => {
 		let tempid = nanoid();
 		let newTasks = tasks; //newtasks is a dictionary where key is tasklistID and value is an array of dictionaries, where each dict is a task
-		console.log(tasks[tasklistID]);
 		const newTasksArray = tasks[tasklistID] //newTasksArray is an array of dicts, where each dict is a task, with the new task appended
 		newTasksArray.push({title:title, taskID:tempid, completed:false}); 
 		newTasks[tasklistID] = newTasksArray; //setting the array that corresponds with the tasklistID to the updated array
-		setTasks(newTasks); //saving to the state
-		
+		setTasks(JSON.parse(JSON.stringify(newTasks))); //saving to the state
 	}
 
 	const completeTask = (tasklistID, taskID) => {
 		let newTasks = tasks;
-		newTasks = newTasks[tasklistID].filter((task) => {
+		let newTasksArray = tasks[tasklistID];
+		newTasksArray = newTasksArray.filter((task) => {
 			if (task.taskID = taskID) {
 				task.completed = true;
 			}
 			return true;
-		})
-		setTasks(newTasks);
+		});
+		newTasks[tasklistID] = newTasksArray;
+		setTasks(JSON.parse(JSON.stringify(newTasks)));
 	}
 
 	const deleteTaskFromTasklist = (tasklistID, taskID) => {
 		let newTasks = tasks;
-		let newTasksArray = tasks[tasklistID].filter((task) => task.taskID != taskID);
+		let newTasksArray = tasks[tasklistID];
+		newTasksArray = newTasksArray.filter((task) => task.taskID != taskID);
 		newTasks[tasklistID] = newTasksArray;
-		setTasks(newTasks);
+		setTasks(JSON.parse(JSON.stringify(newTasks)));
 	}
 
 	return (
@@ -82,7 +88,7 @@ function Dashboard() {
                         deletefunc={deleteByIndex}
                         tasklistlength={tasklistsList.length}
                         key={index}
-						tasksProp={tasks}
+						tasksProp={tasks[tasklist.id]}
 						addtaskfunc={addTaskToTasklist}
 						deletetaskfunc={deleteTaskFromTasklist}
 						completetaskfunc={completeTask}
