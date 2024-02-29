@@ -9,7 +9,8 @@ import SignIn from './routes/signin.jsx';
 import SignUp from './routes/signup.jsx';
 import ForgotPass from './routes/forgotpass.jsx';
 import Pomodoro from './routes/pomodoro.jsx';
-import FirebaseProvider from './components/FirebaseProvider.jsx';
+import EditProfile from './routes/editprofile.jsx';
+import Flashcards from './routes/flashcards.jsx';
 
 const theme = createTheme({
 	palette: {
@@ -24,7 +25,7 @@ const theme = createTheme({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 	<React.StrictMode>
-		<FirebaseProvider/>
+		<FirebaseProvider />
 		<ThemeProvider theme={theme}>
 			<BrowserRouter>
 				<Navbar />
@@ -33,7 +34,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					<Route path='signin' element={<SignIn />} />
 					<Route path='forgotpass' element={<ForgotPass />} />
 					<Route path='signup' element={<SignUp />} />
-					<Route path='pomodoro' element={<Pomodoro />} />
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>
