@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
-
+import { getAuth } from 'firebase/auth'; // Import getAuth
 
 function RoomDetailsPage() {
     const location = useLocation();
@@ -15,24 +15,22 @@ function RoomDetailsPage() {
 
 
     const handleAddToFavorites = async () => {
-        console.log(`Adding ${name} to favorites`);
-        // Assuming you have the user's information available, e.g., their ID or email
-        const userId = "user123"; // This should be dynamically fetched based on the user's session
-    
+        const auth = getAuth(); // Initialize Firebase Auth
+        const user = auth.currentUser; // Get the current user
+      
         const favRoomData = {
-            userId, // Add the user ID to associate this favorite room with the user
-            roomName: name, // Room name fetched from location.state
-            description, // Room description fetched from location.state
-            img, // Room image URL fetched from location.state
-            // You can add more room details here as needed
-        };
+            name,
+            description,
+            time: parseInt(time, 10),
+            backgroundImage: downloadURL,
+            friendInvites: friendInvites.split(',').map(invite => invite.trim()),
+          };
 
-        
-    
         const db = getFirestore(); // Get Firestore instance, make sure Firebase is initialized
     
         try {
-            await addDoc(collection(db, "favstudyroom"), favRoomData);
+            const collectionName = `${userId}_favstudyroom`;
+            await addDoc(collection(db, collectionName), favRoomData);
             console.log("Favorite room added with ID: ");
         } catch (e) {
             console.error("Error adding favorite room: ", e);

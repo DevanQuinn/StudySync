@@ -10,6 +10,8 @@ import SignUp from './routes/signup.jsx';
 import ForgotPass from './routes/forgotpass.jsx';
 import EditProfile from './routes/editprofile.jsx';
 import Flashcards from './routes/flashcards.jsx';
+import StudyRoomUI from './routes/StudyRoomUI.jsx';
+import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 
 const theme = createTheme({
 	palette: {
@@ -34,6 +36,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					<Route path='signup' element={<SignUp />} />
 					<Route path='editprofile' element={<EditProfile />} />
 					<Route path='flashcards' element={<Flashcards />} />
+					<Route path='studyroom/*' element={<><Navbar /><StudyRoomUI /></>} />
+                    <Route path='room/:name' element={<><Navbar /><RoomDetailsPage /></>} />
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>

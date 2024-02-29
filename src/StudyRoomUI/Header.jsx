@@ -10,6 +10,7 @@ import Input from '@mui/material/Input';
 import FormHelperText from '@mui/material/FormHelperText';
 import TextField from '@mui/material/TextField'; // For multiline input
 import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getAuth } from 'firebase/auth';
 
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
@@ -38,6 +39,7 @@ const Header = () => {
   const app = initializeApp(firebaseConfig); // Initialize Firebase
   const db = getFirestore(); // Get Firestore instance
   const storage = getStorage(app);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -61,54 +63,61 @@ const Header = () => {
   };
 
   const handleFormSubmit = async () => {
-    // Check if a file was selected
-    if (backgroundImage) {
-      // Define the file path and name in your storage
-      // Assuming `backgroundImage` is now a File object
-      const storageRef = ref(storage, `studyrooms/${backgroundImage.name}`);
+    const auth = getAuth(app); // Ensure you're passing the `app` instance to `getAuth`
+    const user = auth.currentUser;
   
-      try {
-        // Upload the file to Firebase Storage
-        const snapshot = await uploadBytes(storageRef, backgroundImage);
-        // After successful upload, get the download URL
-        const downloadURL = await getDownloadURL(snapshot.ref);
+    if (user) {
+      // Use the UID for a unique collection name. Adjust as needed for usernames.
+      const collectionName = `${user.uid}_studyrooms`;
   
-        // Prepare your study room data, including the image URL
-        const studyRoomData = {
+      // Proceed with your logic to handle file upload and data submission
+      if (backgroundImage) {
+        const storageRef = ref(storage, `studyrooms/${backgroundImage.name}`);
+  
+        try {
+          const snapshot = await uploadBytes(storageRef, backgroundImage);
+          const downloadURL = await getDownloadURL(snapshot.ref);
+  
+          const studyRoomData = {
+            name,
+            description,
+            time: parseInt(time, 10),
+            backgroundImage: downloadURL,
+            friendInvites: friendInvites.split(',').map(invite => invite.trim()),
+          };
+  
+          // Use the dynamically constructed collection name here
+          const docRef = await addDoc(collection(db, collectionName), studyRoomData);
+          console.log("Document written with ID: ", docRef.id);
+        } catch (error) {
+          console.error("Error uploading image or adding document: ", error);
+        }
+      } else {
+        const studyRoomDataWithoutImage = {
           name,
           description,
-          time: parseInt(time, 10), // Ensure time is stored as a number
-          backgroundImage: downloadURL, // Save the URL of the uploaded image
-          friendInvites: friendInvites.split(',').map(invite => invite.trim()), // Split string into array
+          time: parseInt(time, 10),
+          friendInvites: friendInvites.split(',').map(invite => invite.trim()),
         };
   
-        // Save study room data in Firestore
-        const docRef = await addDoc(collection(db, "studyrooms"), studyRoomData);
-        console.log("Document written with ID: ", docRef.id);
-      } catch (error) {
-        console.error("Error uploading image or adding document: ", error);
+        try {
+          // Again, use the dynamically constructed collection name
+          const docRef = await addDoc(collection(db, collectionName), studyRoomDataWithoutImage);
+          console.log("Document written with ID: ", docRef.id);
+        } catch (error) {
+          console.error("Error adding document without an image: ", error);
+        }
       }
     } else {
-      // Handle the case where no image is uploaded
-      const studyRoomDataWithoutImage = {
-        name,
-        description,
-        time: parseInt(time, 10),
-        friendInvites: friendInvites.split(',').map(invite => invite.trim()),
-        // Optionally handle backgroundImage differently if not uploaded
-      };
-  
-      try {
-        const docRef = await addDoc(collection(db, "studyrooms"), studyRoomDataWithoutImage);
-        console.log("Document written with ID: ", docRef.id);
-      } catch (error) {
-        console.error("Error adding document without an image: ", error);
-      }
+      // Set an error message if no user is signed in
+    setErrorMessage('You must be signed in to create a study room.');
+    return; // Stop the function execution here
+      //console.log("No user is signed in to define a unique collection name.");
     }
-  
+    setErrorMessage(''); // Reset error message when a user is found and submission starts
     handleClose(); // Close the dialog
   };
-
+  
   return (
     <header className="hero" style={{ backgroundImage: `url(${backgroundImage})` }}>
       <div className="heroInner">
@@ -120,6 +129,9 @@ const Header = () => {
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>Create a New Study Room</DialogTitle>
           <DialogContent>
+            {/* Error Message Display */}
+            {errorMessage && <div style={{ color: 'red', marginBottom: '20px' }}>{errorMessage}</div>}
+
             <FormControl fullWidth margin="normal">
               <InputLabel htmlFor="room-name">Room Name</InputLabel>
               <Input id="room-name" value={name} onChange={e => setName(e.target.value)} />
@@ -151,19 +163,10 @@ const Header = () => {
               <FormHelperText>Invite friends by email.</FormHelperText>
             </FormControl>
 
-            {/* Background Image Upload */}
             <FormControl fullWidth margin="normal">
-              <Button
-                variant="contained"
-                component="label"
-              >
+              <Button variant="contained" component="label">
                 Upload Background Image (Optional)
-                <input
-                  type="file"
-                  hidden
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
+                <input type="file" hidden accept="image/*" onChange={handleImageChange} />
               </Button>
               {backgroundImage && (
                 <div style={{ marginTop: '20px' }}>
@@ -172,7 +175,6 @@ const Header = () => {
               )}
               <FormHelperText>Upload an image to use as the background.</FormHelperText>
             </FormControl>
-
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
