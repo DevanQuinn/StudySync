@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -13,30 +13,34 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Copyright from '../components/Copyright.jsx';
 import { grey } from '@mui/material/colors';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
+  const [newImage, setNewImage] = React.useState(null);
   const handleSubmit = event => {
       event.preventDefault();
       const data = new FormData(event.currentTarget);
+      const username = data.get('username');
       const email = data.get('email');
       const password = data.get('password');
       if(password != data.get('confirm-password')){
-        alert("Error: Passwords must match")
+        alert("Please make sure your passwords match.")
       }
       else{
         createUserWithEmailAndPassword(getAuth(), email, password)
             .then(userCredential => {
                 // Signed in
                 const user = userCredential.user;
+                updateProfile(getAuth().currentUser, {
+                  photoURL: URL.createObjectURL(newImage),
+                  displayName: username,
+                })
                 console.log(user);
                 // ...
             })
             .catch(error => {
-                const errorCode = error.code;
                 const errorMessage = error.message;
-                alert(errorMessage)
+                alert(errorMessage);
             });
         }
   };
@@ -100,7 +104,7 @@ export default function SignUp() {
               placeholder='Confirm Password'
               color='primary'
             />
-             <FormControlLabel
+            <FormControlLabel
               control={<Checkbox value="showPass" sx={{
                 color: grey[900],
                 '&Mui.checked': {
@@ -113,6 +117,20 @@ export default function SignUp() {
             }
               variant="filled"
             />
+            <br />
+            <Typography>
+              Profile Picture:
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setNewImage(e.target.files[0])}  
+              />
+            </Typography>
+            {(() => {
+               if (newImage) {
+                  return <img src={URL.createObjectURL(newImage)} width={250} height={250} alt="profile" />;
+                }
+            })()}
             <Button
               type="submit"
               fullWidth

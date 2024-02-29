@@ -14,7 +14,7 @@ const Navbar = () => {
 					</Link>
 				</Typography>
 				{pages.map(page => (
-					<Typography>
+					<Typography sx={{ mr: 3}}>
 						<Link to={page.path} key={page.title}>
 							{page.title}
 						</Link>
