@@ -1,24 +1,25 @@
 import React from 'react';
 import { Box, Typography, TextField, Button } from '@mui/material';
+import emailjs from 'emailjs-com';
 
 const Flashcard = () => {
-
     const [flashcards, setFlashcards] = React.useState([]);
     const [newQuestion, setNewQuestion] = React.useState('');
     const [newAnswer, setNewAnswer] = React.useState('');
     const [newImage, setNewImage] = React.useState(null);
     const [newAudio, setNewAudio] = React.useState(null);
     const [flipped, setFlipped] = React.useState(false);
+    const [shareWithUser, setShareWithUser] = React.useState('');
+    const [shareError, setShareError] = React.useState(null);
 
     const addFlashcard = (event) => {
-        /* avoids page reload when card submitted */
         event.preventDefault();
 
         const newFlashcard = {
             question: newQuestion,
             answer: newAnswer,
             image: newImage,
-            audio: newAudio
+            audio: newAudio,
         };
 
         setFlashcards([...flashcards, newFlashcard]);
@@ -37,7 +38,82 @@ const Flashcard = () => {
 
     const toggleFlip = () => {
         setFlipped(!flipped);
-    }
+    };
+
+const shareFlashcards = () => {
+    const emailParams = {
+        to_email: shareWithUser,
+        subject: 'Flashcards',
+        body: '',
+    };
+
+    const promises = flashcards.map((flashcard, index) => {
+        return new Promise((resolve) => {
+            // Convert image to base64 data URL
+            convertImageToDataUrl(flashcard.image)
+                .then((imageDataUrl) => {
+                    console.log('Image Data URL:', imageDataUrl);
+
+                    const cardContent = `
+                        Question ${index + 1}:
+                        ${flashcard.question}
+                        
+                        Answer ${index + 1}:
+                        ${flashcard.answer}
+                        
+                        ${imageDataUrl ? `![Image ${index + 1}](${imageDataUrl})` : ''}
+                    `;
+
+                    emailParams.body += cardContent + '\n\n';
+                    resolve();
+                })
+                .catch((error) => {
+                    console.error('Error converting image:', error);
+                    resolve(); // Resolve the promise even if there's an error
+                });
+        });
+    });
+
+    Promise.all(promises)
+        .then(() => {
+            console.log('Email Parameters:', emailParams);
+
+            emailjs.send('service_1t89u4s', 'template_snzuvya', emailParams, 'K-nzp7uN1uBdG-gV9')
+                .then((response) => {
+                    console.log('Email sent successfully:', response);
+                    // Additional success handling if needed
+                })
+                .catch((error) => {
+                    console.error('Error sending email:', error);
+                    // Display or log the error message
+                });
+        });
+};
+
+const convertImageToDataUrl = (image) => {
+    return new Promise((resolve, reject) => {
+        if (!image) {
+            resolve(''); // If no image provided, resolve with an empty string
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            const imageDataUrl = event.target.result;
+            console.log('Image converted successfully:', imageDataUrl);
+            resolve(imageDataUrl);
+        };
+
+        reader.onerror = (error) => {
+            console.error('Error converting image:', error);
+            reject(error);
+        };
+
+        reader.readAsDataURL(image);
+    });
+};
+
 
     return (
         <Box sx={{ maxWidth: 600 }}>
@@ -82,9 +158,25 @@ const Flashcard = () => {
                     />
                 </label>
 
+                <TextField
+                    label="Share Flashcards With User"
+                    value={shareWithUser}
+                    onChange={(e) => setShareWithUser(e.target.value)}
+                    fullWidth
+                    margin="normal"
+                />
+
                 <Button type="submit" variant="contained" sx={{ mt: 2 }}>
                     Add Flashcard
                 </Button>
+                <Button variant="contained" sx={{ mt: 2, ml: 2 }} onClick={shareFlashcards}>
+                    Share Flashcards
+                </Button>
+                {shareError && (
+                    <Typography color="error" sx={{ mt: 2 }}>
+                        {shareError}
+                    </Typography>
+                )}
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
@@ -107,12 +199,15 @@ const Flashcard = () => {
                             </>
                         ) : (
                             <>
-                                <Typography variant="h6">
-                                    {flashcard.question}
-                                </Typography>
+                                <Typography variant="h6">{flashcard.question}</Typography>
                                 {(() => {
                                     if (flashcard.image) {
-                                        return <img src={URL.createObjectURL(flashcard.image)} alt="" />;
+                                        return (
+                                            <img
+                                                src={URL.createObjectURL(flashcard.image)}
+                                                alt=""
+                                            />
+                                        );
                                     }
                                 })()}
                                 {(() => {
@@ -131,9 +226,7 @@ const Flashcard = () => {
                                 <Button onClick={toggleFlip}>Reveal Answer</Button>
                             </>
                         )}
-                        <Button onClick={() => deleteFlashcard(index)}>
-                            Delete
-                        </Button>
+                        <Button onClick={() => deleteFlashcard(index)}>Delete</Button>
                     </Box>
                 ))}
             </Box>
@@ -142,3 +235,4 @@ const Flashcard = () => {
 };
 
 export default Flashcard;
+
