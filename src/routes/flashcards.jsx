@@ -62,8 +62,9 @@ const shareFlashcards = () => {
                         ${flashcard.answer}
                         
                         ${imageDataUrl ? `![Image ${index + 1}](${imageDataUrl})` : ''}
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==" alt="Red dot">
                     `;
-
+                    console.log(cardContent);
                     emailParams.body += cardContent + '\n\n';
                     resolve();
                 })
