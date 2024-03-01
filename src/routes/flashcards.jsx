@@ -6,6 +6,7 @@ import {
 	Button,
 	Container,
 	CssBaseline,
+	CircularProgress,
 } from '@mui/material';
 import {
 	query,
@@ -27,6 +28,7 @@ const Flashcards = () => {
 	const [newImage, setNewImage] = React.useState(null);
 	const [newAudio, setNewAudio] = React.useState(null);
 	const [user, setUser] = React.useState();
+	const [loading, setLoading] = React.useState(true);
 
 	const db = getFirestore(app);
 	const col = user
@@ -44,12 +46,14 @@ const Flashcards = () => {
 			queriedFlashcards.push(data);
 		});
 		setFlashcardList(queriedFlashcards);
+		setLoading(false);
 	};
 
 	useEffect(() => {
 		const auth = getAuth();
 		onAuthStateChanged(auth, user => {
 			if (user) setUser(user);
+			else setLoading(false);
 		});
 	}, []);
 
@@ -138,15 +142,21 @@ const Flashcards = () => {
 					</Button>
 				</Box>
 
-				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
-					{flashcardList.map(card => (
-						<FlashCard
-							data={card}
-							deleteFlashcard={deleteFlashcard}
-							key={card.id}
-						/>
-					))}
-				</Box>
+				{loading ? (
+					<Box sx={{ mt: 4 }}>
+						<CircularProgress />
+					</Box>
+				) : (
+					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
+						{flashcardList.map(card => (
+							<FlashCard
+								data={card}
+								deleteFlashcard={deleteFlashcard}
+								key={card.id}
+							/>
+						))}
+					</Box>
+				)}
 			</Box>
 		</Container>
 	);
