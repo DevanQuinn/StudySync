@@ -29,13 +29,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 		<ThemeProvider theme={theme}>
 			<BrowserRouter>
 				<Navbar />
-				<App />
 				<Routes>
 					<Route path='signin' element={<SignIn />} />
 					<Route path='forgotpass' element={<ForgotPass />} />
 					<Route path='signup' element={<SignUp />} />
 					<Route path='editprofile' element={<EditProfile />} />
 					<Route path='flashcards' element={<Flashcards/>} />
+					<Route path='pomodoro' element={<Pomodoro/>} />
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>
