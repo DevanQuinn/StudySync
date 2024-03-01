@@ -21,7 +21,7 @@ export default function Pomodoro() {
   const [breakTime, setBreakTime] = useState(timer.getFt())
   const [startTime, setStartTime] = useState(timer.getFt())  
   const [study, setStudy] = useState("Study!")
-  let count = 1
+  const [count, setCount] = useState(1)
   const handleSubmit = event => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -31,6 +31,8 @@ export default function Pomodoro() {
     setTime(sTime);
     setBreakTime(bTime);
     setStartTime(sTime);
+    setStudy("Study!")
+    setCount(2)
   }
   useEffect(() => {
     timer
@@ -41,19 +43,21 @@ export default function Pomodoro() {
           setTime(timer.getFt())
        })
       .finish(() =>{
-        count += 1
+        console.log(count)
         if(count % 2 === 0) {
           setTime(breakTime)
           setStudy("Break!")
           timer.setStartTime(breakTime)
+          setCount(1)
         }
         else {
           setTime(startTime)
           setStudy("Study!")
           timer.setStartTime(startTime)
+          setCount(2)
         }
       })
- }, [])
+ }, [breakTime, startTime, time])
   return (
     <Container component="main" maxWidth="xs">
         <CssBaseline />
