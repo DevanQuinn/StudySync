@@ -1,144 +1,155 @@
-import React from 'react';
-import { Box, Typography, TextField, Button } from '@mui/material';
+import React, { useEffect } from 'react';
+import {
+	Box,
+	Typography,
+	TextField,
+	Button,
+	Container,
+	CssBaseline,
+} from '@mui/material';
+import {
+	query,
+	getFirestore,
+	collection,
+	getDocs,
+	doc,
+	addDoc,
+	deleteDoc,
+} from 'firebase/firestore';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import app from '../firebase';
+import FlashCard from '../components/FlashCard';
 
-const Flashcard = () => {
+const Flashcards = () => {
+	const [flashcardList, setFlashcardList] = React.useState([]);
+	const [newQuestion, setNewQuestion] = React.useState('');
+	const [newAnswer, setNewAnswer] = React.useState('');
+	const [newImage, setNewImage] = React.useState(null);
+	const [newAudio, setNewAudio] = React.useState(null);
+	const [user, setUser] = React.useState();
 
-    const [flashcards, setFlashcards] = React.useState([]);
-    const [newQuestion, setNewQuestion] = React.useState('');
-    const [newAnswer, setNewAnswer] = React.useState('');
-    const [newImage, setNewImage] = React.useState(null);
-    const [newAudio, setNewAudio] = React.useState(null);
-    const [flipped, setFlipped] = React.useState(false);
+	const db = getFirestore(app);
+	const col = user
+		? collection(db, `flashcards/${user?.uid}/flashcards`)
+		: null;
 
-    const addFlashcard = (event) => {
-        /* avoids page reload when card submitted */
-        event.preventDefault();
+	const fetchCards = async () => {
+		if (!col) return;
+		const q = query(col);
+		const snapshot = await getDocs(q);
+		const queriedFlashcards = [];
+		snapshot.forEach(card => {
+			const data = card.data();
+			data.id = card.id;
+			queriedFlashcards.push(data);
+		});
+		setFlashcardList(queriedFlashcards);
+	};
 
-        const newFlashcard = {
-            question: newQuestion,
-            answer: newAnswer,
-            image: newImage,
-            audio: newAudio
-        };
+	useEffect(() => {
+		const auth = getAuth();
+		onAuthStateChanged(auth, user => {
+			if (user) setUser(user);
+		});
+	}, []);
 
-        setFlashcards([...flashcards, newFlashcard]);
+	useEffect(() => {
+		fetchCards();
+	}, [user]);
 
-        setNewQuestion('');
-        setNewAnswer('');
-        setNewImage(null);
-        setNewAudio(null);
-    };
+	const uploadCard = async flashcard => {
+		await addDoc(col, flashcard);
+		fetchCards();
+	};
+	const addFlashcard = event => {
+		/* avoids page reload when card submitted */
+		event.preventDefault();
 
-    const deleteFlashcard = (index) => {
-        const updatedFlashcards = [...flashcards];
-        updatedFlashcards.splice(index, 1);
-        setFlashcards(updatedFlashcards);
-    };
+		const newFlashcard = {
+			question: newQuestion,
+			answer: newAnswer,
+			image: newImage,
+			audio: newAudio,
+		};
 
-    const toggleFlip = () => {
-        setFlipped(!flipped);
-    }
+		uploadCard(newFlashcard);
 
-    return (
-        <Box sx={{ maxWidth: 600 }}>
-            <Typography component="h1" variant="h5" align="center">
-                Flashcards
-            </Typography>
+		setNewQuestion('');
+		setNewAnswer('');
+		setNewImage(null);
+		setNewAudio(null);
+	};
 
-            <Box component="form" onSubmit={addFlashcard} sx={{ mt: 2 }}>
-                <TextField
-                    label="Question"
-                    value={newQuestion}
-                    onChange={(e) => setNewQuestion(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                />
+	const deleteFlashcard = id => {
+		deleteDoc(doc(db, `flashcards/${user?.uid}/flashcards`, id)).then(() => {
+			fetchCards();
+		});
+	};
 
-                <TextField
-                    label="Answer"
-                    multiline
-                    rows={4}
-                    value={newAnswer}
-                    onChange={(e) => setNewAnswer(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                />
+	// if (!user) return <div>Not signed in</div>;
 
-                <label>
-                    Image:
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setNewImage(e.target.files[0])}
-                    />
-                </label>
+	return (
+		<Container component='main' maxWidth='xs' sx={{ mt: 10 }}>
+			<CssBaseline />
+			<Box sx={{ maxWidth: 600 }}>
+				<Typography component='h1' variant='h5' align='center'>
+					Flashcards
+				</Typography>
 
-                <label>
-                    Audio:
-                    <input
-                        type="file"
-                        accept="audio/*"
-                        onChange={(e) => setNewAudio(e.target.files[0])}
-                    />
-                </label>
+				<Box component='form' onSubmit={addFlashcard} sx={{ mt: 2 }}>
+					<TextField
+						label='Question'
+						value={newQuestion}
+						onChange={e => setNewQuestion(e.target.value)}
+						fullWidth
+						margin='normal'
+					/>
 
-                <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-                    Add Flashcard
-                </Button>
-            </Box>
+					<TextField
+						label='Answer'
+						multiline
+						rows={4}
+						value={newAnswer}
+						onChange={e => setNewAnswer(e.target.value)}
+						fullWidth
+						margin='normal'
+					/>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
-                {flashcards.map((flashcard, index) => (
-                    <Box
-                        key={index}
-                        onClick={toggleFlip}
-                        border={1}
-                        borderColor="grey"
-                        borderRadius={2}
-                        p={2}
-                        display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                    >
-                        {flipped ? (
-                            <>
-                                <Typography>{flashcard.answer}</Typography>
-                                <Button onClick={toggleFlip}>Show Question</Button>
-                            </>
-                        ) : (
-                            <>
-                                <Typography variant="h6">
-                                    {flashcard.question}
-                                </Typography>
-                                {(() => {
-                                    if (flashcard.image) {
-                                        return <img src={URL.createObjectURL(flashcard.image)} alt="" />;
-                                    }
-                                })()}
-                                {(() => {
-                                    if (flashcard.audio) {
-                                        return (
-                                            <audio controls>
-                                                <source
-                                                    src={URL.createObjectURL(flashcard.audio)}
-                                                    type="audio/mpeg"
-                                                />
-                                                Your browser does not support the audio element.
-                                            </audio>
-                                        );
-                                    }
-                                })()}
-                                <Button onClick={toggleFlip}>Reveal Answer</Button>
-                            </>
-                        )}
-                        <Button onClick={() => deleteFlashcard(index)}>
-                            Delete
-                        </Button>
-                    </Box>
-                ))}
-            </Box>
-        </Box>
-    );
+					{/* <label>
+						Image:
+						<input
+							type='file'
+							accept='image/*'
+							onChange={e => setNewImage(e.target.files[0])}
+						/>
+					</label>
+
+					<label>
+						Audio:
+						<input
+							type='file'
+							accept='audio/*'
+							onChange={e => setNewAudio(e.target.files[0])}
+						/>
+					</label> */}
+
+					<Button type='submit' variant='contained' sx={{ mt: 2 }}>
+						Add Flashcard
+					</Button>
+				</Box>
+
+				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
+					{flashcardList.map(card => (
+						<FlashCard
+							data={card}
+							deleteFlashcard={deleteFlashcard}
+							key={card.id}
+						/>
+					))}
+				</Box>
+			</Box>
+		</Container>
+	);
 };
 
-export default Flashcard;
+export default Flashcards;
