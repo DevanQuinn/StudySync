@@ -4,10 +4,7 @@ import React from 'react';
 import Logo from './Logo';
 
 const Navbar = () => {
-	const pages = [
-		{ title: 'Study Room', path: '/studyroom' },
-		{ title: 'Timer', path: '/timer' },
-	];
+	const pages = [{ title: 'Study Room', path: '/studyroom' }, {title: 'Pomodoro', path: '/pomodoro'}];
 	return (
 		<AppBar position='fixed' color='secondary'>
 			<Toolbar>
@@ -17,8 +14,10 @@ const Navbar = () => {
 					</Link>
 				</Typography>
 				{pages.map(page => (
-					<Typography sx={{ mr: 3 }} key={page.title}>
-						<Link to={page.path}>{page.title}</Link>
+					<Typography sx={{ mr: 3}}>
+						<Link to={page.path} key={page.title}>
+							{page.title}
+						</Link>
 					</Typography>
 				))}
 				<Typography
