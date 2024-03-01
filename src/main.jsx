@@ -12,7 +12,6 @@ import SignIn from './routes/signin.jsx';
 import SignUp from './routes/signup.jsx';
 import ForgotPass from './routes/forgotpass.jsx';
 
-import FirebaseProvider from './components/FirebaseProvider.jsx';
 import SpotifyPlaylists from './routes/SpotifyPlaylists.jsx';
 import Callback from './routes/Callback.jsx';
 
