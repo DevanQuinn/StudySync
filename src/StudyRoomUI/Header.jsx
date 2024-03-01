@@ -11,7 +11,6 @@ import FormHelperText from '@mui/material/FormHelperText';
 import TextField from '@mui/material/TextField'; // For multiline input
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { getAuth } from 'firebase/auth';
-
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 //import { getStorage, ref, uploadBytes } from "firebase/storage";
