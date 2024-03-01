@@ -4,10 +4,13 @@ import React, { useEffect, useState } from 'react';
 import Logo from './Logo';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
+/*
+TODO LIST:
+	* navbar should have a profile button with a drop down menu
+		- profile button should display pfp where applicable
+		- drop down should have links to profile page, or if not logged in, sign in page
+*/
 const Navbar = () => {
-<<<<<<< Updated upstream
-	const pages = [{ title: 'Study Room', path: '/studyroom' }, {title: 'Pomodoro', path: '/pomodoro'}];
-=======
 	const [user, setUser] = useState();
 	const pages = [
 		{ title: 'Dashboard', path: '/dashboard' },
@@ -20,12 +23,18 @@ const Navbar = () => {
 	useEffect(() => {
 		const auth = getAuth();
 		onAuthStateChanged(auth, user => {
-			console.log(user);
 			setUser(user);
 		});
 	}, []);
 
->>>>>>> Stashed changes
+	const pages = [{ title: 'Study Room', path: '/studyroom' }, 
+				{ title: 'Leaderboard', path: '/leaderboard'},
+				{ title: 'Dashboard', path: '/dashboard'},
+				{ title: 'Study Room', path: '/studyroom' },
+				{ title: 'Timer', path: '/timer' },
+        { title: 'Pomodoro', path: '/pomodoro'}
+	];
+
 	return (
 		<AppBar position='fixed' color='secondary'>
 			<Toolbar>
@@ -35,15 +44,8 @@ const Navbar = () => {
 					</Link>
 				</Typography>
 				{pages.map(page => (
-<<<<<<< Updated upstream
-					<Typography sx={{ mr: 3}}>
-						<Link to={page.path} key={page.title}>
-							{page.title}
-						</Link>
-=======
 					<Typography sx={{ mr: 3 }} key={page.title}>
 						<Link to={page.path}>{page.title}</Link>
->>>>>>> Stashed changes
 					</Typography>
 				))}
 				<Typography
