@@ -89,6 +89,7 @@ const shareFlashcards = () => {
                     // Display or log the error message
                 });
         });
+
 };
 
 const convertImageToDataUrl = (image) => {

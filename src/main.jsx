@@ -11,10 +11,15 @@ import StudyRoom from './routes/studyroom.jsx'
 import SignIn from './routes/signin.jsx';
 import SignUp from './routes/signup.jsx';
 import ForgotPass from './routes/forgotpass.jsx';
+
+import SpotifyPlaylists from './routes/SpotifyPlaylists.jsx';
+import Callback from './routes/Callback.jsx';
+
 import Pomodoro from './routes/pomodoro.jsx';
 import Firebase from './firebase.js';
 import EditProfile from './routes/editprofile.jsx';
 import Flashcards from './routes/flashcards.jsx';
+
 
 const theme = createTheme({
   palette: {
@@ -44,8 +49,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					<Route path='editprofile' element={<EditProfile />} />
 					<Route path='flashcards' element={<Flashcards/>} />
 					<Route path='pomodoro' element={<Pomodoro/>} />
+          <Route path='SpotifyPlaylists' element={<SpotifyPlaylists />} />
+		      <Route path='Callback' element={<Callback />} />
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>
 	</React.StrictMode>
+
 );
