@@ -10,6 +10,12 @@ import {
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
 
+/*
+TODO LIST:
+	* navbar should have a profile button with a drop down menu
+		- profile button should display pfp where applicable
+		- drop down should have links to profile page, or if not logged in, sign in page
+*/
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [navbarColor, setNavbarColor] = useState('secondary');
@@ -72,6 +78,7 @@ const Navbar = () => {
       </Toolbar>
     </AppBar>
   );
+
 };
 
 export default Navbar;

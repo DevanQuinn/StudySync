@@ -31,11 +31,19 @@ export default function SignUp() {
             .then(userCredential => {
                 // Signed in
                 const user = userCredential.user;
-                updateProfile(getAuth().currentUser, {
-                  photoURL: URL.createObjectURL(newImage),
-                  displayName: username,
-                })
+                if(newImage != null) {
+                  updateProfile(getAuth().currentUser, {
+                    photoURL: URL.createObjectURL(newImage),
+                    displayName: username,
+                  })
+                }
+                else {
+                  updateProfile(getAuth().currentUser, {
+                    displayName: username,
+                  })
+                }
                 console.log(user);
+                alert("Success! Please use the Go Back button to sign in.")
                 // ...
             })
             .catch(error => {

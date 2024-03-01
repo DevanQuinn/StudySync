@@ -236,4 +236,3 @@ const convertImageToDataUrl = (image) => {
 };
 
 export default Flashcard;
-
