@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { useState } from 'react';
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -11,17 +13,44 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Copyright from '../components/Copyright.jsx';
 import { grey } from '@mui/material/colors';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 export default function SignUp() {
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      username: data.get('username'),
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+  const [showPassword, setShowPassword] = useState(false);
+  const [newImage, setNewImage] = React.useState(null);
+  const handleSubmit = event => {
+      event.preventDefault();
+      const data = new FormData(event.currentTarget);
+      const username = data.get('username');
+      const email = data.get('email');
+      const password = data.get('password');
+      if(password != data.get('confirm-password')){
+        alert("Please make sure your passwords match.")
+      }
+      else{
+        createUserWithEmailAndPassword(getAuth(), email, password)
+            .then(userCredential => {
+                // Signed in
+                const user = userCredential.user;
+                if(newImage != null) {
+                  updateProfile(getAuth().currentUser, {
+                    photoURL: URL.createObjectURL(newImage),
+                    displayName: username,
+                  })
+                }
+                else {
+                  updateProfile(getAuth().currentUser, {
+                    displayName: username,
+                  })
+                }
+                console.log(user);
+                alert("Success! Please use the Go Back button to sign in.")
+                // ...
+            })
+            .catch(error => {
+                const errorMessage = error.message;
+                alert(errorMessage);
+            });
+        }
   };
 
   return (
@@ -50,7 +79,6 @@ export default function SignUp() {
               placeholder='Username'
               autoComplete="current-username"
               color='primary'
-              focused
             />
             <TextField
               margin="normal"
@@ -61,7 +89,6 @@ export default function SignUp() {
               label="Email Address"
               autoComplete="email"
               placeholder='Email Address'
-              focused
             />
             <TextField
               margin="normal"
@@ -69,23 +96,49 @@ export default function SignUp() {
               fullWidth
               name='password'
               label="Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               id="password"
               placeholder='Password'
               color='primary'
-              focused
             />
             <TextField
               margin="normal"
               required
               fullWidth
+              name="confirm-password"
               label="Confirm Password"
               type="password"
               id="confirm-password"
               placeholder='Confirm Password'
               color='primary'
-              focused
             />
+            <FormControlLabel
+              control={<Checkbox value="showPass" sx={{
+                color: grey[900],
+                '&Mui.checked': {
+                  color: grey[900],
+                },
+              }} />}
+              label="Show Password"
+              onChange={() =>
+                setShowPassword((prev) => !prev)
+            }
+              variant="filled"
+            />
+            <br />
+            <Typography>
+              Profile Picture:
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setNewImage(e.target.files[0])}  
+              />
+            </Typography>
+            {(() => {
+               if (newImage) {
+                  return <img src={URL.createObjectURL(newImage)} width={250} height={250} alt="profile" />;
+                }
+            })()}
             <Button
               type="submit"
               fullWidth

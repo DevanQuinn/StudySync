@@ -10,12 +10,15 @@ TODO LIST:
 		- drop down should have links to profile page, or if not logged in, sign in page
 */
 const Navbar = () => {
+
 	const pages = [{ title: 'Study Room', path: '/studyroom' }, 
 				{ title: 'Leaderboard', path: '/leaderboard'},
-				{title: 'Dashboard', path: '/dashboard'},
+				{ title: 'Dashboard', path: '/dashboard'},
 				{ title: 'Study Room', path: '/studyroom' },
 				{ title: 'Timer', path: '/timer' },
+        { title: 'Pomodoro', path: '/pomodoro'}
 	];
+
 	return (
 		<AppBar position='fixed' color='secondary'>
 			<Toolbar>
@@ -25,9 +28,9 @@ const Navbar = () => {
 					</Link>
 				</Typography>
 				{pages.map(page => (
-					<Typography>
+					<Typography sx={{ mr: 3}}>
 						<Link to={page.path} key={page.title}>
-							&nbsp; &nbsp; {page.title} &nbsp; &nbsp;    
+							&nbsp; &nbsp; {page.title} &nbsp; &nbsp;  
 						</Link>
 					</Typography>
 				))}
