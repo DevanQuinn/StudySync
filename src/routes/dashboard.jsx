@@ -19,10 +19,10 @@ function Dashboard() {
 		console.log(tasks);
 	}, [JSON.stringify(tasks)]);
 
-	const addTasklistButtonClick = (title) => {
+	const addTasklist = (title) => {
 		if (tasklistsList.length < 10) {
 			let id = nanoid();
-			let newTasklistsList = [...tasklistsList, {title:title + id, id:id}];
+			let newTasklistsList = [...tasklistsList, {title:title, id:id}];
 			setTasklists(newTasklistsList);
 			let newTasks = tasks;
 			newTasks[id] = []
@@ -95,11 +95,34 @@ function Dashboard() {
                         />
                     ))}</>
 			<div>
-				<Button onClick={() => {addTasklistButtonClick("dummytitle")}}>Add new task list</Button>
+				<CreateTasklist addTasklist={addTasklist}/>
 				<h2>There are currently {tasklistsList.length} active tasklists</h2>
 			</div>
 		</div>
 	);
+}
+
+function CreateTasklist({addTasklist}) { //Not Yet Implemented
+	const [value, setValue] = useState("");
+
+	const handleSubmit = e => {
+		e.preventDefault();
+		if (!value) return;
+		addTasklist(value);
+		setValue("");
+	}
+
+	return (
+		<form onSubmit={handleSubmit}>
+			<input
+				type="text"
+				className="input"
+				value={value}
+				placeholder="Add a new tasklist"
+				onChange={e => setValue(e.target.value)}
+			/>
+		</form> 
+	)
 }
 
 export default Dashboard;

@@ -63,7 +63,6 @@ function CreateTask({ addTask }) {
     const handleSubmit = e => {
         e.preventDefault();
         if (!value) return;
-        
         addTask(value);
         setValue("");
     }
