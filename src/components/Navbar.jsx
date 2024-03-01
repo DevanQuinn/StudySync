@@ -1,19 +1,46 @@
-import { AppBar, Container, Toolbar, Typography, Button } from '@mui/material';
-import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Menu,
+  MenuItem,
+} from '@mui/material';
+import { Link } from 'react-router-dom';
 import Logo from './Logo';
 
 const Navbar = () => {
+  const [anchorEl, setAnchorEl] = useState(null);
   const [navbarColor, setNavbarColor] = useState('secondary');
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   const handleColorChange = (newColor) => {
     setNavbarColor(newColor);
+    setAnchorEl(null);
   };
 
-  const pages = [
-    { title: 'Study Room', path: '/studyroom' },
-    { title: 'Pomodoro', path: '/pomodoro' },
+  const colorOptions = [
+    { label: 'Color 1', value: 'primary' },
+    { label: 'Color 2', value: 'secondary' },
+    { label: 'Color 3', value: 'error' },
+    { label: 'Color 4', value: 'info' },
   ];
+
+  const renderColorMenuItems = () => {
+    return colorOptions.map((color) => (
+      <MenuItem key={color.value} onClick={() => handleColorChange(color.value)}>
+        {color.label}
+      </MenuItem>
+    ));
+  };
 
   return (
     <AppBar position='fixed' color={navbarColor}>
@@ -23,26 +50,25 @@ const Navbar = () => {
             <Logo />
           </Link>
         </Typography>
-        {pages.map((page) => (
-          <Typography sx={{ mr: 3 }}>
-            <Link to={page.path} key={page.title}>
-              {page.title}
-            </Link>
-          </Typography>
-        ))}
-        <Typography variant='h6' component='div' sx={{ flexGrow: 1 }}></Typography>
-        <Button onClick={() => handleColorChange('primary')} sx={{ mr: 2 }}>
-          Set Color 1
+        <Typography sx={{ ml: 'auto', mr: 2 }}>
+          <Link to='/signin'>Sign In</Link>
+        </Typography>
+        <Button onClick={handleMenuClick} sx={{ mr: 2 }}>
+          Set Color
         </Button>
-        <Button onClick={() => handleColorChange('secondary')} sx={{ mr: 2 }}>
-          Set Color 2
-        </Button>
-        <Button onClick={() => handleColorChange('error')} sx={{ mr: 2 }}>
-          Set Color 3
-        </Button>
-        <Button onClick={() => handleColorChange('info')}>
-          Set Color 4
-        </Button>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+        >
+          {renderColorMenuItems()}
+        </Menu>
+        <Typography sx={{ mr: 2 }} color='textPrimary'>
+          <Link to='/editprofile'>Edit Profile</Link>
+        </Typography>
+        <Typography sx={{ mr: 2 }} color='textPrimary'>
+          <Link to='/flashcards'>Flashcards</Link>
+        </Typography>
       </Toolbar>
     </AppBar>
   );
