@@ -62,7 +62,7 @@ function Dashboard() {
 		let newTasks = tasks;
 		let newTasksArray = tasks[tasklistID];
 		newTasksArray = newTasksArray.filter((task) => {
-			if (task.taskID = taskID) {
+			if (task.taskID == taskID) {
 				task.completed = true;
 			}
 			return true;
