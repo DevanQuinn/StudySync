@@ -4,3 +4,8 @@
     width: 25em;
     overflow-y: scroll;
   }
+  .header {
+    margin: 0.5em;
+    font-size: 2em;
+    text-align: center;
+  }
