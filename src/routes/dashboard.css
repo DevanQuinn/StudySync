@@ -1,0 +1,6 @@
+.tasklistlist {
+    border: 1px solid white;
+    float: left;
+    width: 25em;
+    overflow-y: scroll;
+  }

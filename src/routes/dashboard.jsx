@@ -3,6 +3,7 @@ import Button from '../components/Button.jsx';
 import React, {useState, useEffect} from 'react'
 import { Task } from '@mui/icons-material';
 import { nanoid } from 'nanoid'
+import "./dashboard.css"
 
 /*
 TODO LIST:
@@ -80,8 +81,8 @@ function Dashboard() {
 	}
 
 	return (
-		<div>
-			<>{tasklistsList.map((tasklist, index) => (
+		<div classname="tasklistlist">
+			<div>{tasklistsList.map((tasklist, index) => (
                         <Tasklist
 						id={tasklist.id}
                         title={tasklist.title}
@@ -93,7 +94,7 @@ function Dashboard() {
 						deletetaskfunc={deleteTaskFromTasklist}
 						completetaskfunc={completeTask}
                         />
-                    ))}</>
+                    ))}</div>
 			<div>
 				<CreateTasklist addTasklist={addTasklist}/>
 				<h2>There are currently {tasklistsList.length} active tasklists</h2>

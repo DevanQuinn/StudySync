@@ -2,12 +2,15 @@
       
       .todo-container {
         background: rgb(41, 33, 33);
-        width: 40vw;
+        width: 20em;
+        height: 20em;
         margin: 10em auto;
         border-radius: 15px;
-        padding: 20px 10px;
+        padding: 20zpx 10px;
         color: white;
         border: 3px solid rgb(36, 110, 194);
+        overflow-y: scroll;
+        overflow-wrap: break-word;
       }
       
       .task {
@@ -15,8 +18,16 @@
         border-radius: 5px;
         padding: 0.5em;
         margin: 0.5em;
+        
       }
-      
+
+      .tasklistlist {
+        border: 1px solid white;
+        float: left;
+        width: 25em;
+        overflow-y: scroll;
+      }
+
       .task button{
         background: rgb(12, 124, 251);
         border-radius: 5px;
@@ -25,7 +36,6 @@
         border: none;
         cursor: pointer;
         color: white;
-        float: right;
       }
       
       .header {
@@ -39,6 +49,6 @@
         width: 80%;
         outline: none;
         border: none;
-        padding: 0.7em;
+        padding: 0.2em;
       }
   

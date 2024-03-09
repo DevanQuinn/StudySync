@@ -10,8 +10,10 @@ function Task({ task, taskID, tasklistID, completeTask, removeTask }) {
             style={{ textDecoration: task.completed ? "line-through" : "" }}
         >
             {task.title}
-            <button style={{ background: "red" }} onClick={removeTask}>x</button>
-            <button onClick={completeTask}>Complete</button>
+            <div>
+                <button onClick={completeTask}>Complete</button>
+                <button style={{ background: "red" }} onClick={removeTask}>x</button>
+            </div>
         </div>
     );
 }
@@ -28,31 +30,33 @@ function Tasklist({title, deletefunc, id, tasksProp, addtaskfunc, deletetaskfunc
     };
 
     return (
-        <Draggable>
+        <div>
             <div className="todo-container">
-                <div className="header">{title}</div>
-                <div className="tasks">
-                    {tasksProp.map((task) => { //not properly mapping
-                        console.log("mapping task: ");
-                        console.log(task);
-                        return (
-                        <Task
-                        task={task}
-                        tasklistID={id}
-                        completeTask={() => completetaskfunc(id, task.taskID)}
-                        removeTask={() => deletetaskfunc(id, task.taskID)}
-                        key={task.taskID}
-                        />
-                    )}
-                    )}
+            <div className="header">{title}</div>
+                <div>
+                    <div className="tasks">
+                        {tasksProp.map((task) => { //not properly mapping
+                            console.log("mapping task: ");
+                            console.log(task);
+                            return (
+                            <Task
+                            task={task}
+                            tasklistID={id}
+                            completeTask={() => completetaskfunc(id, task.taskID)}
+                            removeTask={() => deletetaskfunc(id, task.taskID)}
+                            key={task.taskID}
+                            />
+                        )}
+                        )}
+                    </div>
+                    <>{tasksProp.length} tasks left!</>
+                    <div className="create-task" >
+                        <CreateTask addTask={addTask} />
+                    </div>
+                    <Button onClick={() => deletefunc(id)}>Delete Tasklist</Button>
                 </div>
-                <>{tasksProp.length} tasks left!</>
-                <div className="create-task" >
-                    <CreateTask addTask={addTask} />
-                </div>
-                <Button onClick={() => deletefunc(id)}>Delete Tasklist</Button>
             </div>
-        </Draggable>
+        </div>
     );
 }
 
