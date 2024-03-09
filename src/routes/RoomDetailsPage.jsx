@@ -1,53 +1,55 @@
 import React, { useState, useRef } from 'react';
 import "../index.css"
-//import React, { useState, useEffect } from 'react';
-import { Typography, Button, TextField, Stack, Box, Container, Slide } from '@mui/material';
+import { Typography, Button, Stack, Box, Slide, Menu, MenuItem } from '@mui/material';
 import RoomPomodoro from '../components/RoomPomodoro';
 import { useNavigate } from 'react-router-dom';
 
-const videoUrls = [
-  'jfKfPfyJRdk',
-  'SllpB3W5f6s?si=TlVtxWVxM3XMkRuP',
-  'ZrKPW5d3idY?si=6BVOGZQGwpvv-0MH',
-  'UBw8_yfM?si=BqVaGdzPfgrE75GO',
-  'HO6cbtdmkIc?si=z1IYtIcPvuO_TLpb',
-  'QZTDZFtbrec?si=nbtL0zuNhQwpxSIo',
-  'iicfmXFALM8?si=tTyUzAb_U8SB8v26',
-  'Hc10febKlX8?si=Ruk1fIk5_tTXjzon',
-  'lTRiuFIWV54?si=sJ-NOP5R7hOdR2KF',
-  'c3suauAz0zQ?si=1qNiCWJcsjfzkUu5',
-  'R-bI0AhSyU0?si=de1G6gGOQpxV6qb1',
-  'l-2hOKIrIyI?si=R0qZ4zfe6VQSoeUL',
-  '1ex_bNIFR1A?si=41o5t7ErCAjWK6Zz',
-  'Jvgx5HHJ0qw?si=J1sTppx9SgjRmehE',
-  // Add the rest of your URLs here
-];
-
+// Categories and their associated video URLs
+const videoCategories = {
+  Lofi: [
+    'jfKfPfyJRdk', 'SllpB3W5f6s', 'ZrKPW5d3idY',
+  ],
+  Nature: [
+    'UBw8_yfM', 'HO6cbtdmkIc', 'QZTDZFtbrec',
+  ],
+  StudyWithMe: [
+    'iicfmXFALM8', 'Hc10febKlX8', 'lTRiuFIWV54',
+  ],
+  // Add more categories and videos as needed
+};
 
 const RoomDetailsPage = () => {
   const [isMuted, setIsMuted] = useState(true);
   const iframeRef = useRef(null);
   const [showPomodoro, setShowPomodoro] = useState(false);
   const [showEditMenu, setShowEditMenu] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null); // For category menu
   const navigate = useNavigate(); 
-  const [currentVideoUrl, setCurrentVideoUrl] = useState(videoUrls[0]);
+  const [currentVideoUrl, setCurrentVideoUrl] = useState('');
 
-  const togglePomodoro = () => setShowPomodoro(!showPomodoro); // Toggle Pomodoro
+  const togglePomodoro = () => setShowPomodoro(!showPomodoro);
 
-  const changeRoom = () => {
-    // Select a random video URL
-    const randomIndex = Math.floor(Math.random() * videoUrls.length);
-    setCurrentVideoUrl(videoUrls[randomIndex]);
+  const handleCategoryClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const changeRoom = (category) => {
+    // Select a random video URL from the specified category
+    const videos = videoCategories[category];
+    const randomIndex = Math.floor(Math.random() * videos.length);
+    setCurrentVideoUrl(videos[randomIndex]);
+    handleClose(); // Close the category menu
   };
 
   const videoSrc = `https://www.youtube.com/embed/${currentVideoUrl}?playlist=${currentVideoUrl}&autoplay=1&controls=0&loop=1&modestbranding=1&mute=${isMuted ? '1' : '0'}&showinfo=0&rel=0&iv_load_policy=3`;
 
-
   const toggleVolume = () => setIsMuted(!isMuted);
-  const exitRoom = () =>  navigate('/studyroom');
-  const toggleMic = () => {/* Logic to toggle mic */};
+  const exitRoom = () => navigate('/studyroom');
   const editScreen = () => setShowEditMenu(!showEditMenu);
-
 
   return (
     <section className="layout">
@@ -64,16 +66,26 @@ const RoomDetailsPage = () => {
       <div className="footer">
         <Button variant="contained" onClick={() => setIsMuted(!isMuted)}>{isMuted ? 'Unmute' : 'Mute'}</Button>
         <Button variant="contained" onClick={togglePomodoro}>{showPomodoro ? 'Hide Timer' : 'Show Timer'}</Button>
-        <Button variant="contained" onClick={editScreen}>Edit Room</Button>
+        <Button variant="contained" > Invite Friends</Button>
         <Button variant="contained" onClick={exitRoom}>Exit Room</Button>
+        <Button variant="contained" onClick={handleCategoryClick}>Change Room</Button>
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+        >
+          {Object.keys(videoCategories).map((category) => (
+            <MenuItem key={category} onClick={() => changeRoom(category)}>{category}</MenuItem>
+          ))}
+        </Menu>
       </div>
 
-      {/* Slide-up Pomodoro */}
       <Slide direction="up" in={showPomodoro} mountOnEnter unmountOnExit>
         <Box sx={{ position: 'fixed', bottom: 60, right: 0, zIndex: 1100 }}><RoomPomodoro /></Box>
       </Slide>
 
-      {/* Slide-up Edit Menu */}
       <Slide direction="up" in={showEditMenu} mountOnEnter unmountOnExit>
         <Box sx={{
           backdropFilter: 'blur(10px)',
@@ -87,8 +99,7 @@ const RoomDetailsPage = () => {
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         }}>
           <Button onClick={() => {/* Logic to invite friends */}}>Invite Friends</Button>
-          <Button onClick={changeRoom}>Change Room</Button>
-
+          {/* Removed the direct Change Room button as it's now part of the menu */}
         </Box>
       </Slide>
     </section>

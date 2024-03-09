@@ -84,6 +84,7 @@ handle {
   .body { 
 	grid-area: body; 
 	position: relative; /* Needed for iframe to fill this area */
+	overflow-x: hidden;
   }
   
   .rightSide { 
