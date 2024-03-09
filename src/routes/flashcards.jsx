@@ -17,9 +17,9 @@ import {
 	addDoc,
 	deleteDoc,
 } from 'firebase/firestore';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import app from '../firebase';
 import FlashCard from '../components/FlashCard';
+import useUser from '../hooks/useUser';
 
 const Flashcards = () => {
 	const [flashcardList, setFlashcardList] = React.useState([]);
@@ -27,8 +27,8 @@ const Flashcards = () => {
 	const [newAnswer, setNewAnswer] = React.useState('');
 	const [newImage, setNewImage] = React.useState(null);
 	const [newAudio, setNewAudio] = React.useState(null);
-	const [user, setUser] = React.useState();
 	const [loading, setLoading] = React.useState(true);
+	const user = useUser(true);
 
 	const db = getFirestore(app);
 	const col = user
@@ -48,14 +48,6 @@ const Flashcards = () => {
 		setFlashcardList(queriedFlashcards);
 		setLoading(false);
 	};
-
-	useEffect(() => {
-		const auth = getAuth();
-		onAuthStateChanged(auth, user => {
-			if (user) setUser(user);
-			else setLoading(false);
-		});
-	}, []);
 
 	useEffect(() => {
 		fetchCards();
