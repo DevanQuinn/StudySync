@@ -15,6 +15,8 @@ import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 //import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { getDownloadURL } from "firebase/storage"; // Import getDownloadURLimport { getDownloadURL } from "firebase/storage"; // Import getDownloadURL
+import { useNavigate } from 'react-router-dom';
+
 
 const Header = () => {
   const [open, setOpen] = useState(false);
@@ -23,6 +25,7 @@ const Header = () => {
   const [description, setDescription] = useState('');
   const [time, setTime] = useState('');
   const [friendInvites, setFriendInvites] = useState('');
+  const navigate = useNavigate();
 
   // Your web app's Firebase configuration
   const firebaseConfig = {
@@ -35,9 +38,11 @@ const Header = () => {
 		measurementId: 'G-TS13EWHRMB',
 	};
 
+
   const app = initializeApp(firebaseConfig); // Initialize Firebase
   const db = getFirestore(); // Get Firestore instance
   const storage = getStorage(app);
+
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleClickOpen = () => {
@@ -48,6 +53,8 @@ const Header = () => {
     setOpen(false);
     setBackgroundImage(null); // Reset background image state on close
   };
+
+
 
   const handleImageChange = (event) => {
     if (event.target.files && event.target.files[0]) {
@@ -62,6 +69,11 @@ const Header = () => {
   };
 
   const handleFormSubmit = async () => {
+    if (!name.trim() || !description.trim() || !time.trim()) {
+      setErrorMessage('Please fill out all required fields.');
+      return; // Stop the function execution here
+    }
+
     const auth = getAuth(app); // Ensure you're passing the `app` instance to `getAuth`
     const user = auth.currentUser;
   
@@ -71,8 +83,13 @@ const Header = () => {
   
       // Proceed with your logic to handle file upload and data submission
       if (backgroundImage) {
+        console.log(
+          "Adding background image"
+        );
+
         const storageRef = ref(storage, `studyrooms/${backgroundImage.name}`);
   
+
         try {
           const snapshot = await uploadBytes(storageRef, backgroundImage);
           const downloadURL = await getDownloadURL(snapshot.ref);
@@ -85,9 +102,11 @@ const Header = () => {
             friendInvites: friendInvites.split(',').map(invite => invite.trim()),
           };
   
-          // Use the dynamically constructed collection name here
           const docRef = await addDoc(collection(db, collectionName), studyRoomData);
           console.log("Document written with ID: ", docRef.id);
+
+          // Navigate to room details page with room data
+          navigate(`/room`);
         } catch (error) {
           console.error("Error uploading image or adding document: ", error);
         }
@@ -103,6 +122,9 @@ const Header = () => {
           // Again, use the dynamically constructed collection name
           const docRef = await addDoc(collection(db, collectionName), studyRoomDataWithoutImage);
           console.log("Document written with ID: ", docRef.id);
+
+          // Navigate to room details page with room data
+          navigate(`/room/${docRef.id}`, { state: { ...studyRoomData } }); 
         } catch (error) {
           console.error("Error adding document without an image: ", error);
         }
@@ -117,11 +139,26 @@ const Header = () => {
     handleClose(); // Close the dialog
   };
   
+  // Example of customized button styles
+const customButtonStyles = {
+  backgroundColor: "#32BAAE", // A bright color for visibility
+  color: "white", // Contrast color for text
+  fontWeight: "bold", // Bold text for better readability
+  border: "2px solid white", // White border for contrast
+  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", // Shadow for depth
+  fontSize: "1em", // Slightly larger text
+  padding: "10px 20px", // Comfortable padding
+  cursor: "pointer", // Cursor indication for clickable elements
+  transition: "all 0.3s ease", // Smooth transition for interactions
+};
+
+
+
   return (
-    <header className="hero" style={{ backgroundImage: `url(${backgroundImage})` }}>
+    <header className="hero" style={{ }}>
       <div className="heroInner">
-        <h1>Study Room</h1>
-        <button className="btn" onClick={handleClickOpen}>
+        <h1 style={{ color: '#32BAAE' }}>Study Room</h1>
+        <button className="customButton" onClick={handleClickOpen} style={customButtonStyles}>
           Create Study Room
         </button>
 
@@ -177,7 +214,7 @@ const Header = () => {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleFormSubmit}>Create</Button>
+            <Button onClick={navigate(`/room`)}>Create</Button>
           </DialogActions>
         </Dialog>
       </div>
