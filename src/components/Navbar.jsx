@@ -11,14 +11,8 @@ TODO LIST:
 		- drop down should have links to profile page, or if not logged in, sign in page
 */
 const Navbar = () => {
-	const [user, setUser] = useState();
+	const user = useUser();
 
-	useEffect(() => {
-		const auth = getAuth();
-		onAuthStateChanged(auth, user => {
-			setUser(user);
-		});
-	}, []);
 
 	const pages = [ 
 				{ title: 'Leaderboard', path: '/leaderboard'},
