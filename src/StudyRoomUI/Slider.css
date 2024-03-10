@@ -1,0 +1,135 @@
+/* @tailwind base; */
+/* @tailwind components; */
+/* @tailwind utilities; */
+
+@layer base {
+  body {
+    background-color: whitesmoke;
+  }
+}
+
+.image-slider-container {
+  width: 75%;
+  margin: auto;
+  margin-top: 20px; /* Adjust as needed */
+}
+
+.slider-header {
+  text-align: center;
+  margin-top: 22px; /* Space above the header */
+  margin-bottom: 20px; /* Space between header and slider */
+}
+
+.slider-header h2 {
+  font-size: 24px; /* Equivalent to text-2xl */
+  font-weight: 600; /* Equivalent to font-semibold */
+  color: #B0DCCD; 
+}
+
+/* Custom Slider Styles */
+.custom-slider .slick-slide {
+  padding: 0 15px;/* Add horizontal padding to create space between slides*/
+}
+
+
+
+.custom-slider .slick-track {
+  display: flex;
+  align-items: stretch; /* This will make all slides stretch to fill the track evenly */
+}
+
+.slick-next, .slick-prev, .slick-next::before, .slick-prev::before, .slick-next::before, .slick-next::after, .slick-prev::after {
+  /* background-color: green; */
+  color: #B0DCCD;
+  size: 40px;
+}
+
+
+
+.slick-dots li button:before {
+  color: #B0DCCD; /* Change the color to make the dots visible */
+  font-size: 12px; /* Adjust size as needed */
+  opacity: 1; /* Ensure dots are fully opaque */
+}
+
+.slick-dots li.slick-active button:before {
+  color: #B0DCCD; /* Highlight color for the active dot */
+}
+
+.slider-item {
+  margin: 15px;
+  background-color: white;
+  height: 350px;
+  color: black;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  padding-bottom: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adds shadow for 3D effect */
+  transition: transform 0.3s ease-in-out; /* Smooth transition for hover effect */
+}
+
+
+.slider-item:hover {
+  transform: scale(1.05); /* Slightly enlarges the slide on hover for a 3D effect */
+}
+
+.slider-item-top {
+  height: 10rem; /* Approximation of Tailwind's h-56 */
+  border-top-left-radius: 0.75rem; /* Approximation of rounded-t-xl */
+  border-top-right-radius: 0.75rem;
+  background-color: #B0DCCD; /* Approximation of bg-indigo-500 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+ .slider-item-image {
+  justify-content: center;
+  height: 11rem; 
+  width: 11rem;
+  border-radius: 9999px; 
+  object-fit: cover;
+} 
+
+
+.slider-item-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* gap: 5px;  */
+  /* padding: 5px;  */
+  width: 100%
+}
+
+.slider-item-description {
+  min-height: 50px; /* Adjust based on your needs */
+  max-height: 50px; /* Prevents overflow */
+  padding: 10px;
+  overflow: auto; /* Adds scroll if content exceeds max height */
+}
+
+.slider-item-title {
+  font-size: 1.25rem; /* Approximation of text-xl */
+  font-weight: 600; /* Approximation of font-semibold */
+}
+
+.slider-item-button {
+  background-color: #B0DCCD; /* Approximation of bg-indigo-500 */
+  color: white;
+  font-size: 1.125rem; /* Approximation of text-lg */
+  padding: 0.25rem 1.5rem; /* Approximation of px-6 py-1 */
+  border-radius: 1rem; /* Approximation of rounded-xl */
+  transition: box-shadow 0.3s ease-in-out, transform 0.2s ease; /* Smooth transition for shadow and transform */
+}
+
+.slider-item-button:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Adds shadow to create depth */
+  transform: translateY(-2px); /* Slight upward movement */
+}

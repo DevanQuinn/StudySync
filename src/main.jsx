@@ -7,7 +7,7 @@ import './index.css';
 import Navbar from './components/Navbar.jsx';
 import Dashboard from './routes/dashboard.jsx'
 import Leaderboard from './routes/leaderboard.jsx'
-import StudyRoom from './routes/studyroom.jsx'
+//import StudyRoom from './routes/studyroom.jsx'
 import SignIn from './routes/signin.jsx';
 import SignUp from './routes/signup.jsx';
 import ForgotPass from './routes/forgotpass.jsx';
@@ -19,7 +19,8 @@ import Pomodoro from './routes/pomodoro.jsx';
 import Firebase from './firebase.js'
 import EditProfile from './routes/editprofile.jsx'
 import Flashcards from './routes/flashcards.jsx'
-
+import StudyRoomUI from './routes/StudyRoomUI.jsx';
+import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 
 const theme = createTheme({
   palette: {
@@ -37,20 +38,20 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 	<React.StrictMode>
 		<ThemeProvider theme={theme}>
 			<BrowserRouter>
-				<Navbar />
 				<Routes>
-					<Route path='/' element={<App />} />
-					<Route path="dashboard" element={<Dashboard />} />
-					<Route path="studyroom" element={<StudyRoom />} />
-					<Route path="leaderboard" element={<Leaderboard />} />
-					<Route path='signin' element={<SignIn />} />
-					<Route path='forgotpass' element={<ForgotPass />} />
-					<Route path='signup' element={<SignUp />} />
-					<Route path='editprofile' element={<EditProfile />} />
-					<Route path='flashcards' element={<Flashcards/>} />
-					<Route path='pomodoro' element={<Pomodoro/>} />
-          <Route path='SpotifyPlaylists' element={<SpotifyPlaylists />} />
-		      <Route path='Callback' element={<Callback />} />
+    				<Route path='/' element={<><Navbar /><App /></>} />
+    				<Route path="dashboard" element={<><Navbar /><Dashboard /></>} />
+    				<Route path="leaderboard" element={<><Navbar /><Leaderboard /></>} />
+    				<Route path='signin' element={<><Navbar /><SignIn /></>} />
+    				<Route path='forgotpass' element={<><Navbar /><ForgotPass /></>} />
+    				<Route path='signup' element={<><Navbar /><SignUp /></>} />
+    				<Route path='editprofile' element={<><Navbar /><EditProfile /></>} />
+    				<Route path='flashcards' element={<><Navbar /><Flashcards/></>} />
+    				<Route path='pomodoro' element={<><Navbar /><Pomodoro/></>} />
+    				<Route path='SpotifyPlaylists' element={<><Navbar /><SpotifyPlaylists /></>} />
+    				<Route path='Callback' element={<><Navbar /><Callback /></>} />
+    				<Route path='studyroom/*' element={<><Navbar /><StudyRoomUI /></>} />
+    				<Route path="/room" element={<RoomDetailsPage />} /> {/* No Navbar for /room */}
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>

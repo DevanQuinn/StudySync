@@ -11,17 +11,23 @@ TODO LIST:
 		- drop down should have links to profile page, or if not logged in, sign in page
 */
 const Navbar = () => {
-	const user = useUser();
+	const [user, setUser] = useState();
 
-	const pages = [
-		{ title: 'Study Room', path: '/studyroom' },
-		{ title: 'Leaderboard', path: '/leaderboard' },
-		{ title: 'Dashboard', path: '/dashboard' },
-		{ title: 'Study Room', path: '/studyroom' },
-		{ title: 'Timer', path: '/timer' },
-		{ title: 'Pomodoro', path: '/pomodoro' },
-		{ title: 'SpotifyPlaylists', path: '/SpotifyPlaylists' },
-		{ title: 'Flash Cards', path: '/flashcards' },
+	useEffect(() => {
+		const auth = getAuth();
+		onAuthStateChanged(auth, user => {
+			setUser(user);
+		});
+	}, []);
+
+	const pages = [ 
+				{ title: 'Leaderboard', path: '/leaderboard'},
+				{ title: 'Dashboard', path: '/dashboard'},
+				{ title: 'Study Room', path: '/studyroom' },
+				{ title: 'Timer', path: '/timer' },
+        { title: 'Pomodoro', path: '/pomodoro'},
+        {title: 'SpotifyPlaylists', path: '/SpotifyPlaylists'},
+        { title: 'Flash Cards', path: '/flashcards' },
 	];
 
 	return (
