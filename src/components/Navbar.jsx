@@ -1,8 +1,8 @@
 import { AppBar, Container, Toolbar, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Logo from './Logo';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import useUser from '../hooks/useUser';
 
 /*
 TODO LIST:
@@ -11,7 +11,6 @@ TODO LIST:
 		- drop down should have links to profile page, or if not logged in, sign in page
 */
 const Navbar = () => {
-
 	const [user, setUser] = useState();
 
 	useEffect(() => {
@@ -29,7 +28,6 @@ const Navbar = () => {
         { title: 'Pomodoro', path: '/pomodoro'},
         {title: 'SpotifyPlaylists', path: '/SpotifyPlaylists'},
         { title: 'Flash Cards', path: '/flashcards' },
-
 	];
 
 	return (
