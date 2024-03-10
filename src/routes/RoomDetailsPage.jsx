@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import "../index.css"
-import { Typography, Button, Stack, Box, Slide, Menu, MenuItem } from '@mui/material';
+import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField} from '@mui/material';
 import RoomPomodoro from '../components/RoomPomodoro';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,40 @@ const videoCategories = {
   ],
   // Add more categories and videos as needed
 };
+
+const Chat = () => {
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
+
+  const sendMessage = () => {
+    if (message) {
+      setMessages([...messages, message]);
+      setMessage('');
+    }
+  };
+
+  return (
+    <Box sx={{ position: 'fixed', bottom: 0, left: 0, zIndex: 1100, width: 300, backgroundColor: 'white', padding: '10px', borderRadius: '10px', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', overflow: 'auto', }}>
+      <Stack spacing={2}>
+        {messages.map((msg, index) => (
+          <Box key={index} sx={{ wordWrap: 'break-word' }}>{msg}</Box>
+        ))}
+        <Box>
+          <TextField 
+            fullWidth
+            variant="outlined"
+            size="small"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type a message..."
+          />
+        </Box>
+        <Button variant="contained" onClick={sendMessage}>Send</Button>
+      </Stack>
+    </Box>
+  );
+};
+
 
 const RoomDetailsPage = () => {
   const [isMuted, setIsMuted] = useState(true);
@@ -57,11 +91,15 @@ const RoomDetailsPage = () => {
         <Typography variant="h5" component="h2" className="font-bold">
           Profiles & Hours
         </Typography>
+
+        <Chat /> {/* Place this where it fits best in your layout */}
       </div>
 
       <div className="body">
         <iframe ref={iframeRef} src={videoSrc} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} frameBorder="0" allowFullScreen></iframe>
       </div>
+
+     
 
       <div className="footer">
         <Button variant="contained" onClick={() => setIsMuted(!isMuted)}>{isMuted ? 'Unmute' : 'Mute'}</Button>
