@@ -81,6 +81,11 @@ function TasklistList() {
 		setTasks(JSON.parse(JSON.stringify(newTasks)));
 	}
 
+	const SaveStateToJSON = () => {
+		console.log(JSON.stringify(tasks));
+		console.log(JSON.stringify(tasklistsList));
+	}
+
 	return (
         <div>
             <Draggable handle=".header">
@@ -110,6 +115,7 @@ function TasklistList() {
                     </div>
                 </div>
             </Draggable>
+			<Button onClick={SaveStateToJSON}>Save</Button>
 		</div>
 	);
 }
