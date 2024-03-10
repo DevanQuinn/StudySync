@@ -19,10 +19,11 @@ const videoCategories = {
   // Add more categories and videos as needed
 };
 
-const Chat = () => {
+const Chat = ({theme}) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [activeDrags, setActiveDrags] = useState(0);
+ 
   const onStart = () => {
     setActiveDrags(prevActiveDrags => prevActiveDrags + 1);
   };
@@ -41,6 +42,7 @@ const Chat = () => {
   const dragHandlers = {onStart: onStart, onStop: onStop};
 
   return (
+    
     <Draggable handle=".handle" {...dragHandlers}>
       <Box sx={{
         position: 'fixed', 
@@ -48,11 +50,12 @@ const Chat = () => {
         left: 0, 
         zIndex: 1100, 
         width: 300, 
-        backgroundColor: 'white', 
+        backgroundColor: theme === 'light' ? '#FFF' : '#333', // Use theme prop for background color
         padding: '10px', 
         borderRadius: '10px', 
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', 
         overflow: 'auto',
+        color: theme === 'light' ? '#000' : '#FFF', // Adjust text color based on theme
       }}>
         {/* Draggable handle */}
         <Box className="handle" sx={{cursor: 'move', backgroundColor: '#f0f0f0', padding: '10px', borderRadius: '5px'}}>
@@ -88,7 +91,7 @@ const RoomDetailsPage = () => {
   const [anchorEl, setAnchorEl] = useState(null); // For category menu
   const navigate = useNavigate(); 
   const [currentVideoUrl, setCurrentVideoUrl] = useState('');
-
+  const [isLightMode, setIsLightMode] = useState(true); // Theme state
   const togglePomodoro = () => setShowPomodoro(!showPomodoro);
 
   const handleCategoryClick = (event) => {
@@ -112,15 +115,35 @@ const RoomDetailsPage = () => {
   const toggleVolume = () => setIsMuted(!isMuted);
   const exitRoom = () => navigate('/studyroom');
   const editScreen = () => setShowEditMenu(!showEditMenu);
+  // Theme toggle function
+  const toggleTheme = () => setIsLightMode(!isLightMode);
+
+  // Adjusted to include styles for the left side
+  const themeStyles = {
+    layout: {
+      backgroundColor: isLightMode ? '#F3F4F6' : '#1F2937',
+      color: isLightMode ? '#000' : '#FFF',
+    },
+    leftSide: {
+      backgroundColor: isLightMode ? '#FFF' : '#333', // Explicitly setting background color for left side
+      color: isLightMode ? '#000' : '#FFF',
+      padding: '16px',
+      overflowY: 'auto', // Ensure content is scrollable if it overflows
+    },
+    button: {
+      backgroundColor: isLightMode ? '#FFFFFF' : '#333333',
+      color: isLightMode ? '#000000' : '#FFFFFF',
+    }
+  };
 
   return (
-    <section className="layout">
-      <div className="leftSide">
+    <section className="layout" style={themeStyles.layout}>
+       <div className="leftSide" style={themeStyles.leftSide}>
         <Typography variant="h5" component="h2" className="font-bold">
           Profiles & Hours
         </Typography>
 
-        <Chat /> {/* Place this where it fits best in your layout */}
+        <Chat theme={isLightMode ? 'light' : 'dark'} />
       </div>
 
       <div className="body">
@@ -130,11 +153,14 @@ const RoomDetailsPage = () => {
      
 
       <div className="footer">
-        <Button variant="contained" onClick={() => setIsMuted(!isMuted)}>{isMuted ? 'Unmute' : 'Mute'}</Button>
-        <Button variant="contained" onClick={togglePomodoro}>{showPomodoro ? 'Hide Timer' : 'Show Timer'}</Button>
-        <Button variant="contained" > Invite Friends</Button>
-        <Button variant="contained" onClick={exitRoom}>Exit Room</Button>
-        <Button variant="contained" onClick={handleCategoryClick}>Change Room</Button>
+        <Button variant="contained" style={themeStyles.button} onClick={toggleVolume}>{isMuted ? 'Unmute' : 'Mute'}</Button>
+        <Button variant="contained" style={themeStyles.button} onClick={togglePomodoro}>{showPomodoro ? 'Hide Timer' : 'Show Timer'}</Button>
+        <Button variant="contained" style={themeStyles.button}>Invite Friends</Button>
+        <Button variant="contained" style={themeStyles.button} onClick={exitRoom}>Exit Room</Button>
+        <Button variant="contained" style={themeStyles.button} onClick={handleCategoryClick}>Change Room</Button>
+        <Button variant="contained" style={themeStyles.button} onClick={toggleTheme}>
+            {isLightMode ? 'Dark Mode' : 'Light Mode'}
+        </Button>
         <Menu
           id="simple-menu"
           anchorEl={anchorEl}
