@@ -1,13 +1,48 @@
-import { Box, Typography, TextField, Button } from '@mui/material';
+import { Box, TextField, Button } from '@mui/material';
 import React, { useState } from 'react';
+import app from '../firebase';
+import {
+	getDownloadURL,
+	getStorage,
+	ref as storageRef,
+	uploadBytes,
+} from 'firebase/storage';
+import { addDoc, collection, getFirestore } from 'firebase/firestore';
+import useUser from '../hooks/useUser';
+import { v4 as uuid } from 'uuid';
 
 const CreatePost = () => {
+	const [title, setTitle] = useState('');
+	const [description, setDescription] = useState('');
 	const [image, setImage] = useState();
-	const handleSubmit = () => {};
+	const user = useUser(true);
+	const db = getFirestore(app);
+	const storage = getStorage(app);
+
+	const uploadImage = async imageUpload => {
+		const imageId = uuid();
+		const imageRef = storageRef(storage, `posts/${imageId}`);
+		await uploadBytes(imageRef, imageUpload);
+		return imageId;
+	};
+
+	const clearInputs = () => {
+		setTitle('');
+		setDescription('');
+		setImage();
+	};
+
+	const handleSubmit = async () => {
+		if (!user) return;
+		const col = collection(db, `posts/${user.uid}/posts`);
+		const imageId = image ? await uploadImage(image) : null;
+		const post = { title, description, image: imageId };
+		await addDoc(col, post);
+		alert('Post uploaded!');
+		clearInputs();
+	};
 
 	return (
-		// <Container component='main' maxWidth='xs'>
-		// <CssBaseline />
 		<Box
 			sx={{
 				display: 'flex',
@@ -15,10 +50,7 @@ const CreatePost = () => {
 				alignItems: 'center',
 			}}
 		>
-			<Typography component='h1' variant='h5'>
-				Create Post
-			</Typography>
-			<Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+			<Box noValidate>
 				<TextField
 					margin='normal'
 					required
@@ -27,6 +59,8 @@ const CreatePost = () => {
 					id='title'
 					label='Title'
 					placeholder='Title'
+					value={title}
+					onChange={e => setTitle(e.target.value)}
 				/>
 				<TextField
 					margin='normal'
@@ -36,7 +70,8 @@ const CreatePost = () => {
 					placeholder='Description'
 					multiline
 					rows={4}
-					variant='filled'
+					value={description}
+					onChange={e => setDescription(e.target.value)}
 				/>
 				{image ? (
 					<Box>
@@ -55,7 +90,7 @@ const CreatePost = () => {
 					</Box>
 				) : (
 					<Button variant='text' component='label' margin='normal' fullWidth>
-						Add File
+						Add Image
 						<input
 							type='file'
 							hidden
@@ -72,12 +107,13 @@ const CreatePost = () => {
 					fullWidth
 					variant='contained'
 					sx={{ mt: 3, mb: 2 }}
+					onClick={handleSubmit}
+					disabled={title.length ? false : true}
 				>
 					Submit Post
 				</Button>
 			</Box>
 		</Box>
-		// </Container>
 	);
 };
 

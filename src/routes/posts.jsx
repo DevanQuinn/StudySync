@@ -6,6 +6,7 @@ import {
 	AccordionDetails,
 	CssBaseline,
 	Container,
+	Typography,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -15,7 +16,7 @@ const Posts = () => {
 			<CssBaseline />
 			<Accordion>
 				<AccordionSummary expandIcon={<ExpandMoreIcon />}>
-					Make a new post
+					<Typography variant='h6'>Make a new post</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
 					<CreatePost />
