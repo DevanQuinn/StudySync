@@ -8,15 +8,22 @@ const EditProfile = () => {
         const data = new FormData(event.currentTarget);
         console.log({
             favorites: data.get('favorites'),
-            newPassword: data.get('newPassword'),
-            confirmNewPassword: data.get('confirmNewPassword'),
             studyGoals: data.get('studyGoals'),
             profilePicture: data.get('profilePicture'),
         });
     };
 
+    const handleChangePassword = (event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        console.log({
+            newPassword: data.get('newPassword'),
+            confirmNewPassword: data.get('confirmNewPassword'),
+        });
+    };
+
     return (
-        <Container component="main" maxWidth="xs">
+        <Container component="main" maxWidth="xs" sx={{ mt: 10 }}>
             <CssBaseline />
             <div
                 sx={{
@@ -26,19 +33,10 @@ const EditProfile = () => {
                     alignItems: 'center',
                 }}
             >
-                <Typography component="h1" variant="h5">
-                    Edit Profile
+                <Typography component="h1" variant="h5" >
+                    Change Password
                 </Typography>
-                <form onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-                    <TextField
-                        margin="normal"
-                        fullWidth
-                        name='favorites'
-                        label="Favorites"
-                        id="favorites"
-                        autoFocus
-                        placeholder='Edit your favorites'
-                    />
+                <form onSubmit={handleChangePassword} noValidate sx={{ mt: 1 }}>
                     <TextField
                         margin="normal"
                         fullWidth
@@ -56,6 +54,28 @@ const EditProfile = () => {
                         type="password"
                         id="confirmNewPassword"
                         placeholder='Confirm New Password'
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                    >
+                        Set new password
+                    </Button>
+                </form>
+                <Typography component="h1" variant="h5" sx={{ mt: 5 }}>
+                    Edit Profile
+                </Typography>
+                <form onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        name='favorites'
+                        label="Favorites"
+                        id="favorites"
+                        autoFocus
+                        placeholder='Edit your favorites'
                     />
                     <TextField
                         margin="normal"
