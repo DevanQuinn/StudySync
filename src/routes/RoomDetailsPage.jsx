@@ -3,6 +3,7 @@ import "../index.css"
 import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField} from '@mui/material';
 import RoomPomodoro from '../components/RoomPomodoro';
 import { useNavigate } from 'react-router-dom';
+import Draggable from 'react-draggable';
 
 // Categories and their associated video URLs
 const videoCategories = {
@@ -21,6 +22,14 @@ const videoCategories = {
 const Chat = () => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
+  const [activeDrags, setActiveDrags] = useState(0);
+  const onStart = () => {
+    setActiveDrags(prevActiveDrags => prevActiveDrags + 1);
+  };
+
+  const onStop = () => {
+    setActiveDrags(prevActiveDrags => prevActiveDrags - 1);
+  };
 
   const sendMessage = () => {
     if (message) {
@@ -29,25 +38,44 @@ const Chat = () => {
     }
   };
 
+  const dragHandlers = {onStart: onStart, onStop: onStop};
+
   return (
-    <Box sx={{ position: 'fixed', bottom: 0, left: 0, zIndex: 1100, width: 300, backgroundColor: 'white', padding: '10px', borderRadius: '10px', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', overflow: 'auto', }}>
-      <Stack spacing={2}>
-        {messages.map((msg, index) => (
-          <Box key={index} sx={{ wordWrap: 'break-word' }}>{msg}</Box>
-        ))}
-        <Box>
-          <TextField 
-            fullWidth
-            variant="outlined"
-            size="small"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type a message..."
-          />
+    <Draggable handle=".handle" {...dragHandlers}>
+      <Box sx={{
+        position: 'fixed', 
+        bottom: 0, 
+        left: 0, 
+        zIndex: 1100, 
+        width: 300, 
+        backgroundColor: 'white', 
+        padding: '10px', 
+        borderRadius: '10px', 
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', 
+        overflow: 'auto',
+      }}>
+        {/* Draggable handle */}
+        <Box className="handle" sx={{cursor: 'move', backgroundColor: '#f0f0f0', padding: '10px', borderRadius: '5px'}}>
+          <strong>Drag Me</strong>
         </Box>
-        <Button variant="contained" onClick={sendMessage}>Send</Button>
-      </Stack>
-    </Box>
+        <Stack spacing={2}>
+          {messages.map((msg, index) => (
+            <Box key={index} sx={{ wordWrap: 'break-word' }}>{msg}</Box>
+          ))}
+          <Box>
+            <TextField 
+              fullWidth
+              variant="outlined"
+              size="small"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Type a message..."
+            />
+          </Box>
+          <Button variant="contained" onClick={sendMessage}>Send</Button>
+        </Stack>
+      </Box>
+    </Draggable>
   );
 };
 
