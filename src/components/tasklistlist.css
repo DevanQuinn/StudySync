@@ -1,11 +1,15 @@
-.tasklistlist {
-    border: 1px solid white;
-    float: left;
-    width: 25em;
-    overflow-y: scroll;
-  }
+
   .header {
     margin: 0.5em;
+    color: black;
     font-size: 2em;
     text-align: center;
+  }
+  .component-wrapper {
+    box-sizing: border-box;
+    border: 5px solid blue;
+    border-radius: 10px;
+    height: 75vh;
+    overflow-y: scroll;
+    color: black;
   }

@@ -51,8 +51,8 @@ function Tasklist({title, deletefunc, id, tasksProp, addtaskfunc, deletetaskfunc
                             )}
                             )}
                         </div>
+                        {tasksProp.length} tasks left!
                     </div>
-                    <>{tasksProp.length} tasks left!</>
                     <div className="create-task" >
                         <CreateTask addTask={addTask} />
                     </div>

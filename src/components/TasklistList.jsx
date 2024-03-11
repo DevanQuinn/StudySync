@@ -3,7 +3,7 @@ import Button from '../components/Button.jsx';
 import React, {useState, useEffect} from 'react'
 import { Task } from '@mui/icons-material';
 import { nanoid } from 'nanoid'
-import "./tasklistlist.css"
+import "./TasklistList.css"
 import Draggable from 'react-draggable';
 
 /*
@@ -89,30 +89,24 @@ function TasklistList() {
 	return (
         <div>
             <Draggable handle=".header">
-                <div>
-                    <div className="header">
-                        Tasklists
-                    </div>
-                    <div className="tasklistlist">
-                        <div>
-                            {tasklistsList.map((tasklist, index) => (
-                            <Tasklist
-                            id={tasklist.id}
-                            title={tasklist.title}
-                            deletefunc={deleteByIndex}
-                            tasklistlength={tasklistsList.length}
-                            key={index}
-                            tasksProp={tasks[tasklist.id]}
-                            addtaskfunc={addTaskToTasklist}
-                            deletetaskfunc={deleteTaskFromTasklist}
-                            completetaskfunc={completeTask}
-                            />))}
-                        </div>
-                        <div>
-                            <CreateTasklist addTasklist={addTasklist}/>
-                            <h2>There are currently {tasklistsList.length} active tasklists</h2>
-                        </div>
-                    </div>
+				<div className="component-wrapper">
+					<div className="header">
+						Tasklists
+					</div>
+					{tasklistsList.map((tasklist, index) => (
+					<Tasklist
+					id={tasklist.id}
+					title={tasklist.title}
+					deletefunc={deleteByIndex}
+					tasklistlength={tasklistsList.length}
+					key={index}
+					tasksProp={tasks[tasklist.id]}
+					addtaskfunc={addTaskToTasklist}
+					deletetaskfunc={deleteTaskFromTasklist}
+					completetaskfunc={completeTask}
+					/>))}
+					<CreateTasklist addTasklist={addTasklist}/>
+					<h2>There are currently {tasklistsList.length} active tasklists</h2>
                 </div>
             </Draggable>
 			<Button onClick={SaveStateToJSON}>Save</Button>

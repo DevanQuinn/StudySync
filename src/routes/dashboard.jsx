@@ -1,5 +1,5 @@
 import TasklistList from '../components/TasklistList.jsx'
-import Draggable from 'react-draggable';
+import '../components/TasklistList.css'
 
 /*
 TODO LIST:
@@ -9,7 +9,9 @@ TODO LIST:
 
 function Dashboard() {
 	return (
-		<TasklistList/>
+		<div>
+			<TasklistList/>
+		</div>
 	)
 }
 
