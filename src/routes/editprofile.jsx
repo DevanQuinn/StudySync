@@ -1,13 +1,24 @@
-import React from 'react';
-import { Button, Container, CssBaseline, Grid, Link, TextField, Typography } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import React, { useState } from 'react';
+import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link, TextField, Typography } from '@mui/material';
 
 const EditProfile = () => {
+    const [selectedFavorites, setSelectedFavorites] = useState([]);
+    const favoritesOptions = ['Leaderboard', 'Study Room', 'Timer', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards'];
+
+    const handleCheckboxChange = (event) => {
+        const { value } = event.target;
+        if (selectedFavorites.includes(value)) {
+            setSelectedFavorites(selectedFavorites.filter((item) => item !== value));
+        } else {
+            setSelectedFavorites([...selectedFavorites, value]);
+        }
+    };
+
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         console.log({
-            favorites: data.get('favorites'),
+            favorites: selectedFavorites,
             studyGoals: data.get('studyGoals'),
             profilePicture: data.get('profilePicture'),
         });
@@ -71,15 +82,6 @@ const EditProfile = () => {
                     <TextField
                         margin="normal"
                         fullWidth
-                        name='favorites'
-                        label="Favorites"
-                        id="favorites"
-                        autoFocus
-                        placeholder='Edit your favorites'
-                    />
-                    <TextField
-                        margin="normal"
-                        fullWidth
                         name='studyGoals'
                         label="Study Goals"
                         id="studyGoals"
@@ -93,6 +95,26 @@ const EditProfile = () => {
                         id="profilePicture"
                         placeholder='Enter URL for profile picture'
                     />
+                    <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
+                    Edit Favorites
+                    </Typography>
+                    <Grid container spacing={1}>
+                    {favoritesOptions.map((option, index) => (
+                        <Grid item xs={6} key={index} style={{ display: 'flex', alignItems: 'flex-start' }}>
+                            <FormControlLabel
+                                key={index}
+                                control={
+                                    <Checkbox
+                                        value={option}
+                                        onChange={handleCheckboxChange}
+                                        checked={selectedFavorites.includes(option)}
+                                    />
+                                }
+                                label={option}
+                            />
+                        </Grid>
+                    ))}
+                    </Grid>
                     <Button
                         type="submit"
                         fullWidth
@@ -104,7 +126,7 @@ const EditProfile = () => {
                 </form>
                 <Grid container>
                     <Grid item xs>
-                        <Link href="/" variant="body2">
+                        <Link href="/" variant="body2" paddingBottom="10pt">
                             Go Back
                         </Link>
                     </Grid>
