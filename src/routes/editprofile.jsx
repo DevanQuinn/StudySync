@@ -50,7 +50,10 @@ const EditProfile = () => {
                     alignItems: 'center',
                 }}
             >
-                <Typography component="h1" variant="h5" >
+                <Typography component="h1" variant="h5" sx={{ mt: 5 }}>
+                    Edit Profile
+                </Typography>
+                <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
                     Change Password
                 </Typography>
                 <form onSubmit={handleChangePassword} noValidate sx={{ mt: 1 }}>
@@ -81,13 +84,15 @@ const EditProfile = () => {
                         Set new password
                     </Button>
                 </form>
-                <Typography component="h1" variant="h5" sx={{ mt: 5 }}>
-                    Edit Profile
-                </Typography>
                 <form onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                    <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
+                        Set Study Goals
+                    </Typography>
                     <TextField
                         margin="normal"
                         fullWidth
+                        multiline
+                        rows={4}
                         name='studyGoals'
                         label="Study Goals"
                         id="studyGoals"
