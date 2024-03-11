@@ -3,16 +3,19 @@ import Button from '../components/Button.jsx';
 import React, {useState, useEffect} from 'react'
 import { Task } from '@mui/icons-material';
 import { nanoid } from 'nanoid'
-
+import { Fab, Box, Slide } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RoomPomodoro from '../components/RoomPomodoro.jsx';
 /*
 TODO LIST:
 	* store all tasks in the dashboard component and pass as props the relevant tasks to the tasklist
 	* debug the above procedure
 */
-
-function Dashboard() {
+export function Dashboard() {
 	const [tasklistsList, setTasklists] = React.useState([]);
 	const [tasks, setTasks] = React.useState({})
+	const [showPomodoro, setShowPomodoro] = useState(false);
+	const togglePomodoro = () => setShowPomodoro(!showPomodoro);
 
 	useEffect(() => {
 		console.log("props updated. rerendering dashboard.");
@@ -98,7 +101,13 @@ function Dashboard() {
 				<CreateTasklist addTasklist={addTasklist}/>
 				<h2>There are currently {tasklistsList.length} active tasklists</h2>
 			</div>
-		</div>
+			<Fab color="primary" aria-label="add" onClick={togglePomodoro}>
+				<AddIcon />
+			</Fab>
+			<Slide direction="up" in={showPomodoro} mountOnEnter unmountOnExit>
+       		 	<Box sx={{ position: 'fixed', bottom: 60, right: 0, zIndex: 1100 }}><RoomPomodoro /></Box>
+      		</Slide>	
+		</div>	
 	);
 }
 

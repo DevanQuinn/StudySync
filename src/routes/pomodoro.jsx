@@ -102,10 +102,19 @@ export default function Pomodoro() {
       />
        <TextField
         margin='normal'
-        name='break-time'
-        label="Break Time"
+        name='short-break-time'
+        label="Short Break Time"
         type="text"
-        id="break-time"
+        id="short-break-time"
+        placeholder='10:00'
+        color='primary'
+      />
+        <TextField
+        margin='normal'
+        name='long-break-time'
+        label="Long Break Time"
+        type="text"
+        id="long-break-time"
         placeholder='10:00'
         color='primary'
       />

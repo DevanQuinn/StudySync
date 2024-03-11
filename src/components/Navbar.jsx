@@ -1,4 +1,4 @@
-import { AppBar, Container, Toolbar, Typography } from '@mui/material';
+import { AppBar, Avatar, Container, Toolbar, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import React from 'react';
 import Logo from './Logo';
@@ -11,20 +11,12 @@ TODO LIST:
 		- drop down should have links to profile page, or if not logged in, sign in page
 */
 const Navbar = () => {
-	const [user, setUser] = useState();
-
-	useEffect(() => {
-		const auth = getAuth();
-		onAuthStateChanged(auth, user => {
-			setUser(user);
-		});
-	}, []);
+	const user = useUser()
 
 	const pages = [ 
 				{ title: 'Leaderboard', path: '/leaderboard'},
 				{ title: 'Dashboard', path: '/dashboard'},
 				{ title: 'Study Room', path: '/studyroom' },
-				{ title: 'Timer', path: '/timer' },
         { title: 'Pomodoro', path: '/pomodoro'},
         {title: 'SpotifyPlaylists', path: '/SpotifyPlaylists'},
         { title: 'Flash Cards', path: '/flashcards' },
@@ -48,6 +40,7 @@ const Navbar = () => {
 					component='div'
 					sx={{ flexGrow: 1 }}
 				></Typography>
+				<Avatar sx= {{mr: 2}} />
 				<Typography sx={{ mr: 2 }} color='textPrimary'>
 					<Link to='/signin'>{user ? user.displayName : 'Sign In'}</Link>
 				</Typography>
