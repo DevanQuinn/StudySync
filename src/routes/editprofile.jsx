@@ -3,6 +3,7 @@ import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link,
 
 const EditProfile = () => {
     const [selectedFavorites, setSelectedFavorites] = useState([]);
+    const [selectedImage, setSelectedImage] = useState(null);
     const favoritesOptions = ['Leaderboard', 'Study Room', 'Timer', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards'];
 
     const handleCheckboxChange = (event) => {
@@ -31,6 +32,11 @@ const EditProfile = () => {
             newPassword: data.get('newPassword'),
             confirmNewPassword: data.get('confirmNewPassword'),
         });
+    };
+
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        setSelectedImage(file);
     };
 
     return (
@@ -87,14 +93,32 @@ const EditProfile = () => {
                         id="studyGoals"
                         placeholder='Edit your study goals'
                     />
-                    <TextField
-                        margin="normal"
-                        fullWidth
-                        name='profilePicture'
-                        label="Profile Picture URL"
+                    <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
+                    Change Profile Picture
+                    </Typography>
+                    <input
+                        accept="image/*"
+                        style={{ display: 'none' }}
                         id="profilePicture"
-                        placeholder='Enter URL for profile picture'
+                        type="file"
+                        onChange={handleImageChange}
                     />
+                    <label htmlFor="profilePicture">
+                        <Button
+                            variant="contained"
+                            component="span"
+                            fullWidth
+                            color="primary"
+                            sx={{ mt: 3 }}
+                        >
+                            Select Image
+                        </Button>
+                    </label>
+                    {selectedImage && (
+                        <Typography variant="body2" sx={{ mt: 1 }}>
+                            {selectedImage.name}
+                        </Typography>
+                    )}
                     <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
                     Edit Favorites
                     </Typography>
