@@ -51,7 +51,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     				<Route path='SpotifyPlaylists' element={<><Navbar /><SpotifyPlaylists /></>} />
     				<Route path='Callback' element={<><Navbar /><Callback /></>} />
     				<Route path='studyroom/*' element={<><Navbar /><StudyRoomUI /></>} />
-    				<Route path="/room" element={<RoomDetailsPage />} /> {/* No Navbar for /room */}
+    				<Route path="/room/:roomId" element={<RoomDetailsPage />} /> {/* No Navbar for /room */}
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>
