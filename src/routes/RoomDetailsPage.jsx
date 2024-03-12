@@ -21,18 +21,19 @@ const videoCategories = {
   ],
   Chill: [
     'iicfmXFALM8', 'lTRiuFIWV54',  'HO6cbtdmkIc', 'ANkxRGvl1VY',
+    'sgEJ4sOwboM', 'b8K5sGFu1l4', 'hm7_T0RvnjY',
   ],
   Indie: [
-    
+    'nif7-fGMSAs', 'anPqAKBcsog', 'HxAkpLrW7cQ', 'L8hPtjGb3R0',
   ],
   Pop: [
-  
+    'HQtFR3mhzOY', '471IbdJ4ZOc', 
   ],
   Upbeat: [
-    'ixnqJm697-o', 
+    'ixnqJm697-o', 'ypHMIyXx4v0', '7EDWMYyqJqE',
   ],
   Speedrun: [
-
+    '-XFJoMRMM4k', 'b3TOVBNSJDA', 
   ]
   // Add more categories and videos as needed
 };
@@ -209,7 +210,13 @@ const RoomDetailsPage = () => {
   };
   //const editScreen = () => setShowEditMenu(!showEditMenu);
   // Theme toggle function
-  const toggleTheme = () => setIsLightMode(!isLightMode);
+ 
+   // Theme toggle function
+   const toggleTheme = () => {
+    setIsLightMode(!isLightMode);
+    // Apply the dark class to the body
+    document.body.classList.toggle('dark', !isLightMode);
+  };
 
   // Adjusted to include styles for the left side
   const themeStyles = {
@@ -251,9 +258,16 @@ const RoomDetailsPage = () => {
         <Button variant="contained" style={themeStyles.button}>Invite Friends</Button>
         <Button variant="contained" style={themeStyles.button} onClick={handleExitAndDeleteRoom}>Exit Room</Button>
         <Button variant="contained" style={themeStyles.button} onClick={handleCategoryClick}>Change Room</Button>
-        <Button variant="contained" style={themeStyles.button} onClick={toggleTheme}>
-            {isLightMode ? 'Dark Mode' : 'Light Mode'}
-        </Button>
+         {/* Light/Dark Toggle Button */}
+         <div>
+          <input type="checkbox" className="checkbox" id="checkbox" checked={!isLightMode} onChange={toggleTheme} />
+          <label htmlFor="checkbox" className="checkbox-label">
+            <i className="fas fa-moon"></i>
+            <i className="fas fa-sun"></i>
+            <span className="ball"></span>
+          </label>
+        </div>
+      
         <Menu
           id="simple-menu"
           anchorEl={anchorEl}
