@@ -1,21 +1,39 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import "../index.css"
+import { useParams } from 'react-router-dom';
 import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField} from '@mui/material';
 import RoomPomodoro from '../components/RoomPomodoro';
 import { useNavigate } from 'react-router-dom';
 import Draggable from 'react-draggable';
+import { doc, getDoc, getFirestore, deleteDoc } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth'; // Make sure to import getAuth
+
 
 // Categories and their associated video URLs
 const videoCategories = {
   Lofi: [
-    'jfKfPfyJRdk', 'SllpB3W5f6s', 'ZrKPW5d3idY',
+    'jfKfPfyJRdk', 'SllpB3W5f6s', 'FxJ3zPUU6Y4', 'A_nRzRZQqv0', 
   ],
   Nature: [
-    'UBw8_yfM', 'HO6cbtdmkIc', 'QZTDZFtbrec',
+    'eKFTSSKCzWA', 'FerGgYXVXiw', 'qRTVg8HHzUo', 'SuyWEu5Du8c',
+    'ipf7ifVSeDU', 'Jvgx5HHJ0qw',
   ],
-  StudyWithMe: [
-    'iicfmXFALM8', 'Hc10febKlX8', 'lTRiuFIWV54',
+  Chill: [
+    'iicfmXFALM8', 'lTRiuFIWV54',  'HO6cbtdmkIc', 'ANkxRGvl1VY',
   ],
+  Indie: [
+    
+  ],
+  Pop: [
+  
+  ],
+  Upbeat: [
+    'ixnqJm697-o', 
+  ],
+  Speedrun: [
+
+  ]
   // Add more categories and videos as needed
 };
 
@@ -87,12 +105,14 @@ const RoomDetailsPage = () => {
   const [isMuted, setIsMuted] = useState(true);
   const iframeRef = useRef(null);
   const [showPomodoro, setShowPomodoro] = useState(false);
-  const [showEditMenu, setShowEditMenu] = useState(false);
+  //const [showEditMenu, setShowEditMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null); // For category menu
   const navigate = useNavigate(); 
   const [currentVideoUrl, setCurrentVideoUrl] = useState('');
   const [isLightMode, setIsLightMode] = useState(true); // Theme state
   const togglePomodoro = () => setShowPomodoro(!showPomodoro);
+  const { roomId } = useParams(); // Using useParams to get roomId from the route
+  const [roomData, setRoomData] = useState(null); // State to hold room data
 
   const handleCategoryClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -101,6 +121,59 @@ const RoomDetailsPage = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: 'AIzaSyAOLFu9q6gvdcDoOJ0oPuQKPgDyOye_2uM',
+    authDomain: 'studysync-3fbd7.firebaseapp.com',
+    projectId: 'studysync-3fbd7',
+    storageBucket: 'studysync-3fbd7.appspot.com',
+    messagingSenderId: '885216959280',
+    appId: '1:885216959280:web:917a7216776b36e904c6f5',
+    measurementId: 'G-TS13EWHRMB',
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+
+  useEffect(() => {
+    const fetchRoomData = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        console.error("User not authenticated");
+        navigate('/login'); // Redirect to login or handle unauthenticated state
+        return;
+      }
+
+      const userId = user.uid;
+      console.log(`Fetching room data for room ID: ${roomId} under user ID: ${userId}`); // Debug statement
+
+      try {
+        const roomRef = doc(db, `${userId}_studyrooms/${roomId}`);
+        const docSnap = await getDoc(roomRef);
+        if (docSnap.exists()) {
+          console.log("Room data found:", docSnap.data()); // Debug statement
+          setRoomData(docSnap.data());
+
+          // Use the videoCategory from roomData to select the initial video URL
+          const initialVideoCategory = docSnap.data().videoCategory;
+          const initialVideoUrl = videoCategories[initialVideoCategory]?.[0]; // Use the first video URL from the selected category
+          setCurrentVideoUrl(initialVideoUrl);
+          // Assuming you have a logic to select the initial video based on the room data
+        } else {
+          console.log("No such room exists!");
+        }
+      } catch (error) {
+        console.error("Error fetching room data:", error);
+      }
+    };
+
+    fetchRoomData();
+  }, [roomId, db, auth, navigate]);
+  
 
   const changeRoom = (category) => {
     // Select a random video URL from the specified category
@@ -113,8 +186,28 @@ const RoomDetailsPage = () => {
   const videoSrc = `https://www.youtube.com/embed/${currentVideoUrl}?playlist=${currentVideoUrl}&autoplay=1&controls=0&loop=1&modestbranding=1&mute=${isMuted ? '1' : '0'}&showinfo=0&rel=0&iv_load_policy=3`;
 
   const toggleVolume = () => setIsMuted(!isMuted);
-  const exitRoom = () => navigate('/studyroom');
-  const editScreen = () => setShowEditMenu(!showEditMenu);
+  //const exitRoom = () => navigate('/studyroom');
+  const handleExitAndDeleteRoom = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      const userId = user.uid;
+      try {
+        // Define the room document reference
+        const roomRef = doc(db, `${userId}_studyrooms/${roomId}`);
+        // Delete the document
+        await deleteDoc(roomRef);
+        console.log(`Room ${roomId} deleted successfully`);
+        // Navigate to another page after deletion
+        navigate('/dashboard'); // Adjust the navigation path as needed
+      } catch (error) {
+        console.error("Error deleting room:", error);
+      }
+    } else {
+      console.log("User is not authenticated");
+      navigate('/signin'); // Redirect to signin page or handle unauthenticated state
+    }
+  };
+  //const editScreen = () => setShowEditMenu(!showEditMenu);
   // Theme toggle function
   const toggleTheme = () => setIsLightMode(!isLightMode);
 
@@ -156,7 +249,7 @@ const RoomDetailsPage = () => {
         <Button variant="contained" style={themeStyles.button} onClick={toggleVolume}>{isMuted ? 'Unmute' : 'Mute'}</Button>
         <Button variant="contained" style={themeStyles.button} onClick={togglePomodoro}>{showPomodoro ? 'Hide Timer' : 'Show Timer'}</Button>
         <Button variant="contained" style={themeStyles.button}>Invite Friends</Button>
-        <Button variant="contained" style={themeStyles.button} onClick={exitRoom}>Exit Room</Button>
+        <Button variant="contained" style={themeStyles.button} onClick={handleExitAndDeleteRoom}>Exit Room</Button>
         <Button variant="contained" style={themeStyles.button} onClick={handleCategoryClick}>Change Room</Button>
         <Button variant="contained" style={themeStyles.button} onClick={toggleTheme}>
             {isLightMode ? 'Dark Mode' : 'Light Mode'}
@@ -176,23 +269,6 @@ const RoomDetailsPage = () => {
 
       <Slide direction="up" in={showPomodoro} mountOnEnter unmountOnExit>
         <Box sx={{ position: 'fixed', bottom: 60, right: 0, zIndex: 1100 }}><RoomPomodoro /></Box>
-      </Slide>
-
-      <Slide direction="up" in={showEditMenu} mountOnEnter unmountOnExit>
-        <Box sx={{
-          backdropFilter: 'blur(10px)',
-          backgroundColor: 'rgba(255, 255, 255, 0.7)',
-          borderRadius: '8px',
-          padding: '16px',
-          position: 'fixed',
-          bottom: '100px',
-          left: '20px',
-          zIndex: '1200',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-        }}>
-          <Button onClick={() => {/* Logic to invite friends */}}>Invite Friends</Button>
-          {/* Removed the direct Change Room button as it's now part of the menu */}
-        </Box>
       </Slide>
     </section>
   );
