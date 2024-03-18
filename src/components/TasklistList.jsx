@@ -86,6 +86,12 @@ function TasklistList() {
 		console.log(JSON.stringify(tasklistsList));
 	}
 
+	const handleLoad = (tasklistsString, tasksString) => {
+		console.log(tasklistsString + tasksString);
+		setTasklists(JSON.parse(tasklistsString));
+		setTasks(JSON.parse(tasksString));
+	}
+
 	return (
         <div>
             <Draggable handle=".header">
@@ -110,11 +116,12 @@ function TasklistList() {
                 </div>
             </Draggable>
 			<Button onClick={SaveStateToJSON}>Save</Button>
+			<LoadUserTasks handleLoad={handleLoad}/>
 		</div>
 	);
 }
 
-function CreateTasklist({addTasklist}) { //Not Yet Implemented
+function CreateTasklist({addTasklist}) {
 	const [value, setValue] = useState("");
 
 	const handleSubmit = e => {
@@ -134,6 +141,39 @@ function CreateTasklist({addTasklist}) { //Not Yet Implemented
 				onChange={e => setValue(e.target.value)}
 			/>
 		</form> 
+	)
+}
+
+function LoadUserTasks({handleLoad}) {
+	const [formValues, setFormValues] = useState({tasklists:'', tasks:''});
+	
+	const handleSubmit = e => {
+		console.log("handling submit");
+		e.preventDefault();
+		if (!formValues) return;
+		handleLoad(formValues.tasklists, formValues.tasks);
+		setTasklistsString("");
+		setTasksString("");
+	}
+
+	return (
+		<form onSubmit={handleSubmit}>
+			<input
+				type="text"
+				className="input"
+				value={formValues.tasklists}
+				placeholder="enter tasklists JSON string"
+				onChange={e => setFormValues({tasklists:e.target.value, tasks:formValues.tasks})}
+			/>
+			<input
+				type="text"
+				className="input"
+				value={formValues.tasks}
+				placeholder="enter tasks JSON string"
+				onChange={e => setFormValues({tasklists:formValues.tasklists, tasks:e.target.value})}
+			/>
+			<button type="submit">load</button>
+		</form>
 	)
 }
 

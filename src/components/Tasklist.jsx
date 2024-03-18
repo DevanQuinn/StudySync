@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './Tasklist.css';
 import { Button } from '@mui/material';
 
-function Task({ task, taskID, tasklistID, completeTask, removeTask }) {
+function Task({ task, completeTask, removeTask }) {
     return (
         <div
             className="task"
@@ -43,7 +43,6 @@ function Tasklist({title, deletefunc, id, tasksProp, addtaskfunc, deletetaskfunc
                                 return (
                                 <Task
                                 task={task}
-                                tasklistID={id}
                                 completeTask={() => completetaskfunc(id, task.taskID)}
                                 removeTask={() => deletetaskfunc(id, task.taskID)}
                                 key={task.taskID}
