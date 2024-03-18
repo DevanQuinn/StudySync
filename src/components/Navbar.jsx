@@ -22,6 +22,8 @@ const Navbar = () => {
         { title: 'Pomodoro', path: '/pomodoro'},
         {title: 'SpotifyPlaylists', path: '/SpotifyPlaylists'},
         { title: 'Flash Cards', path: '/flashcards' },
+		{ title: 'AddFriend', path: '/AddFriend' },
+
 	];
 
 	return (
