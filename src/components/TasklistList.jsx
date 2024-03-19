@@ -5,6 +5,17 @@ import { Task } from '@mui/icons-material';
 import { nanoid } from 'nanoid'
 import "./TasklistList.css"
 import Draggable from 'react-draggable';
+import {
+	query,
+	getFirestore,
+	collection,
+	getDocs,
+	doc,
+	addDoc,
+	deleteDoc,
+} from 'firebase/firestore';
+import app from '../firebase.js';
+
 
 /*
 TODO LIST:
@@ -15,6 +26,8 @@ TODO LIST:
 function TasklistList() {
 	const [tasklistsList, setTasklists] = React.useState([]);
 	const [tasks, setTasks] = React.useState({})
+
+	const db = getFirestore(app);
 
 	useEffect(() => {
 		console.log("props updated. rerendering dashboard.");
@@ -81,15 +94,27 @@ function TasklistList() {
 		setTasks(JSON.parse(JSON.stringify(newTasks)));
 	}
 
-	const SaveStateToJSON = () => {
+	const saveStateToJSON = () => {
 		console.log(JSON.stringify(tasks));
 		console.log(JSON.stringify(tasklistsList));
 	}
 
-	const handleLoad = (tasklistsString, tasksString) => {
-		console.log(tasklistsString + tasksString);
-		setTasklists(JSON.parse(tasklistsString));
-		setTasks(JSON.parse(tasksString));
+	const loadState = () => {
+		console.log("attempting to load tasklists from user");
+		const tasklistsSnap = getDocs(collection(db, "users", "jojosrandomtestuser", "tasklists")); //something not importing right? this is not returning a collection snapshot
+		let newTasks = {};
+		let newTasklists = [{}];
+		tasklistsSnap.forEach((tasklist) => {
+			newTasklists = [...newTasklists, {title:tasklist.title, id:tasklist.id}];
+			const tasksSnap = getDocs(collection(db, 'users', 'jojosrandomtestuser', 'tasklists', tasklist.id, 'tasks'));
+			tasksSnap.forEach((task) => {
+				newTasks[tasklist.id].push({title:task.title, taskID:task.id, completed:task.completed})
+			});
+		});
+		console.log(newTasks);
+		console.log(newTaskslists);
+		setTasklists(JSON.parse(JSON.stringify(newTasklists)));
+		setTasks(JSON.parse(JSON.stringify(newTasks)));
 	}
 
 	return (
@@ -115,8 +140,8 @@ function TasklistList() {
 					<h2>There are currently {tasklistsList.length} active tasklists</h2>
                 </div>
             </Draggable>
-			<Button onClick={SaveStateToJSON}>Save</Button>
-			<LoadUserTasks handleLoad={handleLoad}/>
+			<Button onClick={saveStateToJSON}>Save</Button>
+			<LoadUserTasks handleLoad={loadState}/>
 		</div>
 	);
 }
@@ -151,7 +176,7 @@ function LoadUserTasks({handleLoad}) {
 		console.log("handling submit");
 		e.preventDefault();
 		if (!formValues) return;
-		handleLoad(formValues.tasklists, formValues.tasks);
+		handleLoad();
 		setTasklistsString("");
 		setTasksString("");
 	}
