@@ -11,7 +11,7 @@ import { addDoc, collection, getFirestore } from 'firebase/firestore';
 import useUser from '../hooks/useUser';
 import { v4 as uuid } from 'uuid';
 
-const CreatePost = () => {
+const CreatePost = ({ fetchPosts }) => {
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
 	const [image, setImage] = useState();
@@ -34,12 +34,13 @@ const CreatePost = () => {
 
 	const handleSubmit = async () => {
 		if (!user) return;
-		const col = collection(db, `posts/${user.uid}/posts`);
+		const col = collection(db, `posts`);
 		const imageId = image ? await uploadImage(image) : null;
-		const post = { title, description, image: imageId };
+		const post = { title, description, image: imageId, user: user.uid };
 		await addDoc(col, post);
 		alert('Post uploaded!');
 		clearInputs();
+		fetchPosts();
 	};
 
 	return (
