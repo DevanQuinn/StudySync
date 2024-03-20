@@ -14,14 +14,20 @@ import SendIcon from '@mui/icons-material/Send';
 import CommentIcon from '@mui/icons-material/Comment';
 import EditIcon from '@mui/icons-material/Edit';
 import EditTags from './EditTags';
+import { doc, getFirestore, updateDoc } from 'firebase/firestore';
+import app from '../firebase';
 
 const Post = ({ data }) => {
 	const [open, setOpen] = useState(false);
-	const [tags, setTags] = useState([]);
+	const [tags, setTags] = useState(data.tags || []);
 
-	const saveTags = newTags => {
+	const saveTags = async (newTags, cancelled) => {
+		if (newTags === tags) return;
+		if (cancelled) return setOpen(false);
 		setTags(newTags);
-		// Upload to FB
+		const db = getFirestore(app);
+		const docToUpdate = doc(db, 'posts', data.id);
+		await updateDoc(docToUpdate, { tags: newTags });
 		setOpen(false);
 	};
 

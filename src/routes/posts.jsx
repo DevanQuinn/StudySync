@@ -32,7 +32,11 @@ const Posts = () => {
 		const q = query(col, where('user', '==', user.uid));
 		const docs = await getDocs(q);
 		const newPosts = [];
-		docs.forEach(doc => newPosts.push(doc.data()));
+		docs.forEach(doc => {
+			const data = doc.data();
+			data.id = doc.id;
+			newPosts.push(data);
+		});
 		console.log(newPosts);
 		setPosts(newPosts);
 	};

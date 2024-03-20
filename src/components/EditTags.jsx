@@ -45,9 +45,17 @@ const EditTags = ({ initialTags, saveTags }) => {
 					</ListItem>
 				))}
 			</List>
-			<Button variant='contained' onClick={() => saveTags(tags)}>
-				Save
-			</Button>
+			{tags !== initialTags && (
+				<Button
+					variant='contained'
+					onClick={() => saveTags(tags)}
+					disabled={tags === initialTags}
+					sx={{ mb: 1 }}
+				>
+					Save and Close
+				</Button>
+			)}
+			<Button onClick={() => saveTags([], true)}>Cancel</Button>
 		</Card>
 	);
 };
