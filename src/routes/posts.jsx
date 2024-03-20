@@ -42,7 +42,7 @@ const Posts = () => {
 	}, [user]);
 
 	return (
-		<Container sx={{ mt: 10 }}>
+		<Container sx={{ mt: 12 }}>
 			<CssBaseline />
 			<Typography variant='h4'>Your Posts</Typography>
 			<Accordion sx={{ mt: 3 }}>
