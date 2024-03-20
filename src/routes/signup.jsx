@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, updateProfile,} from 'firebase/auth';
+import { doc, setDoc, getFirestore } from "firebase/firestore"
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
+import app from '../firebase';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -43,6 +45,12 @@ export default function SignUp() {
                   })
                 }
                 console.log(user);
+                const db = getFirestore(app);
+                const docData = {
+                  username: username,
+                  userID: user.uid
+                }
+                setDoc(doc(db, 'users', username), docData);
                 alert("Success! Please use the Go Back button to sign in.")
                 // ...
             })

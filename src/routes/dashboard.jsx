@@ -101,7 +101,7 @@ export function Dashboard() {
 				<CreateTasklist addTasklist={addTasklist}/>
 				<h2>There are currently {tasklistsList.length} active tasklists</h2>
 			</div>
-			<Fab color="primary" aria-label="add" onClick={togglePomodoro}>
+			<Fab color="primary" aria-label="add" onClick={togglePomodoro} sx={{top: 300, left: 675 }}>
 				<AddIcon />
 			</Fab>
 			<Slide direction="up" in={showPomodoro} mountOnEnter unmountOnExit>
