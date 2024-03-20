@@ -7,6 +7,9 @@ import './index.css';
 import Navbar from './components/Navbar.jsx';
 import Dashboard from './routes/dashboard.jsx';
 import Leaderboard from './routes/leaderboard.jsx';
+import StudyRoom from './routes/studyroom.jsx';
+import Dashboard from './routes/dashboard.jsx';
+import Leaderboard from './routes/leaderboard.jsx';
 //import StudyRoom from './routes/studyroom.jsx'
 import SignIn from './routes/signin.jsx';
 import SignUp from './routes/signup.jsx';
@@ -24,6 +27,14 @@ import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 import Posts from './routes/posts.jsx';
 
 const theme = createTheme({
+	palette: {
+		primary: {
+			main: '#20c997',
+		},
+		secondary: {
+			main: '#B0DCCD',
+		},
+	},
 	palette: {
 		primary: {
 			main: '#20c997',
