@@ -21,6 +21,7 @@ import Flashcards from './routes/flashcards.jsx';
 import StudyRoomUI from './routes/StudyRoomUI.jsx';
 import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 import Posts from './routes/posts.jsx';
+import UserPosts from './routes/userposts.jsx';
 
 const theme = createTheme({
 	palette: {
@@ -152,6 +153,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 							<>
 								<Navbar />
 								<Posts />
+							</>
+						}
+					/>
+					<Route
+						path=':username/posts'
+						element={
+							<>
+								<Navbar />
+								<UserPosts />
 							</>
 						}
 					/>
