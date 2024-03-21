@@ -28,10 +28,10 @@ const Posts = () => {
 	const [posts, setPosts] = useState([]);
 	const user = useUser();
 	const [loading, setLoading] = useState(true);
+	const db = getFirestore(app);
 
 	const fetchPosts = async () => {
 		if (!user) return;
-		const db = getFirestore(app);
 		const col = collection(db, 'posts');
 		const q = query(
 			col,
@@ -87,7 +87,12 @@ const Posts = () => {
 					{posts && (
 						<Box>
 							{posts.map(post => (
-								<Post data={post} editable key={post.created} />
+								<Post
+									data={post}
+									editable
+									key={post.created}
+									fetchPosts={fetchPosts}
+								/>
 							))}
 						</Box>
 					)}

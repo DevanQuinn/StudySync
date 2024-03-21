@@ -1,12 +1,7 @@
 import { Box, TextField, Button } from '@mui/material';
 import React, { useState } from 'react';
 import app from '../firebase';
-import {
-	getDownloadURL,
-	getStorage,
-	ref as storageRef,
-	uploadBytes,
-} from 'firebase/storage';
+import { getStorage, ref as storageRef, uploadBytes } from 'firebase/storage';
 import {
 	addDoc,
 	collection,
