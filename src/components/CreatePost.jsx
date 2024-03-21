@@ -1,13 +1,13 @@
 import { Box, TextField, Button } from '@mui/material';
 import React, { useState } from 'react';
 import app from '../firebase';
+import { getStorage, ref as storageRef, uploadBytes } from 'firebase/storage';
 import {
-	getDownloadURL,
-	getStorage,
-	ref as storageRef,
-	uploadBytes,
-} from 'firebase/storage';
-import { addDoc, collection, getFirestore } from 'firebase/firestore';
+	addDoc,
+	collection,
+	getFirestore,
+	serverTimestamp,
+} from 'firebase/firestore';
 import useUser from '../hooks/useUser';
 import { v4 as uuid } from 'uuid';
 
@@ -36,7 +36,13 @@ const CreatePost = ({ fetchPosts }) => {
 		if (!user) return;
 		const col = collection(db, `posts`);
 		const imageId = image ? await uploadImage(image) : null;
-		const post = { title, description, image: imageId, user: user.uid };
+		const post = {
+			title,
+			description,
+			image: imageId,
+			user: user.displayName.toLowerCase(),
+			created: serverTimestamp(),
+		};
 		await addDoc(col, post);
 		alert('Post uploaded!');
 		clearInputs();
@@ -76,9 +82,11 @@ const CreatePost = ({ fetchPosts }) => {
 				/>
 				{image ? (
 					<Box>
-						<Box>
-							<img src={URL.createObjectURL(image)} />
-						</Box>
+						<Box
+							component='img'
+							src={URL.createObjectURL(image)}
+							sx={{ maxWidth: 500 }}
+						/>
 						<Button
 							variant='text'
 							component='label'

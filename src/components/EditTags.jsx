@@ -18,7 +18,7 @@ const EditTags = ({ initialTags, saveTags }) => {
 
 	const addTag = e => {
 		e.preventDefault();
-		setTags([...tags, input]);
+		setTags([...tags, ...input.split(' ')]);
 		setInput('');
 	};
 
