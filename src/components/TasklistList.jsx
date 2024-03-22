@@ -7,14 +7,17 @@ import "./TasklistList.css"
 import Draggable from 'react-draggable';
 import {
 	query,
+	where,
 	getFirestore,
 	collection,
 	getDocs,
+	setDoc,
 	doc,
 	addDoc,
 	deleteDoc,
 } from 'firebase/firestore';
 import app from '../firebase.js';
+import useUser from "../hooks/useUser";
 
 
 /*
@@ -28,6 +31,8 @@ function TasklistList() {
 	const [tasks, setTasks] = React.useState({})
 
 	const db = getFirestore(app);
+
+	const user = useUser(false);
 
 	useEffect(() => {
 		console.log("props updated. rerendering dashboard.");
@@ -95,26 +100,55 @@ function TasklistList() {
 	}
 
 	const saveStateToJSON = () => {
-		console.log(JSON.stringify(tasks));
-		console.log(JSON.stringify(tasklistsList));
+		if (user) {
+			setDoc(doc(db, "users", user.uid), {}, {merge: true}).then(() => {
+				tasklistsList.forEach((tasklist) => {
+					console.log("attempting to set doc");
+					setDoc(doc(db, "users", user.uid, "tasklists", tasklist.id), {title: tasklist.title}, {merge: true}).then(() => {
+						tasks[tasklist.id].forEach(task => {
+							setDoc(doc(db, "users", user.uid, "tasklists", tasklist.id, "tasks", task.taskID), {title: task.title, completed: task.completed}, {merge: true});
+						})
+					})
+				})
+				
+			}); //create user in the database if they dont exist without overwriting data
+
+		}
 	}
 
 	const loadState = () => {
-		console.log("attempting to load tasklists from user");
-		const tasklistsSnap = getDocs(collection(db, "users", "jojosrandomtestuser", "tasklists")); //something not importing right? this is not returning a collection snapshot
-		let newTasks = {};
-		let newTasklists = [{}];
-		tasklistsSnap.forEach((tasklist) => {
-			newTasklists = [...newTasklists, {title:tasklist.title, id:tasklist.id}];
-			const tasksSnap = getDocs(collection(db, 'users', 'jojosrandomtestuser', 'tasklists', tasklist.id, 'tasks'));
-			tasksSnap.forEach((task) => {
-				newTasks[tasklist.id].push({title:task.title, taskID:task.id, completed:task.completed})
-			});
-		});
-		console.log(newTasks);
-		console.log(newTaskslists);
-		setTasklists(JSON.parse(JSON.stringify(newTasklists)));
-		setTasks(JSON.parse(JSON.stringify(newTasks)));
+		setTasks({});
+		setTasklists([]);
+		if(user) {
+
+
+					const tasklistsQuery = query(collection(db, "users", user.uid, "tasklists"));
+					getDocs(tasklistsQuery).then((tasklistsSnapshot) => {
+						console.log(tasklistsSnapshot);
+						tasklistsSnapshot.forEach((tasklistsDoc) => {
+							console.log(tasklistsDoc.data());
+							let newTasklists = tasklistsList;
+							newTasklists = [...newTasklists, {title:tasklistsDoc.data().title, id:tasklistsDoc.id}]
+							setTasklists(JSON.parse(JSON.stringify(newTasklists)));
+							let dummyTasks = tasks;
+							dummyTasks[tasklistsDoc.id] = [];
+							setTasks(dummyTasks);
+							const tasksQuery = query(collection(db, "users", user.uid, "tasklists", tasklistsDoc.id, "tasks"))
+							getDocs(tasksQuery).then((tasksSnap) => {
+								//console.log(tasksSnap);
+								tasksSnap.forEach((taskDoc) => {
+									//console.log(taskDoc.data())
+									let newTasks = tasks;
+									let newTasksArray = newTasks[tasklistsDoc.id];
+									newTasksArray.push({title:taskDoc.data().title, taskID:taskDoc.id, completed:taskDoc.data().completed});
+									newTasks[tasklistsDoc.id] = newTasksArray;
+									setTasks(JSON.parse(JSON.stringify(newTasks)));
+								});
+							});
+						});
+					});
+
+		}
 	}
 
 	return (
@@ -141,7 +175,7 @@ function TasklistList() {
                 </div>
             </Draggable>
 			<Button onClick={saveStateToJSON}>Save</Button>
-			<LoadUserTasks handleLoad={loadState}/>
+			<Button onClick={loadState}>Load</Button>
 		</div>
 	);
 }
@@ -177,26 +211,10 @@ function LoadUserTasks({handleLoad}) {
 		e.preventDefault();
 		if (!formValues) return;
 		handleLoad();
-		setTasklistsString("");
-		setTasksString("");
 	}
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<input
-				type="text"
-				className="input"
-				value={formValues.tasklists}
-				placeholder="enter tasklists JSON string"
-				onChange={e => setFormValues({tasklists:e.target.value, tasks:formValues.tasks})}
-			/>
-			<input
-				type="text"
-				className="input"
-				value={formValues.tasks}
-				placeholder="enter tasks JSON string"
-				onChange={e => setFormValues({tasklists:formValues.tasklists, tasks:e.target.value})}
-			/>
 			<button type="submit">load</button>
 		</form>
 	)
