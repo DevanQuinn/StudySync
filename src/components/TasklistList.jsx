@@ -101,7 +101,24 @@ function TasklistList() {
 
 	const saveStateToJSON = () => {
 		if (user) {
-			setDoc(doc(db, "users", user.uid), {}, {merge: true}).then(() => {
+			setDoc(doc(db, "users", user.uid), {}, {merge: true}).then(() => { //first ensure the user's information is in the database
+				//Clear what data the database currently has
+				const tasklistsRef = collection(db, "users", user.uid, "tasklists");
+				const tasklistsQuery = query(tasklistsRef);
+				getDocs(tasklistsQuery).then((tasklistsSnapshot) => {
+					tasklistsSnapshot.forEach((tasklistDoc) => {
+						const tasksRef = collection(db, "users", user.uid, "tasklists", tasklistDoc.id, "tasks")
+						const tasksQuery = query(tasksRef);
+						getDocs(tasksQuery).then((tasksSnapshot) => {
+							tasksSnapshot.forEach(taskDoc => {
+								deleteDoc(doc(db, "users", user.uid, "tasklists", tasklistDoc.id, "tasks", taskDoc.id));
+							})
+						})
+						deleteDoc(doc(db, "users", user.uid, "tasklists", tasklistDoc.id));
+					})
+				})
+
+				//add new up-to-date data to the database
 				tasklistsList.forEach((tasklist) => {
 					console.log("attempting to set doc");
 					setDoc(doc(db, "users", user.uid, "tasklists", tasklist.id), {title: tasklist.title}, {merge: true}).then(() => {
@@ -111,7 +128,7 @@ function TasklistList() {
 					})
 				})
 				
-			}); //create user in the database if they dont exist without overwriting data
+			});
 
 		}
 	}
@@ -120,34 +137,31 @@ function TasklistList() {
 		setTasks({});
 		setTasklists([]);
 		if(user) {
-
-
-					const tasklistsQuery = query(collection(db, "users", user.uid, "tasklists"));
-					getDocs(tasklistsQuery).then((tasklistsSnapshot) => {
-						console.log(tasklistsSnapshot);
-						tasklistsSnapshot.forEach((tasklistsDoc) => {
-							console.log(tasklistsDoc.data());
-							let newTasklists = tasklistsList;
-							newTasklists = [...newTasklists, {title:tasklistsDoc.data().title, id:tasklistsDoc.id}]
-							setTasklists(JSON.parse(JSON.stringify(newTasklists)));
-							let dummyTasks = tasks;
-							dummyTasks[tasklistsDoc.id] = [];
-							setTasks(dummyTasks);
-							const tasksQuery = query(collection(db, "users", user.uid, "tasklists", tasklistsDoc.id, "tasks"))
-							getDocs(tasksQuery).then((tasksSnap) => {
-								//console.log(tasksSnap);
-								tasksSnap.forEach((taskDoc) => {
-									//console.log(taskDoc.data())
-									let newTasks = tasks;
-									let newTasksArray = newTasks[tasklistsDoc.id];
-									newTasksArray.push({title:taskDoc.data().title, taskID:taskDoc.id, completed:taskDoc.data().completed});
-									newTasks[tasklistsDoc.id] = newTasksArray;
-									setTasks(JSON.parse(JSON.stringify(newTasks)));
-								});
-							});
+			const tasklistsQuery = query(collection(db, "users", user.uid, "tasklists"));
+			getDocs(tasklistsQuery).then((tasklistsSnapshot) => {
+				console.log(tasklistsSnapshot);
+				tasklistsSnapshot.forEach((tasklistsDoc) => {
+					console.log(tasklistsDoc.data());
+					let newTasklists = tasklistsList;
+					newTasklists = [...newTasklists, {title:tasklistsDoc.data().title, id:tasklistsDoc.id}]
+					setTasklists(JSON.parse(JSON.stringify(newTasklists)));
+					let dummyTasks = tasks;
+					dummyTasks[tasklistsDoc.id] = [];
+					setTasks(dummyTasks);
+					const tasksQuery = query(collection(db, "users", user.uid, "tasklists", tasklistsDoc.id, "tasks"))
+					getDocs(tasksQuery).then((tasksSnap) => {
+						//console.log(tasksSnap);
+						tasksSnap.forEach((taskDoc) => {
+							//console.log(taskDoc.data())
+							let newTasks = tasks;
+							let newTasksArray = newTasks[tasklistsDoc.id];
+							newTasksArray.push({title:taskDoc.data().title, taskID:taskDoc.id, completed:taskDoc.data().completed});
+							newTasks[tasklistsDoc.id] = newTasksArray;
+							setTasks(JSON.parse(JSON.stringify(newTasks)));
 						});
 					});
-
+				});
+			});
 		}
 	}
 
