@@ -39,6 +39,11 @@ function TasklistList() {
 		console.log(tasks);
 	}, [JSON.stringify(tasks)]);
 
+	useEffect(()=>{
+		console.log("attempting to load state");
+		loadState();
+	}, [user]);
+
 	const addTasklist = (title) => {
 		if (tasklistsList.length < 10) {
 			let id = nanoid();
@@ -99,10 +104,11 @@ function TasklistList() {
 		setTasks(JSON.parse(JSON.stringify(newTasks)));
 	}
 
-	const saveStateToJSON = () => {
+	const SaveState = () => {
 		if (user) {
 			setDoc(doc(db, "users", user.uid), {}, {merge: true}).then(() => { //first ensure the user's information is in the database
 				//Clear what data the database currently has
+				console.log("attempting to clear database of user tasks");
 				const tasklistsRef = collection(db, "users", user.uid, "tasklists");
 				const tasklistsQuery = query(tasklistsRef);
 				getDocs(tasklistsQuery).then((tasklistsSnapshot) => {
@@ -116,33 +122,34 @@ function TasklistList() {
 						})
 						deleteDoc(doc(db, "users", user.uid, "tasklists", tasklistDoc.id));
 					})
-				})
+				}).then(() => {
 
-				//add new up-to-date data to the database
-				tasklistsList.forEach((tasklist) => {
-					console.log("attempting to set doc");
-					setDoc(doc(db, "users", user.uid, "tasklists", tasklist.id), {title: tasklist.title}, {merge: true}).then(() => {
-						tasks[tasklist.id].forEach(task => {
-							setDoc(doc(db, "users", user.uid, "tasklists", tasklist.id, "tasks", task.taskID), {title: task.title, completed: task.completed}, {merge: true});
+					//add new up-to-date data to the database
+					tasklistsList.forEach((tasklist) => {
+						console.log("attempting to save to database");
+						setDoc(doc(db, "users", user.uid, "tasklists", tasklist.id), {title: tasklist.title}, {merge: true}).then(() => {
+							tasks[tasklist.id].forEach(task => {
+								setDoc(doc(db, "users", user.uid, "tasklists", tasklist.id, "tasks", task.taskID), {title: task.title, completed: task.completed}, {merge: true});
+							})
 						})
 					})
-				})
-				
-			});
 
+				})
+			});
 		}
 	}
 
 	const loadState = () => {
+		console.log("attempting to load tasks");
 		setTasks({});
 		setTasklists([]);
+		let newTasklists = [];
 		if(user) {
 			const tasklistsQuery = query(collection(db, "users", user.uid, "tasklists"));
 			getDocs(tasklistsQuery).then((tasklistsSnapshot) => {
 				console.log(tasklistsSnapshot);
 				tasklistsSnapshot.forEach((tasklistsDoc) => {
 					console.log(tasklistsDoc.data());
-					let newTasklists = tasklistsList;
 					newTasklists = [...newTasklists, {title:tasklistsDoc.data().title, id:tasklistsDoc.id}]
 					setTasklists(JSON.parse(JSON.stringify(newTasklists)));
 					let dummyTasks = tasks;
@@ -166,8 +173,8 @@ function TasklistList() {
 	}
 
 	return (
-        <div>
-            <Draggable handle=".header">
+    <div>
+      <Draggable handle=".header">
 				<div className="component-wrapper">
 					<div className="header">
 						Tasklists
@@ -186,10 +193,9 @@ function TasklistList() {
 					/>))}
 					<CreateTasklist addTasklist={addTasklist}/>
 					<h2>There are currently {tasklistsList.length} active tasklists</h2>
-                </div>
-            </Draggable>
-			<Button onClick={saveStateToJSON}>Save</Button>
-			<Button onClick={loadState}>Load</Button>
+					<Button onClick={SaveState}>Save Tasks</Button>
+        </div>
+    	</Draggable>
 		</div>
 	);
 }

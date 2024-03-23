@@ -1,4 +1,5 @@
     /* File: src/components/Todo.css */
+    /* many of the classes here are deprecated or removed because collapsible tasklists wasnt working */
       
       .todo-container {
         background: white(41, 33, 33);
