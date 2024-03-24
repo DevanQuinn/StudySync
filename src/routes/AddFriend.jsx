@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
+//import { getFirestore } from 'firebase/firestore';
+console.log("WORKED HERE");
 
-// User class with friends list property
-class User {
-  constructor(username) {
-    this.username = username;
-    this.friends = [];
-  }
 
-  addFriend(friend) {
-    this.friends.push(friend);
-  }
-}
+//import { app, db } from '/Users/saimonishtunguturu/307S24Project/StudySync/src/firebase.js'; // Adjust the path if necessary
 
-// FriendDropdown component
-const FriendDropdown = ({ user, friends }) => {
+import { db } from '/Users/saimonishtunguturu/307S24Project/StudySync/src/firebase.js';
+console.log("DB: ", db);
+
+//const db = getFirestore(app); // Initialize Firestore using the Firebase app
+
+const FriendDropdown = ({ friends }) => {
   return (
     <select>
       <option value="">Select a friend</option>
@@ -26,45 +23,38 @@ const FriendDropdown = ({ user, friends }) => {
   );
 };
 
-// App component
 const App = () => {
-  const [currentUser, setCurrentUser] = useState(new User('Alice'));
-  const [friends, setFriends] = useState([
-    new User('Bob'),
-    new User('Charlie'),
-    new User('David'),
-    new User('Emily')
-  ]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [friends, setFriends] = useState([]);
 
-  // Search functionality
-  useEffect(() => {
-    const filteredResults = friends.filter(friend =>
-      friend.username.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setSearchResults(filteredResults);
-  }, [searchQuery, friends]);
+  const [error, setError] = useState(null);
 
-  // Invite friends function
+useEffect(() => {
+  const fetchFriends = async () => {
+    try {
+      const friendsCollection = await db.collection('friends').get();
+      const fetchedFriends = friendsCollection.docs.map(doc => doc.data());
+      setFriends(fetchedFriends);
+    } catch (error) {
+      console.error('Error fetching friends:', error);
+      setError('Error fetching friends. Please try again later.');
+    }
+  };
+
+  fetchFriends();
+}, []);
+
+
   const inviteFriends = selectedFriends => {
-    // Add logic to send invitations to selected friends
     console.log('Inviting friends:', selectedFriends);
   };
 
   return (
     <div>
       <h1>Dashboard</h1>
-      <FriendDropdown user={currentUser} friends={searchResults} />
-      <input
-        type="text"
-        placeholder="Search for friends"
-        value={searchQuery}
-        onChange={e => setSearchQuery(e.target.value)}
-      />
-      <button onClick={() => inviteFriends(selectedFriends)}>Invite Selected Friends</button>
+      <FriendDropdown friends={friends} />
+      <button onClick={() => inviteFriends(friends)}>Invite Selected Friends</button>
     </div>
   );
 };
 
-export default App;
+export { FriendDropdown, App };
