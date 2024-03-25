@@ -1,10 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
+import { getBlob, getStorage, ref } from "firebase/storage";
 
 const FlashCard = ({ data, deleteFlashcard }) => {
 	const [flipped, setFlipped] = useState(false);
 
 	const toggleFlip = () => setFlipped(!flipped);
+
+	const [imageBlob, setImageBlob] = useState(null);
+
+    useEffect(() => {
+		// loading the image's StorageReference from the flashcard
+		const loadImageBlob = async () => {
+            if (data.image && data.image != 'unset') {
+                const storage = getStorage();
+                const pathReference = ref(storage, data.image);
+                try {
+					// getting the binary data from the StorageReference path
+                    const blob = await getBlob(pathReference);
+                    setImageBlob(blob);
+                } catch (error) {
+                    console.error('Error loading image blob:', error);
+                }
+            }
+        };
+        loadImageBlob();
+    }, [data.image]);
 
 	return (
 		<Box
@@ -19,15 +40,15 @@ const FlashCard = ({ data, deleteFlashcard }) => {
 		>
 			{flipped ? (
 				<>
-					<Typography>{data.answer}</Typography>
+					<Typography variant='h6'>{data.answer}</Typography>
 					<Button onClick={toggleFlip}>Show Question</Button>
 				</>
 			) : (
 				<>
 					<Typography variant='h6'>{data.question}</Typography>
 					{(() => {
-						if (data.image) {
-							return <img src={URL.createObjectURL(data.image)} alt='' />;
+						if (imageBlob) {
+							return <img src={URL.createObjectURL(imageBlob)}/>;
 						}
 					})()}
 					{(() => {

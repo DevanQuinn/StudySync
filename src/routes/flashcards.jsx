@@ -18,19 +18,22 @@ import {
 	deleteDoc,
 } from 'firebase/firestore';
 import app from '../firebase';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
 import FlashCard from '../components/FlashCard';
 import useUser from '../hooks/useUser';
+import { v4 as uuid } from 'uuid';
 
 const Flashcards = () => {
 	const [flashcardList, setFlashcardList] = React.useState([]);
 	const [newQuestion, setNewQuestion] = React.useState('');
 	const [newAnswer, setNewAnswer] = React.useState('');
-	const [newImage, setNewImage] = React.useState(null);
+	const [newImage, setNewImage] = React.useState('');
 	const [newAudio, setNewAudio] = React.useState(null);
 	const [loading, setLoading] = React.useState(true);
 	const user = useUser(true);
-
 	const db = getFirestore(app);
+	const storage = getStorage();
+	
 	const col = user
 		? collection(db, `flashcards/${user?.uid}/flashcards`)
 		: null;
@@ -57,14 +60,28 @@ const Flashcards = () => {
 		await addDoc(col, flashcard);
 		fetchCards();
 	};
-	const addFlashcard = event => {
+
+	const uploadImage = async imageToUpload => {
+		const imageId = uuid();
+		const storageRef = ref(storage, `flashcard-images/${imageId}`);
+		await uploadBytes(storageRef, imageToUpload);
+
+		return storageRef.fullPath;
+	};
+	
+	const addFlashcard = async event => {
 		/* avoids page reload when card submitted */
 		event.preventDefault();
+
+		var imagePath = 'unset';
+		if (newImage != '') {
+			imagePath = await uploadImage(newImage);
+		}
 
 		const newFlashcard = {
 			question: newQuestion,
 			answer: newAnswer,
-			image: newImage,
+			image: imagePath,
 			audio: newAudio,
 		};
 
@@ -72,8 +89,11 @@ const Flashcards = () => {
 
 		setNewQuestion('');
 		setNewAnswer('');
-		setNewImage(null);
+		setNewImage('');
 		setNewAudio(null);
+
+		document.getElementById('questionImageSelector').value = null;
+		document.getElementById('questionAudioSelector').value = null;
 	};
 
 	const deleteFlashcard = id => {
@@ -111,23 +131,27 @@ const Flashcards = () => {
 						margin='normal'
 					/>
 
-					{/* <label>
-						Image:
+					<label>
+						Attach Image:
 						<input
+							id = 'questionImageSelector'
 							type='file'
 							accept='image/*'
 							onChange={e => setNewImage(e.target.files[0])}
 						/>
 					</label>
 
+					<br/>
+
 					<label>
-						Audio:
+						Attach Audio:
 						<input
+							id = 'questionAudioSelector'
 							type='file'
 							accept='audio/*'
 							onChange={e => setNewAudio(e.target.files[0])}
 						/>
-					</label> */}
+					</label>
 
 					<Button type='submit' variant='contained' sx={{ mt: 2 }}>
 						Add Flashcard
