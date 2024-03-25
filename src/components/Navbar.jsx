@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import Logo from './Logo';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
-
+import useUser from '../hooks/useUser';
 /*
 TODO LIST:
 	* navbar should have a profile button with a drop down menu
@@ -22,6 +22,7 @@ const Navbar = () => {
         { title: 'Flash Cards', path: '/flashcards' },
 
 	];
+
 
 	return (
 		<AppBar position='fixed' color='secondary'>
@@ -47,9 +48,9 @@ const Navbar = () => {
 				<Typography sx={{ mr: 2 }} color='textPrimary'>
 					<Link to='/editprofile'>Edit Profile</Link>
 				</Typography>
-				{/* <Button onClick={signOut(getAuth())}>
+				<Button onClick={ () => signOut(getAuth())} href="/signin">
 					Sign out
-				</Button>	 */}
+				</Button>	
 			</Toolbar>
 		</AppBar>
 	);

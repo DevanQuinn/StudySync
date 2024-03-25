@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile,} from 'firebase/auth';
-import { doc, setDoc, getFirestore } from "firebase/firestore"
+import { doc, setDoc, getFirestore, getDoc, DocumentSnapshot } from "firebase/firestore"
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -19,18 +19,25 @@ import { grey } from '@mui/material/colors';
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [newImage, setNewImage] = React.useState(null);
-  const handleSubmit = event => {
+  const handleSubmit = async event => {
       event.preventDefault();
       const data = new FormData(event.currentTarget);
       const username = data.get('username');
       const email = data.get('email');
       const password = data.get('password');
+      const db = getFirestore(app);
+      const docRef = doc(db, "users", username);
+      const docSnap = await getDoc(docRef);
+      console.log(docSnap);
       if(password != data.get('confirm-password')){
         alert("Please make sure your passwords match.")
       }
+      else if(docSnap.exists()) {
+        alert("The username is currently in use, please input a different one")
+      }
       else{
         createUserWithEmailAndPassword(getAuth(), email, password)
-            .then(userCredential => {
+            .then(async userCredential => {
                 // Signed in
                 const user = userCredential.user;
                 if(newImage != null) {
@@ -50,8 +57,9 @@ export default function SignUp() {
                   username: username,
                   userID: user.uid
                 }
-                setDoc(doc(db, 'users', username), docData);
+                await setDoc(doc(db, 'users', username), docData);
                 alert("Success! Please use the Go Back button to sign in.")
+                window.location = "/"
                 // ...
             })
             .catch(error => {
