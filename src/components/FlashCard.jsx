@@ -8,24 +8,41 @@ const FlashCard = ({ data, deleteFlashcard }) => {
 	const toggleFlip = () => setFlipped(!flipped);
 
 	const [imageBlob, setImageBlob] = useState(null);
+	const [audioBlob, setAudioBlob] = useState(null);
 
-    useEffect(() => {
+	useEffect(() => {
 		// loading the image's StorageReference from the flashcard
 		const loadImageBlob = async () => {
-            if (data.image && data.image != 'unset') {
-                const storage = getStorage();
-                const pathReference = ref(storage, data.image);
-                try {
+			if (data.image && data.image != 'unset') {
+				const storage = getStorage();
+				const pathReference = ref(storage, data.image);
+				try {
 					// getting the binary data from the StorageReference path
-                    const blob = await getBlob(pathReference);
-                    setImageBlob(blob);
-                } catch (error) {
-                    console.error('Error loading image blob:', error);
-                }
-            }
-        };
-        loadImageBlob();
-    }, [data.image]);
+					const blob = await getBlob(pathReference);
+					setImageBlob(blob);
+				} catch (error) {
+					console.error('Error loading image blob:', error);
+				}
+			}
+		};
+
+		// loading the audio's StorageReference from the flashcard
+		const loadAudioBlob = async () => {
+			if (data.audio && data.audio !== 'unset') {
+				const storage = getStorage();
+				const pathReference = ref(storage, data.audio);
+				try {
+					const blob = await getBlob(pathReference);
+					setAudioBlob(blob);
+				} catch (error) {
+					console.error('Error loading audio blob:', error);
+				}
+			}
+		};
+		loadImageBlob();
+		loadAudioBlob();
+	}, [data.image, data.audio]);
+
 
 	return (
 		<Box
@@ -37,6 +54,8 @@ const FlashCard = ({ data, deleteFlashcard }) => {
 			display='flex'
 			flexDirection='column'
 			alignItems='center'
+			alignSelf='center'
+			style={{ width: '500px', height: '300px' }}
 		>
 			{flipped ? (
 				<>
@@ -48,15 +67,20 @@ const FlashCard = ({ data, deleteFlashcard }) => {
 					<Typography variant='h6'>{data.question}</Typography>
 					{(() => {
 						if (imageBlob) {
-							return <img src={URL.createObjectURL(imageBlob)}/>;
+							return (
+								<img
+									src={URL.createObjectURL(imageBlob)}
+									style={{ maxWidth: '60%', maxHeight: '60%', height: 'auto', width: 'auto'}}
+								/>
+							);
 						}
 					})()}
 					{(() => {
-						if (data.audio) {
+						if (audioBlob) {
 							return (
 								<audio controls>
 									<source
-										src={URL.createObjectURL(data.audio)}
+										src={URL.createObjectURL(audioBlob)}
 										type='audio/mpeg'
 									/>
 									Your browser does not support the audio element.
@@ -64,6 +88,7 @@ const FlashCard = ({ data, deleteFlashcard }) => {
 							);
 						}
 					})()}
+
 					<Button onClick={toggleFlip}>Reveal Answer</Button>
 				</>
 			)}

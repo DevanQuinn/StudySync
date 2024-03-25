@@ -68,6 +68,14 @@ const Flashcards = () => {
 
 		return storageRef.fullPath;
 	};
+
+	const uploadAudio = async audioToUpload => {
+		const audioId = uuid();
+		const storageRef = ref(storage, `flashcard-audios/${audioId}`);
+		await uploadBytes(storageRef, audioToUpload);
+		
+		return storageRef.fullPath;
+	};
 	
 	const addFlashcard = async event => {
 		/* avoids page reload when card submitted */
@@ -78,11 +86,16 @@ const Flashcards = () => {
 			imagePath = await uploadImage(newImage);
 		}
 
+		var audioPath = 'unset';
+    	if (newAudio != null) {
+        	audioPath = await uploadAudio(newAudio);
+    	}
+
 		const newFlashcard = {
 			question: newQuestion,
 			answer: newAnswer,
 			image: imagePath,
-			audio: newAudio,
+			audio: audioPath,
 		};
 
 		uploadCard(newFlashcard);
