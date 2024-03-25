@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './Tasklist.css';
 import { Button } from '@mui/material';
 
-function Task({ task, taskID, tasklistID, completeTask, removeTask }) {
+function Task({ task, completeTask, removeTask }) {
     return (
         <div
             className="task"
@@ -34,25 +34,20 @@ function Tasklist({title, deletefunc, id, tasksProp, addtaskfunc, deletetaskfunc
             <div className="header">{title}</div>
                 <div>
                     <div className="tasks">
-                        <input id="collapsible" className="toggle" type="checkbox"></input>
-                        <label for="collapsible" className="lbl-toggle">Collapse/Expand</label>
-                        <div className="collapsible-content">
-                            {tasksProp.map((task) => { //not properly mapping
-                                console.log("mapping task: ");
-                                console.log(task);
+                        <div>
+                            {tasksProp.map((task) => {
                                 return (
-                                <Task
-                                task={task}
-                                tasklistID={id}
-                                completeTask={() => completetaskfunc(id, task.taskID)}
-                                removeTask={() => deletetaskfunc(id, task.taskID)}
-                                key={task.taskID}
-                                />
-                            )}
+                                    <Task
+                                    task={task}
+                                    completeTask={() => completetaskfunc(id, task.taskID)}
+                                    removeTask={() => deletetaskfunc(id, task.taskID)}
+                                    key={task.taskID}
+                                    />
+                                )}
                             )}
                         </div>
+                        {tasksProp.length} tasks left!
                     </div>
-                    <>{tasksProp.length} tasks left!</>
                     <div className="create-task" >
                         <CreateTask addTask={addTask} />
                     </div>
