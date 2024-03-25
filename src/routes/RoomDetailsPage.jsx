@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import "../index.css"
 import { useParams } from 'react-router-dom';
-import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField} from '@mui/material';
+import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField, withTheme, withStyles} from '@mui/material';
 import RoomPomodoro from '../components/RoomPomodoro';
 import { useNavigate } from 'react-router-dom';
 import Draggable from 'react-draggable';
-import { doc, getDoc, getFirestore, deleteDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, deleteDoc, updateDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth'; // Make sure to import getAuth
 
@@ -38,11 +38,34 @@ const videoCategories = {
   // Add more categories and videos as needed
 };
 
-const Chat = ({theme}) => {
+
+
+const Chat = ({theme, roomId}) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [activeDrags, setActiveDrags] = useState(0);
- 
+  
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: 'AIzaSyAOLFu9q6gvdcDoOJ0oPuQKPgDyOye_2uM',
+      authDomain: 'studysync-3fbd7.firebaseapp.com',
+      projectId: 'studysync-3fbd7',
+      storageBucket: 'studysync-3fbd7.appspot.com',
+      messagingSenderId: '885216959280',
+      appId: '1:885216959280:web:917a7216776b36e904c6f5',
+      measurementId: 'G-TS13EWHRMB',
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+  
+
+  const clearMessages = () => {
+    setMessages([]); // Clears the messages from the UI
+  };
+
   const onStart = () => {
     setActiveDrags(prevActiveDrags => prevActiveDrags + 1);
   };
@@ -51,10 +74,19 @@ const Chat = ({theme}) => {
     setActiveDrags(prevActiveDrags => prevActiveDrags - 1);
   };
 
-  const sendMessage = () => {
-    if (message) {
-      setMessages([...messages, message]);
-      setMessage('');
+  const sendMessage = async () => {
+    if (message.trim()) {
+      try {
+        const chatRef = doc(db, `studyrooms/${roomId}/chat`, new Date().toISOString()); // Creates a unique ID based on timestamp
+        await setDoc(chatRef, {
+          message: message,
+          timestamp: serverTimestamp(), // Firebase server timestamp
+        });
+        setMessages([...messages, message]);
+        setMessage('');
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
     }
   };
 
@@ -95,6 +127,7 @@ const Chat = ({theme}) => {
             />
           </Box>
           <Button variant="contained" onClick={sendMessage}>Send</Button>
+          <Button variant="outlined" onClick={clearMessages} sx={{ mt: 1 }}>Clear Messages</Button> 
         </Stack>
       </Box>
     </Draggable>
@@ -114,6 +147,7 @@ const RoomDetailsPage = () => {
   const togglePomodoro = () => setShowPomodoro(!showPomodoro);
   const { roomId } = useParams(); // Using useParams to get roomId from the route
   const [roomData, setRoomData] = useState(null); // State to hold room data
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
 
   // const handleCategoryClick = (event) => {
   //   setAnchorEl(event.currentTarget);
@@ -121,6 +155,17 @@ const RoomDetailsPage = () => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  // Function to handle "Change Room" button click
+  const handleOpenCategoryMenu = () => {
+    setShowCategoryMenu(true); // Show the category menu
+  };
+
+  const handleSelectCategory = async (category) => {
+    // Function logic to change the room, similar to changeRoom
+    await changeRoom(category);
+    setShowCategoryMenu(false); // Hide the category menu after selection
   };
 
   // Your web app's Firebase configuration
@@ -241,6 +286,7 @@ const RoomDetailsPage = () => {
     document.body.classList.toggle('dark', !isLightMode);
   };
 
+
   // Adjusted to include styles for the left side
   const themeStyles = {
     layout: {
@@ -266,7 +312,7 @@ const RoomDetailsPage = () => {
           Profiles & Hours
         </Typography>
 
-        <Chat theme={isLightMode ? 'light' : 'dark'} />
+        <Chat theme={isLightMode ? 'light' : 'dark'} roomId={roomId} />
       </div>
 
       <div className="body">
@@ -280,7 +326,23 @@ const RoomDetailsPage = () => {
         <Button variant="contained" style={themeStyles.button} onClick={togglePomodoro}>{showPomodoro ? 'Hide Timer' : 'Show Timer'}</Button>
         <Button variant="contained" style={themeStyles.button}>Invite Friends</Button>
         <Button variant="contained" style={themeStyles.button} onClick={handleExitAndDeleteRoom}>Exit Room</Button>
-        <Button variant="contained" style={themeStyles.button} onClick={changeRoom}>Change Room</Button>
+        <Button variant="contained" style={themeStyles.button} onClick={handleOpenCategoryMenu}>Change Room</Button>
+      
+      {/* Slide-up category menu */}
+      <Slide direction="up" in={showCategoryMenu} mountOnEnter unmountOnExit>
+        <Box sx={{ position: 'fixed', bottom: 0, width: '50%', zIndex: 1200}}>
+          <Typography variant="h6" sx={{ textAlign: 'center', padding: '10px 0' }}>
+            Select a Video Category
+          </Typography>
+          <Stack>
+            {Object.keys(videoCategories).map((category) => (
+              <Button key={category} onClick={() => handleSelectCategory(category)} sx={{ margin: '5px' }}>
+                {category}
+              </Button>
+            ))}
+          </Stack>
+        </Box>
+      </Slide>
          {/* Light/Dark Toggle Button */}
          <div>
           <input type="checkbox" className="checkbox" id="checkbox" checked={!isLightMode} onChange={toggleTheme} />
