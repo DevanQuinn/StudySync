@@ -44,14 +44,15 @@ const Header = () => {
   const handleFormSubmit = async () => {
     const auth = getAuth(app);
     const user = auth.currentUser;
-
+  
     if (user) {
       const collectionName = `${user.uid}_studyrooms`;
       const studyRoomData = {
         videoCategory,
         friendInvites: friendInvites.split(',').map(invite => invite.trim()),
+        videoUrl: null, // Set videoUrl to null initially
       };
-
+  
       try {
         const docRef = await addDoc(collection(db, collectionName), studyRoomData);
         navigate(`/room/${docRef.id}`, { state: { ...studyRoomData } });
@@ -62,9 +63,10 @@ const Header = () => {
     } else {
       setErrorMessage('You must be signed in to create a study room.');
     }
-
+  
     handleClose(); // Close the dialog after handling form submission
   };
+  
 
   // Customized button styles
   const customButtonStyles = {

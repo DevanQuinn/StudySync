@@ -5,7 +5,7 @@ import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField} from 
 import RoomPomodoro from '../components/RoomPomodoro';
 import { useNavigate } from 'react-router-dom';
 import Draggable from 'react-draggable';
-import { doc, getDoc, getFirestore, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, deleteDoc, updateDoc } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth'; // Make sure to import getAuth
 
@@ -115,9 +115,9 @@ const RoomDetailsPage = () => {
   const { roomId } = useParams(); // Using useParams to get roomId from the route
   const [roomData, setRoomData] = useState(null); // State to hold room data
 
-  const handleCategoryClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  // const handleCategoryClick = (event) => {
+  //   setAnchorEl(event.currentTarget);
+  // };
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -176,13 +176,36 @@ const RoomDetailsPage = () => {
   }, [roomId, db, auth, navigate]);
   
 
-  const changeRoom = (category) => {
+  const changeRoom = async (category) => {
     // Select a random video URL from the specified category
     const videos = videoCategories[category];
     const randomIndex = Math.floor(Math.random() * videos.length);
-    setCurrentVideoUrl(videos[randomIndex]);
+    const newVideoUrl = videos[randomIndex];
+    setCurrentVideoUrl(newVideoUrl);
     handleClose(); // Close the category menu
+  
+    // Now update the video URL and category in the database
+    const user = auth.currentUser;
+    if (user) {
+      const userId = user.uid;
+      const roomRef = doc(db, `${userId}_studyrooms/${roomId}`);
+      
+      try {
+        // Update the video URL and category in the room document
+        await updateDoc(roomRef, {
+          videoCategory: category, // Field for video category
+          videoUrl: newVideoUrl // Assuming 'videoUrl' is the field name for video URL
+        });
+        console.log("Video URL and category updated successfully in the database.");
+      } catch (error) {
+        console.error("Error updating room details:", error);
+      }
+    } else {
+      console.log("User is not authenticated");
+      // Handle unauthenticated state, e.g., redirect to login
+    }
   };
+  
 
   const videoSrc = `https://www.youtube.com/embed/${currentVideoUrl}?playlist=${currentVideoUrl}&autoplay=1&controls=0&loop=1&modestbranding=1&mute=${isMuted ? '1' : '0'}&showinfo=0&rel=0&iv_load_policy=3`;
 
@@ -257,7 +280,7 @@ const RoomDetailsPage = () => {
         <Button variant="contained" style={themeStyles.button} onClick={togglePomodoro}>{showPomodoro ? 'Hide Timer' : 'Show Timer'}</Button>
         <Button variant="contained" style={themeStyles.button}>Invite Friends</Button>
         <Button variant="contained" style={themeStyles.button} onClick={handleExitAndDeleteRoom}>Exit Room</Button>
-        <Button variant="contained" style={themeStyles.button} onClick={handleCategoryClick}>Change Room</Button>
+        <Button variant="contained" style={themeStyles.button} onClick={changeRoom}>Change Room</Button>
          {/* Light/Dark Toggle Button */}
          <div>
           <input type="checkbox" className="checkbox" id="checkbox" checked={!isLightMode} onChange={toggleTheme} />
