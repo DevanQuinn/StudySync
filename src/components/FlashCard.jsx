@@ -95,7 +95,11 @@ const FlashCard = ({ data, deleteFlashcard }) => {
 					<Button onClick={toggleFlip}>Reveal Answer</Button>
 				</>
 			)}
-			<Button onClick={() => deleteFlashcard(data.id)}>Delete</Button>
+			{ /* stopping delete click from flipping the card before deleting itself */}
+			<Button onClick={(event) => {
+				event.stopPropagation();
+				deleteFlashcard(data.id);
+			}}>Delete</Button>
 		</Box>
 	);
 };
