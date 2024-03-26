@@ -7,6 +7,7 @@ import {
 	Container,
 	CssBaseline,
 	CircularProgress,
+	IconButton,
 } from '@mui/material';
 import {
 	query,
@@ -16,12 +17,14 @@ import {
 	doc,
 	addDoc,
 	deleteDoc,
+	orderBy
 } from 'firebase/firestore';
 import app from '../firebase';
 import { getStorage, ref, uploadBytes } from 'firebase/storage';
 import FlashCard from '../components/FlashCard';
 import useUser from '../hooks/useUser';
 import { v4 as uuid } from 'uuid';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 
 const Flashcards = () => {
 	const [flashcardList, setFlashcardList] = React.useState([]);
@@ -30,17 +33,19 @@ const Flashcards = () => {
 	const [newImage, setNewImage] = React.useState('');
 	const [newAudio, setNewAudio] = React.useState(null);
 	const [loading, setLoading] = React.useState(true);
+	const [currentIndex, setCurrentIndex] = React.useState(0);
 	const user = useUser(true);
 	const db = getFirestore(app);
 	const storage = getStorage();
-	
+
 	const col = user
 		? collection(db, `flashcards/${user?.uid}/flashcards`)
 		: null;
 
 	const fetchCards = async () => {
 		if (!col) return;
-		const q = query(col);
+		//sorting flashcards by time created at (i.e. appending new card to end of the collection)
+		const q = query(col, orderBy('createdAt'));
 		const snapshot = await getDocs(q);
 		const queriedFlashcards = [];
 		snapshot.forEach(card => {
@@ -57,7 +62,11 @@ const Flashcards = () => {
 	}, [user]);
 
 	const uploadCard = async flashcard => {
-		await addDoc(col, flashcard);
+		//adding created at field to flashcard
+		await addDoc(col, {
+			...flashcard,
+			createdAt: new Date(),
+		});
 		fetchCards();
 	};
 
@@ -76,7 +85,7 @@ const Flashcards = () => {
 		
 		return storageRef.fullPath;
 	};
-	
+
 	const addFlashcard = async event => {
 		/* avoids page reload when card submitted */
 		event.preventDefault();
@@ -87,9 +96,9 @@ const Flashcards = () => {
 		}
 
 		var audioPath = 'unset';
-    	if (newAudio != null) {
-        	audioPath = await uploadAudio(newAudio);
-    	}
+		if (newAudio != null) {
+			audioPath = await uploadAudio(newAudio);
+		}
 
 		const newFlashcard = {
 			question: newQuestion,
@@ -110,12 +119,34 @@ const Flashcards = () => {
 	};
 
 	const deleteFlashcard = id => {
+		// delete the document from Firestore
 		deleteDoc(doc(db, `flashcards/${user?.uid}/flashcards`, id)).then(() => {
 			fetchCards();
+			// if we reach the end of the list
+			if (currentIndex === flashcardList.length - 1) {
+				// we loop back to the beginning
+				setCurrentIndex(0);
+			}
 		});
 	};
+	
 
-	// if (!user) return <div>Not signed in</div>;
+	const handleNavigation = (direction) => {
+		if (direction === 'prev') {
+			// loop back when list over, else iterate forward or backward
+			if (currentIndex === 0) {
+				setCurrentIndex(flashcardList.length - 1);
+			} else {
+				setCurrentIndex(currentIndex - 1);
+			}
+		} else if (direction === 'next') {
+			if (currentIndex === flashcardList.length - 1) {
+				setCurrentIndex(0);
+			} else {
+				setCurrentIndex(currentIndex + 1);
+			}
+		}
+	};
 
 	return (
 		<Container component='main' maxWidth='xs' sx={{ mt: 10 }}>
@@ -147,19 +178,19 @@ const Flashcards = () => {
 					<label>
 						Attach Image:
 						<input
-							id = 'questionImageSelector'
+							id='questionImageSelector'
 							type='file'
 							accept='image/*'
 							onChange={e => setNewImage(e.target.files[0])}
 						/>
 					</label>
 
-					<br/>
+					<br />
 
 					<label>
 						Attach Audio:
 						<input
-							id = 'questionAudioSelector'
+							id='questionAudioSelector'
 							type='file'
 							accept='audio/*'
 							onChange={e => setNewAudio(e.target.files[0])}
@@ -175,15 +206,33 @@ const Flashcards = () => {
 					<Box sx={{ mt: 4 }}>
 						<CircularProgress />
 					</Box>
+				) : flashcardList.length === 0 ? (
+					// handling case with 0 cards
+					<Typography variant='h6' align='center' sx={{ mt: 4 }}>
+						No flashcards available. Add one to get started!
+					</Typography>
 				) : (
 					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
-						{flashcardList.map(card => (
-							<FlashCard
-								data={card}
-								deleteFlashcard={deleteFlashcard}
-								key={card.id}
-							/>
+						{/* displaying all flashcards */}
+						{flashcardList.map((card, index) => (
+							// ensures only current card is displayed (avoid stacking them up)
+							<Box key={card.id} sx={{ display: index === currentIndex ? 'block' : 'none' }}>
+								<FlashCard
+									data={card}
+									deleteFlashcard={deleteFlashcard}
+								/>
+							</Box>
 						))}
+
+						{/* navigation buttons */}
+						<Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+							<IconButton onClick={() => handleNavigation('prev')}>
+								<ChevronLeft />
+							</IconButton>
+							<IconButton onClick={() => handleNavigation('next')}>
+								<ChevronRight />
+							</IconButton>
+						</Box>
 					</Box>
 				)}
 			</Box>
