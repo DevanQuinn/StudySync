@@ -25,6 +25,7 @@ import FlashCard from '../components/FlashCard';
 import useUser from '../hooks/useUser';
 import { v4 as uuid } from 'uuid';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { LinearProgress } from '@mui/material';
 
 const Flashcards = () => {
 	const [flashcardList, setFlashcardList] = React.useState([]);
@@ -37,6 +38,7 @@ const Flashcards = () => {
 	const user = useUser(true);
 	const db = getFirestore(app);
 	const storage = getStorage();
+	const progress = ((currentIndex + 1) / flashcardList.length) * 100;
 
 	const col = user
 		? collection(db, `flashcards/${user?.uid}/flashcards`)
@@ -134,17 +136,9 @@ const Flashcards = () => {
 	const handleNavigation = (direction) => {
 		if (direction === 'prev') {
 			// loop back when list over, else iterate forward or backward
-			if (currentIndex === 0) {
-				setCurrentIndex(flashcardList.length - 1);
-			} else {
-				setCurrentIndex(currentIndex - 1);
-			}
+			setCurrentIndex(currentIndex - 1);
 		} else if (direction === 'next') {
-			if (currentIndex === flashcardList.length - 1) {
-				setCurrentIndex(0);
-			} else {
-				setCurrentIndex(currentIndex + 1);
-			}
+			setCurrentIndex(currentIndex + 1);
 		}
 	};
 
@@ -225,13 +219,32 @@ const Flashcards = () => {
 								/>
 							</Box>
 						))}
+								<Typography variant='body2' align='center' sx={{ mt: 2 }}>
+									Progress: {progress}%
+								</Typography>
 
-						{/* navigation buttons */}
-						<Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-							<IconButton onClick={() => handleNavigation('prev')}>
+								<LinearProgress
+									variant="determinate"
+									value={progress}
+									sx={{
+										height: 20,
+										borderRadius: 1, //making it a little curved
+										marginTop: 1,
+									}}
+								/>
+
+								{/* navigation buttons */}
+								<Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, mb: 2 }}>
+									<IconButton onClick={() => handleNavigation('prev')}
+									// can't go back from first card
+									disabled={currentIndex === 0}
+									>
 								<ChevronLeft />
 							</IconButton>
-							<IconButton onClick={() => handleNavigation('next')}>
+							<IconButton onClick={() => handleNavigation('next')}
+							// can't go forward when on last card
+							disabled={currentIndex === flashcardList.length - 1}
+							>
 								<ChevronRight />
 							</IconButton>
 						</Box>
