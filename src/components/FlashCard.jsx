@@ -55,7 +55,10 @@ const FlashCard = ({ data, deleteFlashcard }) => {
 			flexDirection='column'
 			alignItems='center'
 			alignSelf='center'
-			style={{ width: '500px', height: '300px' }}
+			sx={{
+				width: '100%',
+				height: '300px',
+			  }}
 		>
 			{flipped ? (
 				<>
