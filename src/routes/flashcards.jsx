@@ -163,6 +163,7 @@ const Flashcards = () => {
 						onChange={e => setNewQuestion(e.target.value)}
 						fullWidth
 						margin='normal'
+						inputProps={{ maxLength: 50 }}
 					/>
 
 					<TextField
@@ -173,6 +174,7 @@ const Flashcards = () => {
 						onChange={e => setNewAnswer(e.target.value)}
 						fullWidth
 						margin='normal'
+						inputProps={{ maxLength: 200 }}
 					/>
 
 					<label>

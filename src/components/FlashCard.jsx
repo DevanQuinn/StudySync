@@ -50,7 +50,7 @@ const FlashCard = ({ data, deleteFlashcard }) => {
 			border={1}
 			borderColor='grey'
 			borderRadius={2}
-			p={2}
+			p={3}
 			display='flex'
 			flexDirection='column'
 			alignItems='center'
@@ -58,6 +58,7 @@ const FlashCard = ({ data, deleteFlashcard }) => {
 			sx={{
 				width: '100%',
 				height: '300px',
+				overflow: 'auto',
 			  }}
 		>
 			{flipped ? (
