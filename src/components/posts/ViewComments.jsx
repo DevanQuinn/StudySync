@@ -21,8 +21,8 @@ import {
 	serverTimestamp,
 } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import app from '../firebase';
-import useUser from '../hooks/useUser';
+import app from '../../firebase';
+import useUser from '../../hooks/useUser';
 
 const ViewComments = ({ postId }) => {
 	const [comments, setComments] = useState([]);
