@@ -35,14 +35,34 @@ const Flashcards = () => {
 	const [newAudio, setNewAudio] = React.useState(null);
 	const [loading, setLoading] = React.useState(true);
 	const [currentIndex, setCurrentIndex] = React.useState(0);
+	const [studyStartTime, setStudyStartTime] = React.useState(null);
+	const [displayDuration, setDisplayDuration] = React.useState(false);
+	const [studyDurationMins, setStudyDurationMins] = React.useState(0);
 	const user = useUser(true);
 	const db = getFirestore(app);
 	const storage = getStorage();
+
 	const progress = ((currentIndex + 1) / flashcardList.length) * 100;
 
 	const col = user
 		? collection(db, `flashcards/${user?.uid}/flashcards`)
 		: null;
+
+	const userStatsCol = user 
+		? collection(db, `userStats/${user?.uid}/timeStudied`) 
+		: null;
+
+	const uploadUserStats = async (startTime, endTime, duration) => {
+		if (!userStatsCol) return;
+
+		const statsData = { startTime, endTime, duration };
+
+		try {
+			await addDoc(userStatsCol, statsData);
+		} catch (error) {
+			console.error('Error uploading user statistics:', error);
+		}
+	};	
 
 	const fetchCards = async () => {
 		if (!col) return;
@@ -142,6 +162,29 @@ const Flashcards = () => {
 		}
 	};
 
+	const startStudySession = () => {
+		setStudyStartTime(new Date());
+	  };
+	
+	  const endStudySession = async () => {
+		if (studyStartTime) {
+		  const studyEndTime = new Date();
+
+		  const durationMs = (studyEndTime - studyStartTime);
+		  // study duration in mins
+		  const durationMins = durationMs / (1000 * 60);
+		  setStudyDurationMins(durationMins.toFixed(2));
+		  console.log(studyStartTime, studyEndTime);
+		  console.log(studyEndTime - studyStartTime);
+		  console.log(durationMs)
+		  console.log(durationMins);
+		  uploadUserStats(studyStartTime, studyEndTime, studyDurationMins);
+		  setStudyStartTime(null);
+		  //flag to display time studied
+		  setDisplayDuration(true);
+		}
+	  };
+	
 	return (
 		<Container component='main' maxWidth='xs' sx={{ mt: 10 }}>
 			<CssBaseline />
@@ -150,7 +193,7 @@ const Flashcards = () => {
 					Flashcards
 				</Typography>
 
-				<Box component='form' onSubmit={addFlashcard} sx={{ mt: 2 }}>
+				<Box component='form' onSubmit={addFlashcard}  >
 					<TextField
 						label='Question'
 						value={newQuestion}
@@ -172,7 +215,8 @@ const Flashcards = () => {
 					/>
 
 					<label>
-						Attach Image:
+						{/* added spacing */}
+						Attach Image:&nbsp;
 						<input
 							id='questionImageSelector'
 							type='file'
@@ -184,7 +228,8 @@ const Flashcards = () => {
 					<br />
 
 					<label>
-						Attach Audio:
+						{/* added spacing */}
+						Attach Audio::&nbsp;
 						<input
 							id='questionAudioSelector'
 							type='file'
@@ -197,7 +242,31 @@ const Flashcards = () => {
 						Add Flashcard
 					</Button>
 				</Box>
-
+				<Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+					<Button
+						variant='contained'
+						color='primary'
+						onClick={startStudySession}
+						//disable if study session in progress (not  null)
+            			disabled={!!studyStartTime}
+					>
+						Start Study Session
+					</Button>
+					<Button
+						variant='contained'
+						color='secondary'
+						onClick={endStudySession}
+						//disable if study session not in progress (null)
+            			disabled={!studyStartTime}
+					>
+						End Study Session
+					</Button>
+				</Box>
+				{displayDuration && (
+					<Typography variant="body2" align="center" sx={{ mt: 2 }}>
+						Time studied: {studyDurationMins}
+					</Typography>
+				)}
 				{loading ? (
 					<Box sx={{ mt: 4 }}>
 						<CircularProgress />
@@ -208,7 +277,7 @@ const Flashcards = () => {
 						No flashcards available. Add one to get started!
 					</Typography>
 				) : (
-					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
+					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}>
 						{/* displaying all flashcards */}
 						{flashcardList.map((card, index) => (
 							// ensures only current card is displayed (avoid stacking them up)
