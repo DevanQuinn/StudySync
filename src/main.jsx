@@ -15,7 +15,7 @@ import AddFriend from './routes/AddFriend.jsx'; // Import your AddFriend compone
 import SpotifyPlaylists from './routes/SpotifyPlaylists.jsx';
 import Callback from './routes/Callback.jsx';
 import Pomodoro from './routes/pomodoro.jsx';
-import Firebase from './firebase.js'
+//import Firebase from './firebase.js'
 import EditProfile from './routes/editprofile.jsx'
 import Flashcards from './routes/flashcards.jsx'
 import StudyRoomUI from './routes/StudyRoomUI.jsx';

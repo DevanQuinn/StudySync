@@ -17,7 +17,7 @@ import {
 	addDoc,
 	deleteDoc,
 } from 'firebase/firestore';
-import app from '../firebase';
+import { app, analytics, db } from '../firebase';
 import FlashCard from '../components/FlashCard';
 import useUser from '../hooks/useUser';
 
