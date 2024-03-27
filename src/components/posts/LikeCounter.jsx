@@ -1,5 +1,10 @@
 import { Typography } from '@mui/material';
-import { collection, doc, getDocs, getFirestore } from 'firebase/firestore';
+import {
+	collection,
+	getFirestore,
+	onSnapshot,
+	query,
+} from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import app from '../../firebase';
 
@@ -7,14 +12,17 @@ const LikeCounter = ({ postId }) => {
 	const [count, setCount] = useState(null);
 	const db = getFirestore(app);
 
-	const fetchLikeCount = async () => {
+	const fetchLikeCount = () => {
 		const col = collection(db, 'posts', postId, 'likes');
-		const docs = await getDocs(col);
-		setCount(docs.size);
+		const unsubscribe = onSnapshot(query(col), snapshot => {
+			setCount(snapshot.size);
+		});
+		return unsubscribe;
 	};
 
 	useEffect(() => {
-		fetchLikeCount();
+		const unsubscribe = fetchLikeCount();
+		return () => unsubscribe();
 	}, []);
 
 	if (count == null) return <></>;
