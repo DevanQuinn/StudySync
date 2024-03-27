@@ -1,6 +1,6 @@
 import TasklistList from '../components/TasklistList.jsx'
 import DashboardConfigurator from '../components/DashboardConfigurator.jsx'
-import '../components/TasklistList.css';
+import '../components/tasklistlist.css';
 import {useState, useEffect} from 'react';
 /*
 TODO LIST:
