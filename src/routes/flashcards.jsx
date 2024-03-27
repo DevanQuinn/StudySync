@@ -53,10 +53,10 @@ const Flashcards = () => {
 		? collection(db, `userStats/${user?.uid}/timeStudied`) 
 		: null;
 
-	const uploadUserStats = async (startTime, endTime, duration) => {
+	const uploadUserStats = async (startTime, endTime, durationMs, duration) => {
 		if (!userStatsCol) return;
 
-		const statsData = { startTime, endTime, duration };
+		const statsData = { startTime, endTime, durationMs, duration };
 
 		try {
 			await addDoc(userStatsCol, statsData);
@@ -178,7 +178,7 @@ const Flashcards = () => {
 			const studyDuration = moment.utc(duration.as('milliseconds')).format('HH[h] mm[m] ss[s]');
 
 			setStudyDuration(studyDuration);
-			uploadUserStats(studyStartTime, studyEndTime, studyDuration);
+			uploadUserStats(studyStartTime, studyEndTime, durationMs, studyDuration);
 			setStudyStartTime(null);
 			// flag to display time studied
 			setDisplayDuration(true);
