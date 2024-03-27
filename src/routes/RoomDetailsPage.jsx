@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import "../index.css"
 import { useParams } from 'react-router-dom';
-import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField, withTheme, withStyles} from '@mui/material';
+import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField, withTheme, withStyles, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Select} from '@mui/material';
 import RoomPomodoro from '../components/RoomPomodoro';
 import { useNavigate } from 'react-router-dom';
 import Draggable from 'react-draggable';
-import { doc, getDoc, getFirestore, deleteDoc, updateDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, deleteDoc, updateDoc, setDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth'; // Make sure to import getAuth
 
@@ -135,6 +135,7 @@ const Chat = ({theme, roomId}) => {
 };
 
 
+
 const RoomDetailsPage = () => {
   const [isMuted, setIsMuted] = useState(true);
   const iframeRef = useRef(null);
@@ -148,6 +149,9 @@ const RoomDetailsPage = () => {
   const { roomId } = useParams(); // Using useParams to get roomId from the route
   const [roomData, setRoomData] = useState(null); // State to hold room data
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [selectedFriends, setSelectedFriends] = useState([]);
+  const [allUsers, setAllUsers] = useState([]); // Assuming you fetch all users for inviting
 
   // const handleCategoryClick = (event) => {
   //   setAnchorEl(event.currentTarget);
@@ -184,7 +188,39 @@ const RoomDetailsPage = () => {
   const db = getFirestore(app);
   const auth = getAuth(app);
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const querySnapshot = await getDocs(collection(db, "users")); // Adjust path as necessary
+      const users = [];
+      querySnapshot.forEach((doc) => {
+        users.push(doc.data().username); // Or whatever field you're using
+      });
+      setAllUsers(users);
+    };
+  
+    fetchUsers();
+  }, []);
 
+  const sendInvitations = async () => {
+    try {
+      const user = auth.currentUser;
+      selectedFriends.forEach(async (friendDisplayName) => {
+        await addDoc(collection(db, "invitations"), {
+          invitedUserDisplayName: friendDisplayName,
+          roomId: roomId,
+          inviterUserId: user.displayName, // Or UID, depending on your preference
+        });
+      });
+      // Reset state and close dialog after sending invitations
+      setSelectedFriends([]);
+      setInviteDialogOpen(false);
+      console.log("Invitations sent successfully.");
+    } catch (error) {
+      console.error("Error sending invitations:", error);
+    }
+  };
+  
+  
   useEffect(() => {
     const fetchRoomData = async () => {
       const user = auth.currentUser;
@@ -259,23 +295,33 @@ const RoomDetailsPage = () => {
   const handleExitAndDeleteRoom = async () => {
     const user = auth.currentUser;
     if (user) {
-      const userId = user.uid;
       try {
         // Define the room document reference
-        const roomRef = doc(db, `${userId}_studyrooms/${roomId}`);
-        // Delete the document
+        const roomRef = doc(db, `studyrooms/${roomId}`); // Adjusted for a more generic path if necessary
+        // Delete the room document
         await deleteDoc(roomRef);
         console.log(`Room ${roomId} deleted successfully`);
-        // Navigate to another page after deletion
+  
+        // Now, query and delete all invitations for this room
+        const invitationsRef = collection(db, 'invitations');
+        const q = query(invitationsRef, where('roomId', '==', roomId));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (document) => {
+          await deleteDoc(doc(db, 'invitations', document.id));
+        });
+        console.log(`All invitations for room ${roomId} deleted successfully`);
+  
+        // Navigate to another page after deletion and cleanup
         navigate('/dashboard'); // Adjust the navigation path as needed
       } catch (error) {
-        console.error("Error deleting room:", error);
+        console.error("Error during room exit and cleanup:", error);
       }
     } else {
       console.log("User is not authenticated");
       navigate('/signin'); // Redirect to signin page or handle unauthenticated state
     }
   };
+  
   //const editScreen = () => setShowEditMenu(!showEditMenu);
   // Theme toggle function
  
@@ -324,10 +370,34 @@ const RoomDetailsPage = () => {
       <div className="footer">
         <Button variant="contained" style={themeStyles.button} onClick={toggleVolume}>{isMuted ? 'Unmute' : 'Mute'}</Button>
         <Button variant="contained" style={themeStyles.button} onClick={togglePomodoro}>{showPomodoro ? 'Hide Timer' : 'Show Timer'}</Button>
-        <Button variant="contained" style={themeStyles.button}>Invite Friends</Button>
+        <Button variant="contained" style={themeStyles.button} onClick={() => setInviteDialogOpen(true)}>Invite Friends</Button>
         <Button variant="contained" style={themeStyles.button} onClick={handleExitAndDeleteRoom}>Exit Room</Button>
         <Button variant="contained" style={themeStyles.button} onClick={handleOpenCategoryMenu}>Change Room</Button>
       
+        <Dialog open={inviteDialogOpen} onClose={() => setInviteDialogOpen(false)}>
+      <DialogTitle>Invite Friends</DialogTitle>
+      <DialogContent>
+        <FormControl fullWidth>
+          <InputLabel>Friends</InputLabel>
+          <Select
+            multiple
+            value={selectedFriends}
+            onChange={(event) => setSelectedFriends(event.target.value)}
+            renderValue={(selected) => selected.join(', ')}
+          >
+            {allUsers.map((user) => (
+              <MenuItem key={user} value={user}>
+                {user}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setInviteDialogOpen(false)}>Cancel</Button>
+        <Button onClick={sendInvitations}>Send Invites</Button>
+      </DialogActions>
+    </Dialog>
       {/* Slide-up category menu */}
       <Slide direction="up" in={showCategoryMenu} mountOnEnter unmountOnExit>
         <Box sx={{ position: 'fixed', bottom: 0, width: '50%', zIndex: 1200}}>

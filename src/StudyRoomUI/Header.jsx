@@ -22,6 +22,9 @@ const Header = () => {
   const [friendInvites, setFriendInvites] = useState([]);
   const [usernames, setUsernames] = useState([]); // New state for usernames
   const [errorMessage, setErrorMessage] = useState('');
+  const [invitationDialogOpen, setInvitationDialogOpen] = useState(false);
+  const [currentInvitation, setCurrentInvitation] = useState(null);
+
   const navigate = useNavigate();
 
   // Your web app's Firebase configuration
@@ -56,17 +59,34 @@ const Header = () => {
   }, [db]); // Run once when the component mounts
 
  
+  useEffect(() => {
+    if (invitations.length > 0) {
+      // Assuming you want to show the first invitation for simplicity
+      setCurrentInvitation(invitations[0]);
+      setInvitationDialogOpen(true);
+    }
+  }, [invitations]);
+
+  const handleAcceptInvitation = () => {
+    if (currentInvitation && currentInvitation.roomId) {
+      navigate(`/room/${currentInvitation.roomId}`);
+      setInvitationDialogOpen(false); // Close the dialog upon accepting
+    }
+  };
+  const handleCloseInvitationDialog = () => {
+    setInvitationDialogOpen(false);
+  };
 
   
   useEffect(() => {
     const currentUser = auth.currentUser;
     console.log("Current User:", currentUser); // Debug current user
-    if (!currentUser) return;
+    if (!currentUser || !currentUser.displayName) return;
   
-    // Adjust this query to match your new invitations structure
-    const invitationsQuery = query(collection(db, "invitations"), where("invitedUserDisplayName", "==", currentUser.uid));
+    // Adjust this query to use display names
+    const invitationsQuery = query(collection(db, "invitations"), where("invitedUserDisplayName", "==", currentUser.displayName));
     console.log("Invitations Query:", invitationsQuery); // Debug the query
-
+  
     const unsubscribe = onSnapshot(invitationsQuery, (querySnapshot) => {
       const fetchedInvitations = [];
       querySnapshot.forEach((doc) => {
@@ -116,7 +136,7 @@ const handleJoinRoom = async (roomId) => {
           await addDoc(collection(db, "invitations"), {
             invitedUserDisplayName: friendDisplayName, // Assuming this matches exactly with users' displayNames
             roomId: docRef.id,
-            inviterUserId: user.uid, // Correctly using 'user' here
+            inviterUserId: user.displayName, // Correctly using 'user' here
           });
         });
         navigate(`/room/${docRef.id}`, { state: { ...studyRoomData } });
@@ -218,8 +238,24 @@ const handleJoinRoom = async (roomId) => {
           </DialogActions>
         </Dialog>
       </div>
+
+      <Dialog open={invitationDialogOpen} onClose={handleCloseInvitationDialog}>
+<DialogTitle>Invitation to Join Study Room</DialogTitle>
+<DialogContent>
+  <p>{currentInvitation ? `You've been invited by ${currentInvitation.inviterUserId} to join a study room.` : ''}</p>
+</DialogContent>
+<DialogActions>
+  <Button onClick={handleCloseInvitationDialog}>Decline</Button>
+  <Button onClick={handleAcceptInvitation} color="primary">Join Room</Button>
+</DialogActions>
+</Dialog>
+
     </header>
+
+
+
   );
 };
 
 export default Header;
+
