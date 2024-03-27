@@ -26,6 +26,7 @@ import useUser from '../hooks/useUser';
 import { v4 as uuid } from 'uuid';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { LinearProgress } from '@mui/material';
+import moment from 'moment';
 
 const Flashcards = () => {
 	const [flashcardList, setFlashcardList] = React.useState([]);
@@ -37,7 +38,7 @@ const Flashcards = () => {
 	const [currentIndex, setCurrentIndex] = React.useState(0);
 	const [studyStartTime, setStudyStartTime] = React.useState(null);
 	const [displayDuration, setDisplayDuration] = React.useState(false);
-	const [studyDurationMins, setStudyDurationMins] = React.useState(0);
+	const [studyDuration, setStudyDuration] = React.useState(0);
 	const user = useUser(true);
 	const db = getFirestore(app);
 	const storage = getStorage();
@@ -147,7 +148,7 @@ const Flashcards = () => {
 			// if we reach the end of the list
 			if (currentIndex === flashcardList.length - 1) {
 				// we loop back to the beginning
-				setCurrentIndex(0);
+				setCurrentIndex(flashcardList.length - 2);
 			}
 		});
 	};
@@ -166,24 +167,23 @@ const Flashcards = () => {
 		setStudyStartTime(new Date());
 	  };
 	
-	  const endStudySession = async () => {
+	const endStudySession = async () => {
 		if (studyStartTime) {
-		  const studyEndTime = new Date();
+			const studyEndTime = new Date();
 
-		  const durationMs = (studyEndTime - studyStartTime);
-		  // study duration in mins
-		  const durationMins = durationMs / (1000 * 60);
-		  setStudyDurationMins(durationMins.toFixed(2));
-		  console.log(studyStartTime, studyEndTime);
-		  console.log(studyEndTime - studyStartTime);
-		  console.log(durationMs)
-		  console.log(durationMins);
-		  uploadUserStats(studyStartTime, studyEndTime, studyDurationMins);
-		  setStudyStartTime(null);
-		  //flag to display time studied
-		  setDisplayDuration(true);
+			const durationMs = (studyEndTime - studyStartTime);
+			// converting milliseconds to a moment duration object
+			const duration = moment.duration(durationMs);
+			// formatting the duration using moment.js
+			const studyDuration = moment.utc(duration.as('milliseconds')).format('HH[h] mm[m] ss[s]');
+
+			setStudyDuration(studyDuration);
+			uploadUserStats(studyStartTime, studyEndTime, studyDuration);
+			setStudyStartTime(null);
+			// flag to display time studied
+			setDisplayDuration(true);
 		}
-	  };
+	};
 	
 	return (
 		<Container component='main' maxWidth='xs' sx={{ mt: 10 }}>
@@ -229,7 +229,7 @@ const Flashcards = () => {
 
 					<label>
 						{/* added spacing */}
-						Attach Audio::&nbsp;
+						Attach Audio:&nbsp;
 						<input
 							id='questionAudioSelector'
 							type='file'
@@ -264,7 +264,7 @@ const Flashcards = () => {
 				</Box>
 				{displayDuration && (
 					<Typography variant="body2" align="center" sx={{ mt: 2 }}>
-						Time studied: {studyDurationMins}
+						Time studied: {studyDuration}
 					</Typography>
 				)}
 				{loading ? (
@@ -289,7 +289,7 @@ const Flashcards = () => {
 							</Box>
 						))}
 								<Typography variant='body2' align='center' sx={{ mt: 2 }}>
-									Progress: {progress}%
+									Progress: {progress.toFixed(0)}%
 								</Typography>
 
 								<LinearProgress
