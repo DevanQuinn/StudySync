@@ -1,6 +1,6 @@
 import { Box, TextField, Button } from '@mui/material';
 import React, { useState } from 'react';
-import app from '../firebase';
+import app from '../../firebase';
 import { getStorage, ref as storageRef, uploadBytes } from 'firebase/storage';
 import {
 	addDoc,
@@ -8,7 +8,7 @@ import {
 	getFirestore,
 	serverTimestamp,
 } from 'firebase/firestore';
-import useUser from '../hooks/useUser';
+import useUser from '../../hooks/useUser';
 import { v4 as uuid } from 'uuid';
 
 const CreatePost = ({ fetchPosts }) => {
