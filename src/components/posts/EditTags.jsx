@@ -34,8 +34,7 @@ const EditTags = ({ initialTags, saveTags }) => {
 	};
 
 	const deleteTag = index => {
-		const newTags = tags.filter((tag, idx) => idx != index);
-		setTags(newTags);
+		setTags(tags => tags.filter((tag, idx) => idx != index));
 	};
 
 	return (
@@ -45,9 +44,6 @@ const EditTags = ({ initialTags, saveTags }) => {
 				sx={{
 					width: 1,
 					height: 1,
-					// display: 'flex',
-					// flexDirection: 'column',
-					// justifyContent: 'center',
 					p: 1,
 				}}
 			>
