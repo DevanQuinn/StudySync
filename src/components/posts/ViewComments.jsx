@@ -36,7 +36,7 @@ const ViewComments = ({ postId }) => {
 		left: '50%',
 		transform: 'translate(-50%, -50%)',
 		width: 400,
-		height: 400,
+		height: 500,
 		p: 3,
 		display: 'flex',
 		flexDirection: 'column',
@@ -89,26 +89,26 @@ const ViewComments = ({ postId }) => {
 
 	return (
 		<Card sx={style}>
+			<TextField
+				variant='outlined'
+				label='Add comment'
+				component='form'
+				onSubmit={addComment}
+				value={input}
+				onChange={e => setInput(e.target.value)}
+				autoFocus
+				fullWidth
+				InputProps={{
+					endAdornment: (
+						<InputAdornment position='end'>
+							<IconButton onClick={addComment}>
+								<AddCircleOutlineOutlined />
+							</IconButton>
+						</InputAdornment>
+					),
+				}}
+			/>
 			<Box overflow='scroll' sx={{ height: 1, width: 1, p: 1 }}>
-				<TextField
-					variant='outlined'
-					label='Add comment'
-					component='form'
-					onSubmit={addComment}
-					value={input}
-					onChange={e => setInput(e.target.value)}
-					autoFocus
-					fullWidth
-					InputProps={{
-						endAdornment: (
-							<InputAdornment position='end'>
-								<IconButton onClick={addComment}>
-									<AddCircleOutlineOutlined />
-								</IconButton>
-							</InputAdornment>
-						),
-					}}
-				/>
 				{comments.length ? (
 					<List>
 						{comments.map((comment, index) => (

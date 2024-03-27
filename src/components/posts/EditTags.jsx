@@ -1,4 +1,12 @@
-import { Button, Card, Chip, List, ListItem, TextField } from '@mui/material';
+import {
+	Box,
+	Button,
+	Card,
+	Chip,
+	List,
+	ListItem,
+	TextField,
+} from '@mui/material';
 import React, { useState } from 'react';
 
 const EditTags = ({ initialTags, saveTags }) => {
@@ -10,7 +18,8 @@ const EditTags = ({ initialTags, saveTags }) => {
 		left: '50%',
 		transform: 'translate(-50%, -50%)',
 		width: 400,
-		p: 4,
+		height: 500,
+		p: 3,
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'center',
@@ -18,7 +27,9 @@ const EditTags = ({ initialTags, saveTags }) => {
 
 	const addTag = e => {
 		e.preventDefault();
-		setTags([...tags, ...input.split(' ')]);
+		const trimmedInput = input.trim();
+		if (!trimmedInput.length || trimmedInput == ' ') return;
+		setTags([...tags, ...trimmedInput.split(' ')]);
 		setInput('');
 	};
 
@@ -28,23 +39,36 @@ const EditTags = ({ initialTags, saveTags }) => {
 	};
 
 	return (
-		<Card sx={style}>
-			<TextField
-				variant='standard'
-				label='Add tag'
-				component='form'
-				onSubmit={addTag}
-				value={input}
-				onChange={e => setInput(e.target.value)}
-				autoFocus
-			/>
-			<List>
-				{tags.map((tag, index) => (
-					<ListItem key={index} disableGutters>
-						<Chip label={tag} onDelete={() => deleteTag(index)} />
-					</ListItem>
-				))}
-			</List>
+		<Card sx={style} overflow='scroll'>
+			<Box
+				overflow='scroll'
+				sx={{
+					width: 1,
+					height: 1,
+					// display: 'flex',
+					// flexDirection: 'column',
+					// justifyContent: 'center',
+					p: 1,
+				}}
+			>
+				<TextField
+					variant='standard'
+					label='Add tag'
+					component='form'
+					onSubmit={addTag}
+					value={input}
+					onChange={e => setInput(e.target.value)}
+					autoFocus
+					fullWidth
+				/>
+				<List>
+					{tags.map((tag, index) => (
+						<ListItem key={index} disableGutters>
+							<Chip label={tag} onDelete={() => deleteTag(index)} />
+						</ListItem>
+					))}
+				</List>
+			</Box>
 			{tags !== initialTags && (
 				<Button
 					variant='contained'

@@ -27,7 +27,9 @@ const TagSearch = () => {
 
 	const handleSubmit = e => {
 		e.preventDefault();
-		setTags([...tags, ...input.split(' ')]);
+		const trimmedInput = input.trim();
+		if (!trimmedInput.length || trimmedInput == ' ') return;
+		setTags([...tags, ...trimmedInput.split(' ')]);
 		setInput('');
 	};
 
