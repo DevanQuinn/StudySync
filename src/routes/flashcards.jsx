@@ -49,8 +49,8 @@ const Flashcards = () => {
 		? collection(db, `flashcards/${user?.uid}/flashcards`)
 		: null;
 
-	const userStatsCol = user 
-		? collection(db, `userStats/${user?.uid}/timeStudied`) 
+	const userStatsCol = user
+		? collection(db, `userStats/${user?.uid}/timeStudied`)
 		: null;
 
 	const uploadUserStats = async (startTime, endTime, durationMs, duration) => {
@@ -63,7 +63,7 @@ const Flashcards = () => {
 		} catch (error) {
 			console.error('Error uploading user statistics:', error);
 		}
-	};	
+	};
 
 	const fetchCards = async () => {
 		if (!col) return;
@@ -105,7 +105,7 @@ const Flashcards = () => {
 		const audioId = uuid();
 		const storageRef = ref(storage, `flashcard-audios/${audioId}`);
 		await uploadBytes(storageRef, audioToUpload);
-		
+
 		return storageRef.fullPath;
 	};
 
@@ -152,7 +152,7 @@ const Flashcards = () => {
 			}
 		});
 	};
-	
+
 
 	const handleNavigation = (direction) => {
 		if (direction === 'prev') {
@@ -165,8 +165,8 @@ const Flashcards = () => {
 
 	const startStudySession = () => {
 		setStudyStartTime(new Date());
-	  };
-	
+	};
+
 	const endStudySession = async () => {
 		if (studyStartTime) {
 			const studyEndTime = new Date();
@@ -184,13 +184,99 @@ const Flashcards = () => {
 			setDisplayDuration(true);
 		}
 	};
-	
+
 	return (
 		<Container component='main' maxWidth='xs' sx={{ mt: 10 }}>
 			<CssBaseline />
 			<Box sx={{ maxWidth: 600 }}>
 				<Typography component='h1' variant='h5' align='center'>
 					Flashcards
+				</Typography>
+
+				<Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+					<Button
+						variant='contained'
+						color='primary'
+						onClick={startStudySession}
+						//disable if study session in progress (not  null)
+						disabled={!!studyStartTime}
+					>
+						Start Study Session
+					</Button>
+					<Button
+						variant='contained'
+						color='secondary'
+						onClick={endStudySession}
+						//disable if study session not in progress (null)
+						disabled={!studyStartTime}
+					>
+						End Study Session
+					</Button>
+				</Box>
+				{displayDuration && (
+					<Typography variant="body2" align="center" sx={{ mt: 2 }}>
+						Time studied: {studyDuration}
+					</Typography>
+				)}
+				{loading ? (
+					<Box sx={{ mt: 4 }}>
+						<CircularProgress />
+					</Box>
+				) : flashcardList.length === 0 ? (
+					// handling case with 0 cards
+					<Typography variant='h6' align='center' sx={{ mt: 4 }}>
+						No flashcards available. Add one to get started!
+					</Typography>
+				) : (
+					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}>
+						{/* displaying all flashcards */}
+						{flashcardList.map((card, index) => (
+							// ensures only current card is displayed (avoid stacking them up)
+							<Box key={card.id} sx={{ display: index === currentIndex ? 'block' : 'none' }}>
+								<FlashCard
+									data={card}
+									deleteFlashcard={deleteFlashcard}
+								/>
+							</Box>
+						))}
+						<Typography variant='body2' align='center' sx={{ mb: -2 }}>
+							Card: {currentIndex + 1} / {flashcardList.length}
+						</Typography>
+
+						<Typography variant='body2' align='center'>
+							Progress: {progress.toFixed(0)}%
+						</Typography>
+
+						<LinearProgress
+							variant="determinate"
+							value={progress}
+							sx={{
+								height: 20,
+								borderRadius: 1, //making it a little curved
+								mb: -2
+							}}
+						/>
+
+						{/* navigation buttons */}
+						<Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+							<IconButton onClick={() => handleNavigation('prev')}
+								// can't go back from first card
+								disabled={currentIndex === 0}
+							>
+								<ChevronLeft />
+							</IconButton>
+							<IconButton onClick={() => handleNavigation('next')}
+								// can't go forward when on last card
+								disabled={currentIndex === flashcardList.length - 1}
+							>
+								<ChevronRight />
+							</IconButton>
+						</Box>
+					</Box>
+				)}
+
+				<Typography component='h1' variant='h5' align='center'>
+					Create Flashcards
 				</Typography>
 
 				<Box component='form' onSubmit={addFlashcard}  >
@@ -238,87 +324,10 @@ const Flashcards = () => {
 						/>
 					</label>
 
-					<Button type='submit' variant='contained' sx={{ mt: 2 }}>
+					<Button type='submit' variant='contained' sx={{ mt: 2, mb: 4}}>
 						Add Flashcard
 					</Button>
 				</Box>
-				<Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-					<Button
-						variant='contained'
-						color='primary'
-						onClick={startStudySession}
-						//disable if study session in progress (not  null)
-            			disabled={!!studyStartTime}
-					>
-						Start Study Session
-					</Button>
-					<Button
-						variant='contained'
-						color='secondary'
-						onClick={endStudySession}
-						//disable if study session not in progress (null)
-            			disabled={!studyStartTime}
-					>
-						End Study Session
-					</Button>
-				</Box>
-				{displayDuration && (
-					<Typography variant="body2" align="center" sx={{ mt: 2 }}>
-						Time studied: {studyDuration}
-					</Typography>
-				)}
-				{loading ? (
-					<Box sx={{ mt: 4 }}>
-						<CircularProgress />
-					</Box>
-				) : flashcardList.length === 0 ? (
-					// handling case with 0 cards
-					<Typography variant='h6' align='center' sx={{ mt: 4 }}>
-						No flashcards available. Add one to get started!
-					</Typography>
-				) : (
-					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}>
-						{/* displaying all flashcards */}
-						{flashcardList.map((card, index) => (
-							// ensures only current card is displayed (avoid stacking them up)
-							<Box key={card.id} sx={{ display: index === currentIndex ? 'block' : 'none' }}>
-								<FlashCard
-									data={card}
-									deleteFlashcard={deleteFlashcard}
-								/>
-							</Box>
-						))}
-								<Typography variant='body2' align='center' sx={{ mt: 2 }}>
-									Progress: {progress.toFixed(0)}%
-								</Typography>
-
-								<LinearProgress
-									variant="determinate"
-									value={progress}
-									sx={{
-										height: 20,
-										borderRadius: 1, //making it a little curved
-										marginTop: 1,
-									}}
-								/>
-
-								{/* navigation buttons */}
-								<Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, mb: 2 }}>
-									<IconButton onClick={() => handleNavigation('prev')}
-									// can't go back from first card
-									disabled={currentIndex === 0}
-									>
-								<ChevronLeft />
-							</IconButton>
-							<IconButton onClick={() => handleNavigation('next')}
-							// can't go forward when on last card
-							disabled={currentIndex === flashcardList.length - 1}
-							>
-								<ChevronRight />
-							</IconButton>
-						</Box>
-					</Box>
-				)}
 			</Box>
 		</Container>
 	);
