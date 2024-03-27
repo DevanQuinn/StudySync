@@ -34,8 +34,7 @@ const TagSearch = () => {
 	};
 
 	const deleteTag = index => {
-		const newTags = tags.filter((tag, idx) => idx != index);
-		setTags(newTags);
+		setTags(tags => tags.filter((tag, idx) => idx != index));
 	};
 
 	const updatePosts = async () => {

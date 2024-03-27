@@ -74,7 +74,9 @@ const Post = ({ data, editable, fetchPosts }) => {
 			{image && <Box component='img' src={image} sx={{ maxWidth: 1, mt: 2 }} />}
 			<Divider sx={{ mt: 2, mb: 2 }} />
 			{tags?.length ? (
-				<Box sx={{ display: 'flex', flexDirection: 'row' }}>
+				<Box
+					sx={{ display: 'flex', flexDirection: 'row', mb: editable ? 0 : 1 }}
+				>
 					{tags.map((tag, index) => (
 						<Chip label={tag} sx={{ mr: 1 }} key={index} />
 					))}
@@ -101,7 +103,7 @@ const Post = ({ data, editable, fetchPosts }) => {
 			</Modal>
 			<Modal open={commentsOpen} onClose={() => setCommentsOpen(false)}>
 				<>
-					<ViewComments postId={data.id} />
+					<ViewComments postId={data.id} editable={editable} />
 				</>
 			</Modal>
 			{editable && (

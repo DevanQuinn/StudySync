@@ -1,4 +1,4 @@
-import { AddCircleOutlineOutlined } from '@mui/icons-material';
+import { AddCircleOutlineOutlined, Delete } from '@mui/icons-material';
 import {
 	Box,
 	Card,
@@ -14,6 +14,8 @@ import {
 import {
 	addDoc,
 	collection,
+	deleteDoc,
+	doc,
 	getDocs,
 	getFirestore,
 	orderBy,
@@ -24,7 +26,7 @@ import React, { useEffect, useState } from 'react';
 import app from '../../firebase';
 import useUser from '../../hooks/useUser';
 
-const ViewComments = ({ postId }) => {
+const ViewComments = ({ postId, editable }) => {
 	const [comments, setComments] = useState([]);
 	const [input, setInput] = useState('');
 	const [loading, setLoading] = useState(true);
@@ -50,6 +52,7 @@ const ViewComments = ({ postId }) => {
 		docs.forEach(doc => {
 			const data = doc.data();
 			data.id = doc.id;
+			if (data.user == user.displayName) data.self = true;
 			newComments.push(data);
 		});
 		setComments(newComments);
@@ -69,9 +72,15 @@ const ViewComments = ({ postId }) => {
 		setInput(' ');
 	};
 
+	const deleteComment = async (commentId, index) => {
+		await deleteDoc(doc(db, 'posts', postId, 'comments', commentId));
+		setComments(comments => comments.filter((comment, idx) => idx != index));
+	};
+
 	useEffect(() => {
+		if (!user) return;
 		fetchComments();
-	}, []);
+	}, [user]);
 
 	if (loading)
 		return (
@@ -113,13 +122,32 @@ const ViewComments = ({ postId }) => {
 					<List>
 						{comments.map((comment, index) => (
 							<Box key={index}>
-								<ListItem disableGutters>
+								<ListItem
+									disableGutters
+									sx={{
+										display: 'flex',
+										flexDirection: 'row',
+									}}
+								>
 									<Box textOverflow={'ellipsis'} width={1}>
 										<Typography variant='caption' noWrap>
 											{comment.user}
 										</Typography>
 										<Typography noWrap>{comment.content}</Typography>
 									</Box>
+									<Typography
+										variant='h6'
+										component='div'
+										sx={{ flexGrow: 1 }}
+									></Typography>
+									{(comment.self || editable) && (
+										<IconButton
+											size='small'
+											onClick={() => deleteComment(comment.id, index)}
+										>
+											<Delete size='small' />
+										</IconButton>
+									)}
 								</ListItem>
 								{index != comments.length - 1 && <Divider />}
 							</Box>
