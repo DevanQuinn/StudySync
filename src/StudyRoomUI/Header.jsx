@@ -60,28 +60,24 @@ const Header = () => {
   
   useEffect(() => {
     const currentUser = auth.currentUser;
+    console.log("Current User:", currentUser); // Debug current user
     if (!currentUser) return;
   
-    const invitationsQuery = query(collection(db, "invitations"), where("invitedUserId", "==", currentUser.uid));
-    const unsubscribe = onSnapshot(invitationsQuery, async (querySnapshot) => {
-      const invitationsPromises = querySnapshot.docs.map(async (doc) => {
-        const invitation = { id: doc.id, ...doc.data() };
-        // Assuming you have a users collection where each document ID is `uid`
-        const inviterRef = doc(db, "users", invitation.inviterUserId);
-        const inviterDoc = await getDoc(inviterRef);
-        if (inviterDoc.exists()) {
-          // Add the inviter's displayName to the invitation object
-          invitation.inviterDisplayName = inviterDoc.data().displayName;
-        }
-        return invitation;
+    // Adjust this query to match your new invitations structure
+    const invitationsQuery = query(collection(db, "invitations"), where("invitedUserDisplayName", "==", currentUser.uid));
+    console.log("Invitations Query:", invitationsQuery); // Debug the query
+
+    const unsubscribe = onSnapshot(invitationsQuery, (querySnapshot) => {
+      const fetchedInvitations = [];
+      querySnapshot.forEach((doc) => {
+        console.log("Invitation Document:", doc.id, doc.data());
+        fetchedInvitations.push({ id: doc.id, ...doc.data() });
       });
-  
-      const fetchedInvitations = await Promise.all(invitationsPromises);
       setInvitations(fetchedInvitations);
     });
   
     return () => unsubscribe();
-  }, [auth.currentUser, db]);
+  }, [auth.currentUser]);
   
   
   
@@ -104,24 +100,23 @@ const handleJoinRoom = async (roomId) => {
   const handleClose = () => setOpen(false);
 
   const handleFormSubmit = async () => {
-    const auth = getAuth(app);
-    const user = auth.currentUser;
+    const user = auth.currentUser; // Use 'user' throughout this function
   
     if (user) {
       const collectionName = `${user.uid}_studyrooms`;
       const studyRoomData = {
         videoCategory,
-        videoUrl: null, // Set videoUrl to null initially
+        videoUrl: null, // Assume you define this somewhere
       };
   
       try {
         const docRef = await addDoc(collection(db, collectionName), studyRoomData);
-        // After successfully creating the study room, send invitations
-        friendInvites.forEach(async (invitedUserId) => {
+        // Send invitations using displayName
+        friendInvites.forEach(async (friendDisplayName) => {
           await addDoc(collection(db, "invitations"), {
-            invitedUserId,
+            invitedUserDisplayName: friendDisplayName, // Assuming this matches exactly with users' displayNames
             roomId: docRef.id,
-            inviterUserId: user.uid,
+            inviterUserId: user.uid, // Correctly using 'user' here
           });
         });
         navigate(`/room/${docRef.id}`, { state: { ...studyRoomData } });
@@ -135,6 +130,7 @@ const handleJoinRoom = async (roomId) => {
   
     handleClose(); // Close the dialog after handling form submission
   };
+  
 
   const handleInviteChange = (event) => {
     const {
