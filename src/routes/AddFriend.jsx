@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '/Users/saimonishtunguturu/307S24Project/StudySync/src/firebase.js';
+import { db } from './src/firebase.js';
 import { collection, onSnapshot, doc, setDoc } from "firebase/firestore";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import NotificationFeedback from '/Users/saimonishtunguturu/307S24Project/StudySync/src/components/NotificationFeedback.jsx';
+import NotificationFeedback from './src/components/NotificationFeedback.jsx';
 
 const FriendDropdown = ({ friends, setSelectedFriend, inviteFriend }) => {
   const handleSelectChange = (event) => {
