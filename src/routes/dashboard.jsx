@@ -26,7 +26,7 @@ function Dashboard() {
 	}, [preferences])
 	return (
 		<div>
-			<Fab color="primary" aria-label="add" onClick={togglePomodoro} sx={{top: 700, left: 675 }}>
+			<Fab color="primary" aria-label="add" onClick={togglePomodoro} sx={{top: 450, left: 675 }}>
 				<AddIcon />
 			</Fab>
 			<Slide direction="up" in={showPomodoro} mountOnEnter unmountOnExit>
