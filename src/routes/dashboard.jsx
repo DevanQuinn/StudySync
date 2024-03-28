@@ -17,9 +17,9 @@ function Dashboard() {
 	//should load preferences from user doc and reflect them
 	const [preferences, setPreferences] = useState(defaultPreferences);
 
-	const updatePreferences = (prefObj) => {
+	const updatePreferences = prefObj => {
 		setPreferences(prefObj);
-	}
+	};
 
 	useEffect(() => {
 		document.body.style.backgroundColor = preferences.color;
