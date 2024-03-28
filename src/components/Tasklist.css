@@ -1,13 +1,13 @@
     /* File: src/components/Todo.css */
+    /* many of the classes here are deprecated or removed because collapsible tasklists wasnt working */
       
       .todo-container {
-        background: rgb(41, 33, 33);
+        background: white(41, 33, 33);
         width: 20em;
         height: 15em;
         margin: 1em auto;
         border-radius: 15px;
         padding: 20px 10px;
-        color: white;
         border: 3px solid rgb(36, 110, 194);
         overflow-y: scroll;
         overflow-wrap: break-word;
@@ -19,6 +19,7 @@
 
       .lbl-toggle {
         display: block;
+        color: black;
       }
 
       .lbl-toggle:hover {
@@ -60,19 +61,10 @@
       }
 
       .task {
-        border: 1px solid white;
+        border: 1px solid black;
         border-radius: 5px;
         padding: 0.5em;
         margin: 0.5em;
-        
-      }
-
-      .tasklistlist {
-        border: 1px solid white;
-        float: left;
-        width: 25em;
-        height: 40em;
-        overflow-y: scroll;
       }
 
       .task button{
@@ -82,9 +74,13 @@
         padding: 3px 5px;
         border: none;
         cursor: pointer;
-        color: white;
+        color: black;
       }
       
+      .tasks {
+        color: black;
+      }
+
       .header {
         margin: 0.5em;
         font-size: 2em;

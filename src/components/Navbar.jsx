@@ -13,17 +13,15 @@ TODO LIST:
 const Navbar = () => {
 	const user = useUser();
 
-
-	const pages = [ 
-				{ title: 'Leaderboard', path: '/leaderboard'},
-				{ title: 'Dashboard', path: '/dashboard'},
-				{ title: 'Study Room', path: '/studyroom' },
-				{ title: 'Timer', path: '/timer' },
-        { title: 'Pomodoro', path: '/pomodoro'},
-        {title: 'SpotifyPlaylists', path: '/SpotifyPlaylists'},
-        { title: 'Flash Cards', path: '/flashcards' },
-		{ title: 'AddFriend', path: '/AddFriend' },
-
+	const pages = [
+		{ title: 'Leaderboard', path: '/leaderboard' },
+		{ title: 'Dashboard', path: '/dashboard' },
+		{ title: 'Study Room', path: '/studyroom' },
+		{ title: 'Timer', path: '/timer' },
+		{ title: 'Pomodoro', path: '/pomodoro' },
+		{ title: 'SpotifyPlaylists', path: '/SpotifyPlaylists' },
+		{ title: 'Flash Cards', path: '/flashcards' },
+    { title: 'AddFriend', path: '/AddFriend' }
 	];
 
 	return (
@@ -45,7 +43,11 @@ const Navbar = () => {
 					sx={{ flexGrow: 1 }}
 				></Typography>
 				<Typography sx={{ mr: 2 }} color='textPrimary'>
-					<Link to='/signin'>{user ? user.displayName : 'Sign In'}</Link>
+					{user ? (
+						<Link to={'/posts'}>{user.displayName}</Link>
+					) : (
+						<Link to={'/signin'}>Sign In</Link>
+					)}
 				</Typography>
 				<Typography sx={{ mr: 2 }} color='textPrimary'>
 					<Link to='/editprofile'>Edit Profile</Link>

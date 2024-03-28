@@ -5,6 +5,20 @@ import { Task } from '@mui/icons-material';
 import { nanoid } from 'nanoid'
 import "./tasklistlist.css"
 import Draggable from 'react-draggable';
+import {
+	query,
+	where,
+	getFirestore,
+	collection,
+	getDocs,
+	setDoc,
+	doc,
+	addDoc,
+	deleteDoc,
+} from 'firebase/firestore';
+import app from '../firebase.js';
+import useUser from "../hooks/useUser";
+
 
 /*
 TODO LIST:
@@ -16,10 +30,19 @@ function TasklistList() {
 	const [tasklistsList, setTasklists] = React.useState([]);
 	const [tasks, setTasks] = React.useState({})
 
+	const db = getFirestore(app);
+
+	const user = useUser(false);
+
 	useEffect(() => {
 		console.log("props updated. rerendering dashboard.");
 		console.log(tasks);
 	}, [JSON.stringify(tasks)]);
+
+	useEffect(()=>{
+		console.log("attempting to load state");
+		loadState();
+	}, [user]);
 
 	const addTasklist = (title) => {
 		if (tasklistsList.length < 10) {
@@ -81,40 +104,103 @@ function TasklistList() {
 		setTasks(JSON.parse(JSON.stringify(newTasks)));
 	}
 
+	const SaveState = () => {
+		if (user) {
+			setDoc(doc(db, "users", user.uid), {}, {merge: true}).then(() => { //first ensure the user's information is in the database
+				//Clear what data the database currently has
+				console.log("attempting to clear database of user tasks");
+				const tasklistsRef = collection(db, "users", user.uid, "tasklists");
+				const tasklistsQuery = query(tasklistsRef);
+				getDocs(tasklistsQuery).then((tasklistsSnapshot) => {
+					tasklistsSnapshot.forEach((tasklistDoc) => {
+						const tasksRef = collection(db, "users", user.uid, "tasklists", tasklistDoc.id, "tasks")
+						const tasksQuery = query(tasksRef);
+						getDocs(tasksQuery).then((tasksSnapshot) => {
+							tasksSnapshot.forEach(taskDoc => {
+								deleteDoc(doc(db, "users", user.uid, "tasklists", tasklistDoc.id, "tasks", taskDoc.id));
+							})
+						})
+						deleteDoc(doc(db, "users", user.uid, "tasklists", tasklistDoc.id));
+					})
+				}).then(() => {
+
+					//add new up-to-date data to the database
+					tasklistsList.forEach((tasklist) => {
+						console.log("attempting to save to database");
+						setDoc(doc(db, "users", user.uid, "tasklists", tasklist.id), {title: tasklist.title}, {merge: true}).then(() => {
+							tasks[tasklist.id].forEach(task => {
+								setDoc(doc(db, "users", user.uid, "tasklists", tasklist.id, "tasks", task.taskID), {title: task.title, completed: task.completed}, {merge: true});
+							})
+						})
+					})
+
+				})
+			});
+		}
+	}
+
+	const loadState = () => {
+		console.log("attempting to load tasks");
+		setTasks({});
+		setTasklists([]);
+		let newTasklists = [];
+		if(user) {
+			const tasklistsQuery = query(collection(db, "users", user.uid, "tasklists"));
+			getDocs(tasklistsQuery).then((tasklistsSnapshot) => {
+				console.log(tasklistsSnapshot);
+				tasklistsSnapshot.forEach((tasklistsDoc) => {
+					console.log(tasklistsDoc.data());
+					newTasklists = [...newTasklists, {title:tasklistsDoc.data().title, id:tasklistsDoc.id}]
+					setTasklists(JSON.parse(JSON.stringify(newTasklists)));
+					let dummyTasks = tasks;
+					dummyTasks[tasklistsDoc.id] = [];
+					setTasks(dummyTasks);
+					const tasksQuery = query(collection(db, "users", user.uid, "tasklists", tasklistsDoc.id, "tasks"))
+					getDocs(tasksQuery).then((tasksSnap) => {
+						//console.log(tasksSnap);
+						tasksSnap.forEach((taskDoc) => {
+							//console.log(taskDoc.data())
+							let newTasks = tasks;
+							let newTasksArray = newTasks[tasklistsDoc.id];
+							newTasksArray.push({title:taskDoc.data().title, taskID:taskDoc.id, completed:taskDoc.data().completed});
+							newTasks[tasklistsDoc.id] = newTasksArray;
+							setTasks(JSON.parse(JSON.stringify(newTasks)));
+						});
+					});
+				});
+			});
+		}
+	}
+
 	return (
-        <div>
-            <Draggable handle=".header">
-                <div>
-                    <div className="header">
-                        Tasklists
-                    </div>
-                    <div className="tasklistlist">
-                        <div>
-                            {tasklistsList.map((tasklist, index) => (
-                            <Tasklist
-                            id={tasklist.id}
-                            title={tasklist.title}
-                            deletefunc={deleteByIndex}
-                            tasklistlength={tasklistsList.length}
-                            key={index}
-                            tasksProp={tasks[tasklist.id]}
-                            addtaskfunc={addTaskToTasklist}
-                            deletetaskfunc={deleteTaskFromTasklist}
-                            completetaskfunc={completeTask}
-                            />))}
-                        </div>
-                        <div>
-                            <CreateTasklist addTasklist={addTasklist}/>
-                            <h2>There are currently {tasklistsList.length} active tasklists</h2>
-                        </div>
-                    </div>
-                </div>
-            </Draggable>
+    <div>
+      <Draggable handle=".header">
+				<div className="component-wrapper">
+					<div className="header">
+						Tasklists
+					</div>
+					{tasklistsList.map((tasklist, index) => (
+					<Tasklist
+					id={tasklist.id}
+					title={tasklist.title}
+					deletefunc={deleteByIndex}
+					tasklistlength={tasklistsList.length}
+					key={index}
+					tasksProp={tasks[tasklist.id]}
+					addtaskfunc={addTaskToTasklist}
+					deletetaskfunc={deleteTaskFromTasklist}
+					completetaskfunc={completeTask}
+					/>))}
+					<CreateTasklist addTasklist={addTasklist}/>
+					<h2>There are currently {tasklistsList.length} active tasklists</h2>
+					<Button onClick={SaveState}>Save Tasks</Button>
+        </div>
+    	</Draggable>
 		</div>
 	);
 }
 
-function CreateTasklist({addTasklist}) { //Not Yet Implemented
+function CreateTasklist({addTasklist}) {
 	const [value, setValue] = useState("");
 
 	const handleSubmit = e => {
@@ -134,6 +220,23 @@ function CreateTasklist({addTasklist}) { //Not Yet Implemented
 				onChange={e => setValue(e.target.value)}
 			/>
 		</form> 
+	)
+}
+
+function LoadUserTasks({handleLoad}) {
+	const [formValues, setFormValues] = useState({tasklists:'', tasks:''});
+	
+	const handleSubmit = e => {
+		console.log("handling submit");
+		e.preventDefault();
+		if (!formValues) return;
+		handleLoad();
+	}
+
+	return (
+		<form onSubmit={handleSubmit}>
+			<button type="submit">load</button>
+		</form>
 	)
 }
 

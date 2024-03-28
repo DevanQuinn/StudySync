@@ -1,7 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link, Switch, TextField, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link, TextField, Typography } from '@mui/material';
+import useUser from '../hooks/useUser';
+import {
+	query,
+	getFirestore,
+	collection,
+	getDocs,
+	doc,
+	addDoc,
+	deleteDoc,
+} from 'firebase/firestore';
+import { app } from '../firebase';
 
 const EditProfile = () => {
+    const user = useUser(true);
+    const db = getFirestore(app);
+    const col = user
+		? collection(db, `profile-data/${user?.uid}/data`)
+		: null;
+
+    const [studyGoals, setStudyGoals] = useState('');
     const [selectedFavorites, setSelectedFavorites] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
     const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
@@ -19,6 +37,18 @@ const EditProfile = () => {
     useEffect(() => {
         localStorage.setItem('isPublicProfile', JSON.stringify(isPublicProfile));
     }, [isPublicProfile]);
+    const uploadProfileData = async profile => {
+		await addDoc(col, profile);
+		//fetchProfileData();
+	};
+
+    const fetchProfileData = async () => {
+		if (!col) return;
+		const q = query(col);
+		const snapshot = await getDocs(q);
+        const data = snapshot.docs[0].data;
+        console.log('fetched data',data);
+	};
 
     const handleCheckboxChange = (event) => {
         const { value } = event.target;
@@ -32,6 +62,13 @@ const EditProfile = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
+
+        var newData = {
+            favorites: selectedFavorites,
+            studyGoals: data.get('studyGoals'),
+            profilePicture: data.get('profilePicture'),
+        }
+        uploadProfileData(newData);
         console.log({
             favorites: selectedFavorites,
             studyGoals: data.get('studyGoals'),
