@@ -20,9 +20,10 @@ import {
 	orderBy
 } from 'firebase/firestore';
 
-import { app, analytics, db } from '../firebase';
+//import { db } from '../firebase';
+const db = getFirestore(firebaseApp);
 
-//import app from '../firebase';
+import app from '../firebase';
 import { getStorage, ref, uploadBytes } from 'firebase/storage';
 
 import FlashCard from '../components/FlashCard';
