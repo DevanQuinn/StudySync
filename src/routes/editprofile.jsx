@@ -10,7 +10,7 @@ import {
 	addDoc,
 	deleteDoc,
 } from 'firebase/firestore';
-import { app } from '../firebase';
+import app from '../firebase';
 
 const EditProfile = () => {
     const user = useUser(true);
