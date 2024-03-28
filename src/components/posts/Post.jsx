@@ -9,13 +9,11 @@ import {
 	Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import SendIcon from '@mui/icons-material/Send';
 import CommentIcon from '@mui/icons-material/Comment';
 import EditIcon from '@mui/icons-material/Edit';
 import EditTags from './EditTags';
 import { deleteDoc, doc, getFirestore, updateDoc } from 'firebase/firestore';
-import app from '../firebase';
+import app from '../../firebase';
 import {
 	deleteObject,
 	getDownloadURL,
@@ -23,10 +21,14 @@ import {
 	ref,
 } from 'firebase/storage';
 import { Delete } from '@mui/icons-material';
-import DeleteAlert from './DeleteAlert';
+import DeleteAlert from '../DeleteAlert';
+import ViewComments from './ViewComments';
+import PostLikeButton from './PostLikeButton';
+import LikeCounter from './LikeCounter';
 
 const Post = ({ data, editable, fetchPosts }) => {
-	const [modalOpen, setModalOpen] = useState(false);
+	const [tagsOpen, setTagsOpen] = useState(false);
+	const [commentsOpen, setCommentsOpen] = useState(false);
 	const [alertOpen, setAlertOpen] = useState(false);
 	const [tags, setTags] = useState(data.tags || []);
 	const [image, setImage] = useState();
@@ -35,11 +37,11 @@ const Post = ({ data, editable, fetchPosts }) => {
 
 	const saveTags = async (newTags, cancelled) => {
 		if (newTags === tags) return;
-		if (cancelled) return setModalOpen(false);
+		if (cancelled) return setTagsOpen(false);
 		setTags(newTags);
 		const docToUpdate = doc(db, 'posts', data.id);
 		await updateDoc(docToUpdate, { tags: newTags });
-		setModalOpen(false);
+		setTagsOpen(false);
 	};
 
 	const fetchImage = async () => {
@@ -72,9 +74,11 @@ const Post = ({ data, editable, fetchPosts }) => {
 			{image && <Box component='img' src={image} sx={{ maxWidth: 1, mt: 2 }} />}
 			<Divider sx={{ mt: 2, mb: 2 }} />
 			{tags?.length ? (
-				<Box sx={{ display: 'flex', flexDirection: 'row' }}>
-					{tags.map(tag => (
-						<Chip label={tag} sx={{ mr: 1 }} />
+				<Box
+					sx={{ display: 'flex', flexDirection: 'row', mb: editable ? 0 : 1 }}
+				>
+					{tags.map((tag, index) => (
+						<Chip label={tag} sx={{ mr: 1 }} key={index} />
 					))}
 					<Typography
 						variant='h6'
@@ -82,23 +86,25 @@ const Post = ({ data, editable, fetchPosts }) => {
 						sx={{ flexGrow: 1 }}
 					></Typography>
 					{editable && (
-						<IconButton onClick={() => setModalOpen(true)}>
+						<IconButton onClick={() => setTagsOpen(true)}>
 							<EditIcon />
 						</IconButton>
 					)}
 				</Box>
 			) : editable ? (
-				<Button onClick={() => setModalOpen(true)}>Add tags</Button>
+				<Button onClick={() => setTagsOpen(true)}>Add tags</Button>
 			) : (
 				<Typography variant='caption'>No tags</Typography>
 			)}
-			<Modal
-				open={modalOpen}
-				onClose={() => setModalOpen(false)}
-				aria-labelledby='modal-modal-title'
-				aria-describedby='modal-modal-description'
-			>
-				<EditTags initialTags={tags} saveTags={saveTags} />
+			<Modal open={tagsOpen} onClose={() => setTagsOpen(false)}>
+				<>
+					<EditTags initialTags={tags} saveTags={saveTags} />
+				</>
+			</Modal>
+			<Modal open={commentsOpen} onClose={() => setCommentsOpen(false)}>
+				<>
+					<ViewComments postId={data.id} editable={editable} />
+				</>
 			</Modal>
 			{editable && (
 				<IconButton
@@ -125,29 +131,24 @@ const Post = ({ data, editable, fetchPosts }) => {
 				</Button>
 			</DeleteAlert>
 
-			{/* <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-				<IconButton>
-					<FavoriteIcon />
+			<Box
+				sx={{
+					display: 'flex',
+					flexDirection: 'row',
+					alignItems: 'center',
+				}}
+			>
+				<PostLikeButton postId={data.id} />
+				<IconButton onClick={() => setCommentsOpen(true)}>
+					<CommentIcon />
 				</IconButton>
 				<Typography
 					variant='h6'
 					component='div'
 					sx={{ flexGrow: 1 }}
 				></Typography>
-				<TextField
-					variant='standard'
-					label='Comment'
-					InputProps={{
-						endAdornment: (
-							<InputAdornment position='end'>
-								<IconButton>
-									<SendIcon />
-								</IconButton>
-							</InputAdornment>
-						),
-					}}
-				/>
-			</Box> */}
+				<LikeCounter postId={data.id} />
+			</Box>
 		</Card>
 	);
 };
