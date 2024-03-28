@@ -1,14 +1,18 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, updateProfile,} from 'firebase/auth';
+import { doc, setDoc, getFirestore, getDoc} from "firebase/firestore"
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
+import app from '../firebase';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
+import { v4 as uuid } from 'uuid';
+import { getStorage, ref as storageRef, uploadBytes } from 'firebase/storage';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Copyright from '../components/Copyright.jsx';
@@ -17,23 +21,38 @@ import { grey } from '@mui/material/colors';
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [newImage, setNewImage] = React.useState(null);
-  const handleSubmit = event => {
+  const [image, setImage] = useState();
+  const storage = getStorage(app);
+  const uploadImage = async imageUpload => {
+		const imageId = uuid();
+		const imageRef = storageRef(storage, `profile-pictures/${imageId}`);
+		await uploadBytes(imageRef, imageUpload);
+		return imageId;
+	};
+  const handleSubmit = async event => {
       event.preventDefault();
       const data = new FormData(event.currentTarget);
       const username = data.get('username');
       const email = data.get('email');
       const password = data.get('password');
+      const db = getFirestore(app);
+      const docRef = doc(db, "users", username);
+      const docSnap = await getDoc(docRef);
+      console.log(docSnap);
       if(password != data.get('confirm-password')){
         alert("Please make sure your passwords match.")
       }
+      else if(docSnap.exists()) {
+        alert("The username is currently in use, please input a different one")
+      }
       else{
         createUserWithEmailAndPassword(getAuth(), email, password)
-            .then(userCredential => {
+            .then(async userCredential => {
                 // Signed in
                 const user = userCredential.user;
-                if(newImage != null) {
+                const imageID = image ? await uploadImage(image) : "default-avatar-icon-of-social-media-user-vector.jpg";
+                if(image != null) {
                   updateProfile(getAuth().currentUser, {
-                    photoURL: URL.createObjectURL(newImage),
                     displayName: username,
                   })
                 }
@@ -43,7 +62,16 @@ export default function SignUp() {
                   })
                 }
                 console.log(user);
-                alert("Success! Please use the Go Back button to sign in.")
+                const db = getFirestore(app);
+                const docData = {
+                  username: username,
+                  userID: user.uid,
+                  pfpID: imageID,
+                  lower: username.toLowerCase()
+                }
+                await setDoc(doc(db, 'users', username), docData);
+                alert("Success!")
+                window.location = "/"
                 // ...
             })
             .catch(error => {
@@ -131,14 +159,9 @@ export default function SignUp() {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setNewImage(e.target.files[0])}  
+                onChange={(e) => setImage(e.target.files[0])}  
               />
             </Typography>
-            {(() => {
-               if (newImage) {
-                  return <img src={URL.createObjectURL(newImage)} width={250} height={250} alt="profile" />;
-                }
-            })()}
             <Button
               type="submit"
               fullWidth

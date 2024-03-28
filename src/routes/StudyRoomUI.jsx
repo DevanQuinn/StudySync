@@ -13,7 +13,6 @@ function StudyRoomUI() {
         <Header />
         {/* Setup Routes within StudyRoomUI */}
         <Routes>
-          <Route path="/" element={<InviteSlider />} />
           <Route path="room" element={<RoomDetailsPage />} />
         </Routes>
         {/* Other components or content here */}

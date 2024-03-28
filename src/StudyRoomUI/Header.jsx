@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -8,218 +9,253 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Input from '@mui/material/Input';
 import FormHelperText from '@mui/material/FormHelperText';
-import TextField from '@mui/material/TextField'; // For multiline input
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, doc, getDoc} from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
-//import { getStorage, ref, uploadBytes } from "firebase/storage";
-import { getDownloadURL } from "firebase/storage"; // Import getDownloadURLimport { getDownloadURL } from "firebase/storage"; // Import getDownloadURL
-import { useNavigate } from 'react-router-dom';
-
 
 const Header = () => {
   const [open, setOpen] = useState(false);
-  const [backgroundImage, setBackgroundImage] = useState(null);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [time, setTime] = useState('');
-  const [friendInvites, setFriendInvites] = useState('');
+  const [invitations, setInvitations] = useState([]);
+  const [videoCategory, setVideoCategory] = useState('');
+  const [friendInvites, setFriendInvites] = useState([]);
+  const [usernames, setUsernames] = useState([]); // New state for usernames
+  const [errorMessage, setErrorMessage] = useState('');
+  const [invitationDialogOpen, setInvitationDialogOpen] = useState(false);
+  const [currentInvitation, setCurrentInvitation] = useState(null);
+
   const navigate = useNavigate();
 
   // Your web app's Firebase configuration
   const firebaseConfig = {
-		apiKey: 'AIzaSyAOLFu9q6gvdcDoOJ0oPuQKPgDyOye_2uM',
-		authDomain: 'studysync-3fbd7.firebaseapp.com',
-		projectId: 'studysync-3fbd7',
-		storageBucket: 'studysync-3fbd7.appspot.com',
-		messagingSenderId: '885216959280',
-		appId: '1:885216959280:web:917a7216776b36e904c6f5',
-		measurementId: 'G-TS13EWHRMB',
-	};
-
-
-  const app = initializeApp(firebaseConfig); // Initialize Firebase
-  const db = getFirestore(); // Get Firestore instance
-  const storage = getStorage(app);
-
-  const [errorMessage, setErrorMessage] = useState('');
-
-  const handleClickOpen = () => {
-    setOpen(true);
+    apiKey: 'AIzaSyAOLFu9q6gvdcDoOJ0oPuQKPgDyOye_2uM',
+    authDomain: 'studysync-3fbd7.firebaseapp.com',
+    projectId: 'studysync-3fbd7',
+    storageBucket: 'studysync-3fbd7.appspot.com',
+    messagingSenderId: '885216959280',
+    appId: '1:885216959280:web:917a7216776b36e904c6f5',
+    measurementId: 'G-TS13EWHRMB',
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    setBackgroundImage(null); // Reset background image state on close
-  };
+   // Initialize Firebase
+   const app = initializeApp(firebaseConfig);
+   const db = getFirestore(app);
+   const auth = getAuth(app);
+ 
 
+  useEffect(() => {
+    // Function to fetch usernames from Firestore
+    const fetchUsernames = async () => {
+      const querySnapshot = await getDocs(collection(db, "users"));
+      const fetchedUsernames = [];
+      querySnapshot.forEach((doc) => {
+        fetchedUsernames.push(doc.data().username); // Assuming 'username' is the field
+      });
+      setUsernames(fetchedUsernames);
+    };
 
+    fetchUsernames();
+  }, [db]); // Run once when the component mounts
 
-  const handleImageChange = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      const reader = new FileReader();
+ 
+  useEffect(() => {
+    if (invitations.length > 0) {
+      // Assuming you want to show the first invitation for simplicity
+      setCurrentInvitation(invitations[0]);
+      setInvitationDialogOpen(true);
+    }
+  }, [invitations]);
 
-      reader.onload = function(e) {
-        setBackgroundImage(e.target.result);
-      };
-
-      reader.readAsDataURL(event.target.files[0]);
+  const handleAcceptInvitation = () => {
+    if (currentInvitation && currentInvitation.roomId) {
+      navigate(`/room/${currentInvitation.roomId}`);
+      setInvitationDialogOpen(false); // Close the dialog upon accepting
     }
   };
-
-  const handleFormSubmit = async () => {
-    if (!name.trim() || !description.trim() || !time.trim()) {
-      setErrorMessage('Please fill out all required fields.');
-      return; // Stop the function execution here
-    }
-
-    const auth = getAuth(app); // Ensure you're passing the `app` instance to `getAuth`
-    const user = auth.currentUser;
-  
-    if (user) {
-      // Use the UID for a unique collection name. Adjust as needed for usernames.
-      const collectionName = `${user.uid}_studyrooms`;
-  
-      // Proceed with your logic to handle file upload and data submission
-      if (backgroundImage) {
-        console.log(
-          "Adding background image"
-        );
-
-        const storageRef = ref(storage, `studyrooms/${backgroundImage.name}`);
-  
-
-        try {
-          const snapshot = await uploadBytes(storageRef, backgroundImage);
-          const downloadURL = await getDownloadURL(snapshot.ref);
-  
-          const studyRoomData = {
-            name,
-            description,
-            time: parseInt(time, 10),
-            backgroundImage: downloadURL,
-            friendInvites: friendInvites.split(',').map(invite => invite.trim()),
-          };
-  
-          const docRef = await addDoc(collection(db, collectionName), studyRoomData);
-          console.log("Document written with ID: ", docRef.id);
-
-          // Navigate to room details page with room data
-          navigate(`/room`);
-        } catch (error) {
-          console.error("Error uploading image or adding document: ", error);
-        }
-      } else {
-        const studyRoomDataWithoutImage = {
-          name,
-          description,
-          time: parseInt(time, 10),
-          friendInvites: friendInvites.split(',').map(invite => invite.trim()),
-        };
-  
-        try {
-          // Again, use the dynamically constructed collection name
-          const docRef = await addDoc(collection(db, collectionName), studyRoomDataWithoutImage);
-          console.log("Document written with ID: ", docRef.id);
-
-          // Navigate to room details page with room data
-          navigate(`/room/${docRef.id}`, { state: { ...studyRoomData } }); 
-        } catch (error) {
-          console.error("Error adding document without an image: ", error);
-        }
-      }
-    } else {
-      // Set an error message if no user is signed in
-    setErrorMessage('You must be signed in to create a study room.');
-    return; // Stop the function execution here
-      //console.log("No user is signed in to define a unique collection name.");
-    }
-    setErrorMessage(''); // Reset error message when a user is found and submission starts
-    handleClose(); // Close the dialog
+  const handleCloseInvitationDialog = () => {
+    setInvitationDialogOpen(false);
   };
+
   
-  // Example of customized button styles
-const customButtonStyles = {
-  backgroundColor: "#32BAAE", // A bright color for visibility
-  color: "white", // Contrast color for text
-  fontWeight: "bold", // Bold text for better readability
-  border: "2px solid white", // White border for contrast
-  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", // Shadow for depth
-  fontSize: "1em", // Slightly larger text
-  padding: "10px 20px", // Comfortable padding
-  cursor: "pointer", // Cursor indication for clickable elements
-  transition: "all 0.3s ease", // Smooth transition for interactions
+  useEffect(() => {
+    const currentUser = auth.currentUser;
+    console.log("Current User:", currentUser); // Debug current user
+    if (!currentUser || !currentUser.displayName) return;
+  
+    // Adjust this query to use display names
+    const invitationsQuery = query(collection(db, "invitations"), where("invitedUserDisplayName", "==", currentUser.displayName));
+    console.log("Invitations Query:", invitationsQuery); // Debug the query
+  
+    const unsubscribe = onSnapshot(invitationsQuery, (querySnapshot) => {
+      const fetchedInvitations = [];
+      querySnapshot.forEach((doc) => {
+        console.log("Invitation Document:", doc.id, doc.data());
+        fetchedInvitations.push({ id: doc.id, ...doc.data() });
+      });
+      setInvitations(fetchedInvitations);
+    });
+  
+    return () => unsubscribe();
+  }, [auth.currentUser]);
+  
+  
+  
+  // Handler to navigate to the room based on invitation
+const handleJoinRoom = async (roomId) => {
+  const roomRef = doc(db, `${roomId}_studyrooms`, roomId); // Adjust the path according to your database structure
+  const docSnap = await getDoc(roomRef);
+
+  if (docSnap.exists()) {
+    // If the room exists, navigate to the room
+    navigate(`/room/${roomId}`);
+  } else {
+    // If the room does not exist, show an error message
+    // This could be a state-based message shown in the UI, an alert, or a custom modal/dialog
+    alert("The creator of the room has left, and the room no longer exists.");
+  }
 };
 
+  const handleClickOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
+  const handleFormSubmit = async () => {
+    const user = auth.currentUser; // Use 'user' throughout this function
+  
+    if (user) {
+      const collectionName = `${user.uid}_studyrooms`;
+      const studyRoomData = {
+        videoCategory,
+        videoUrl: null, // Assume you define this somewhere
+      };
+  
+      try {
+        const docRef = await addDoc(collection(db, collectionName), studyRoomData);
+        // Send invitations using displayName
+        friendInvites.forEach(async (friendDisplayName) => {
+          await addDoc(collection(db, "invitations"), {
+            invitedUserDisplayName: friendDisplayName, // Assuming this matches exactly with users' displayNames
+            roomId: docRef.id,
+            inviterUserId: user.displayName, // Correctly using 'user' here
+          });
+        });
+        navigate(`/room/${docRef.id}`, { state: { ...studyRoomData } });
+      } catch (error) {
+        console.error("Error adding document: ", error);
+        setErrorMessage('Error creating study room. Please try again.');
+      }
+    } else {
+      setErrorMessage('You must be signed in to create a study room.');
+    }
+  
+    handleClose(); // Close the dialog after handling form submission
+  };
+  
+
+  const handleInviteChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setFriendInvites(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
+    );
+  };
+  
+
+  // Customized button styles
+  const customButtonStyles = {
+    backgroundColor: "#32BAAE",
+    color: "white",
+    fontWeight: "bold",
+    border: "2px solid white",
+    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)",
+    fontSize: "1em",
+    padding: "10px 20px",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+  };
 
   return (
-    <header className="hero" style={{ }}>
+    <header className="hero" style={{}}>
       <div className="heroInner">
         <h1 style={{ color: '#32BAAE' }}>Study Room</h1>
         <button className="customButton" onClick={handleClickOpen} style={customButtonStyles}>
           Create Study Room
         </button>
 
+        {invitations.map(invitation => (
+        <div key={invitation.id} onClick={() => handleJoinRoom(invitation.roomId)}>
+          You've been invited by {invitation.inviterUserId} to join a study room.
+        </div>
+        ))}
+   
+
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>Create a New Study Room</DialogTitle>
           <DialogContent>
-            {/* Error Message Display */}
             {errorMessage && <div style={{ color: 'red', marginBottom: '20px' }}>{errorMessage}</div>}
 
             <FormControl fullWidth margin="normal">
-              <InputLabel htmlFor="room-name">Room Name</InputLabel>
-              <Input id="room-name" value={name} onChange={e => setName(e.target.value)} />
-              <FormHelperText>Name your study room.</FormHelperText>
+              <InputLabel htmlFor="video-category">Video Category</InputLabel>
+              <Select
+                value={videoCategory}
+                onChange={(e) => setVideoCategory(e.target.value)}
+                label="Video Category"
+                id="video-category"
+              >
+                <MenuItem value="Lofi">Lofi</MenuItem>
+                <MenuItem value="Nature">Nature</MenuItem>
+                <MenuItem value="Indie">Indie</MenuItem>
+                <MenuItem value="Pop">Pop</MenuItem>
+                <MenuItem value="Upbeat">Upbeat</MenuItem>
+                <MenuItem value="Speedrun">Speedrun</MenuItem>
+              </Select>
             </FormControl>
 
             <FormControl fullWidth margin="normal">
-              <TextField
-                id="room-description"
-                label="Description"
-                multiline
-                rows={4}
-                variant="outlined"
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="Describe your study room"
-              />
-            </FormControl>
-
-            <FormControl fullWidth margin="normal">
-              <InputLabel htmlFor="time-limit">Time Limit (Minutes)</InputLabel>
-              <Input id="time-limit" type="number" value={time} onChange={e => setTime(e.target.value)} />
-              <FormHelperText>Set a time limit for the study session.</FormHelperText>
-            </FormControl>
-
-            <FormControl fullWidth margin="normal">
-              <InputLabel htmlFor="invite-friends">Invite Friends</InputLabel>
-              <Input id="invite-friends" value={friendInvites} onChange={e => setFriendInvites(e.target.value)} placeholder="Enter emails separated by commas" />
-              <FormHelperText>Invite friends by email.</FormHelperText>
-            </FormControl>
-
-            <FormControl fullWidth margin="normal">
-              <Button variant="contained" component="label">
-                Upload Background Image (Optional)
-                <input type="file" hidden accept="image/*" onChange={handleImageChange} />
-              </Button>
-              {backgroundImage && (
-                <div style={{ marginTop: '20px' }}>
-                  <img src={backgroundImage} alt="Background Preview" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain' }} />
-                </div>
-              )}
-              <FormHelperText>Upload an image to use as the background.</FormHelperText>
-            </FormControl>
+          <InputLabel id="invite-friends-label">Invite Friends</InputLabel>
+          <Select
+            labelId="invite-friends-label"
+            id="invite-friends"
+            multiple
+            value={friendInvites}
+            onChange={handleInviteChange}
+            renderValue={(selected) => selected.join(', ')}
+          >
+            {usernames.map((username) => (
+              <MenuItem key={username} value={username}>
+                {username}
+              </MenuItem>
+            ))}
+          </Select>
+          <FormHelperText>Invite friends by username.</FormHelperText>
+        </FormControl>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
-            <Button onClick={navigate(`/room`)}>Create</Button>
+            <Button onClick={handleFormSubmit}>Create</Button>
           </DialogActions>
         </Dialog>
       </div>
+
+      <Dialog open={invitationDialogOpen} onClose={handleCloseInvitationDialog}>
+<DialogTitle>Invitation to Join Study Room</DialogTitle>
+<DialogContent>
+  <p>{currentInvitation ? `You've been invited by ${currentInvitation.inviterUserId} to join a study room.` : ''}</p>
+</DialogContent>
+<DialogActions>
+  <Button onClick={handleCloseInvitationDialog}>Decline</Button>
+  <Button onClick={handleAcceptInvitation} color="primary">Join Room</Button>
+</DialogActions>
+</Dialog>
+
     </header>
+
+
+
   );
 };
 
 export default Header;
+
