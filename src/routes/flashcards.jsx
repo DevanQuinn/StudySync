@@ -56,13 +56,13 @@ const Flashcards = () => {
 		: null;
 
 	const userStatsCol = user
-		? collection(db, `userStats/${user?.uid}/timeStudied`)
+		? collection(db, `userStats/${user?.uid}/studyStats`)
 		: null;
 
-	const uploadUserStats = async (startTime, endTime, durationMs, duration) => {
+	const uploadUserStats = async (startTime, endTime, durationMs, duration, numCardsStudied) => {
 		if (!userStatsCol) return;
 
-		const statsData = { startTime, endTime, durationMs, duration };
+		const statsData = { startTime, endTime, durationMs, duration, numCardsStudied };
 
 		try {
 			await addDoc(userStatsCol, statsData);
@@ -161,7 +161,9 @@ const Flashcards = () => {
 
 	const handleNavigation = (direction) => {
 		if (cardStudied) {
-			numCardsStudied += 1;
+			if (studyStartTime) {
+				numCardsStudied += 1;
+			}
 			setCardStudied(false);
 		}
 		if (direction === 'prev') {
@@ -190,7 +192,8 @@ const Flashcards = () => {
 			const studyDuration = moment.utc(duration.as('milliseconds')).format('HH[h] mm[m] ss[s]');
 
 			setStudyDuration(studyDuration);
-			uploadUserStats(studyStartTime, studyEndTime, durationMs, studyDuration);
+			uploadUserStats(studyStartTime, studyEndTime, durationMs, studyDuration, numCardsStudied);
+			numCardsStudied = 0;
 			setStudyStartTime(null);
 			// flag to display time studied
 			setDisplayDuration(true);
