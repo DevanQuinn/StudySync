@@ -13,6 +13,19 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.layout.light {
+	background-color: #ffffff; /* Light background */
+	color: #000000; /* Dark text for light background */
+  }
+  
+  .layout.dark {
+	background-color: #363537; /* Dark background */
+	color: #FAFAFA; /* Light text for dark background */
+  }
+  
+  /* You can add similar theme-dependent styles for other components */
+
+  
 a {
 	font-weight: 500;
 	color: inherit;
@@ -72,7 +85,11 @@ handle {
 	grid-template-columns: auto 1fr auto;
 	grid-template-rows: auto 1fr auto;
 	gap: 8px;
+	overflow-x: hidden;
   }
+
+  
+  
   
   .leftSide { 
 	grid-area: leftSide; 
