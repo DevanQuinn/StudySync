@@ -28,7 +28,8 @@
     "react-spotify-embed": "^2.0.4",
     "slick-carousel": "^1.8.1",
     "sort-by": "^1.2.0",
-    "timrjs": "^3.2.1"
+    "timrjs": "^3.2.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.55",

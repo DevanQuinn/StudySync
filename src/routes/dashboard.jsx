@@ -4,6 +4,20 @@ import TasklistList from '../components/TasklistList.jsx'
 import RoomPomodoro from '../components/RoomPomodoro.jsx';
 import AddIcon from '@mui/icons-material/Add';
 import { Fab, Box, Slide } from '@mui/material';
+import {
+	query,
+	where,
+	getFirestore,
+	collection,
+	getDocs,
+	setDoc,
+	doc,
+	addDoc,
+	deleteDoc,
+} from 'firebase/firestore';
+import app from '../firebase.js';
+import useUser from '../hooks/useUser';
+import '../components/tasklistlist.css';
 /*
 TODO LIST:
 	* store all tasks in the dashboard component and pass as props the relevant tasks to the tasklist
@@ -45,7 +59,7 @@ function Dashboard() {
        		 	<Box sx={{ position: 'fixed', bottom: 60, right: 0, zIndex: 1100 }}><RoomPomodoro /></Box>
       		</Slide>
 			<DashboardConfigurator initialPreference={preferences} preferenceCallback={updatePreferences}/>
-			<TasklistList/>	
+			<TasklistList className="component-wrapper"/>	
 		</div>
 		
 	)
