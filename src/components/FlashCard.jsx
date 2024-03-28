@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { getBlob, getStorage, ref } from "firebase/storage";
 
-const FlashCard = ({ data, deleteFlashcard }) => {
-	const [flipped, setFlipped] = useState(false);
+const FlashCard = ({ data, deleteFlashcard, cardStudied}) => {
 
-	const toggleFlip = () => setFlipped(!flipped);
-
+	const toggleFlip = () => {
+		setFlipped(!flipped);
+		cardStudied(true);
+	}
+	
+	const [flipped, setFlipped] = React.useState(false);
 	const [imageBlob, setImageBlob] = useState(null);
 	const [audioBlob, setAudioBlob] = useState(null);
 

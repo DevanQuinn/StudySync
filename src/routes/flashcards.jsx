@@ -28,6 +28,10 @@ import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { LinearProgress } from '@mui/material';
 import moment from 'moment';
 
+// variable to count number of cards studied (flipped)
+let numCardsStudied = 0;
+
+
 const Flashcards = () => {
 	const [flashcardList, setFlashcardList] = React.useState([]);
 	const [newQuestion, setNewQuestion] = React.useState('');
@@ -39,6 +43,8 @@ const Flashcards = () => {
 	const [studyStartTime, setStudyStartTime] = React.useState(null);
 	const [displayDuration, setDisplayDuration] = React.useState(false);
 	const [studyDuration, setStudyDuration] = React.useState(0);
+	// flag to make a card count as studied when it has been flipped
+	const [cardStudied, setCardStudied] = React.useState(false);
 	const user = useUser(true);
 	const db = getFirestore(app);
 	const storage = getStorage();
@@ -153,14 +159,20 @@ const Flashcards = () => {
 		});
 	};
 
-
 	const handleNavigation = (direction) => {
+		if (cardStudied) {
+			numCardsStudied += 1;
+			setCardStudied(false);
+		}
 		if (direction === 'prev') {
 			// loop back when list over, else iterate forward or backward
 			setCurrentIndex(currentIndex - 1);
 		} else if (direction === 'next') {
 			setCurrentIndex(currentIndex + 1);
 		}
+		console.log(cardStudied);
+		console.log(numCardsStudied);
+
 	};
 
 	const startStudySession = () => {
@@ -183,6 +195,10 @@ const Flashcards = () => {
 			// flag to display time studied
 			setDisplayDuration(true);
 		}
+	};
+
+	const updateCardStudied = (value) => {
+		setCardStudied(value);
 	};
 
 	return (
@@ -236,6 +252,7 @@ const Flashcards = () => {
 								<FlashCard
 									data={card}
 									deleteFlashcard={deleteFlashcard}
+									cardStudied={updateCardStudied}
 								/>
 							</Box>
 						))}
