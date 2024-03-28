@@ -12,7 +12,7 @@ const DeleteAlert = ({ title, description, state, children }) => {
 	return (
 		<Dialog
 			open={alertOpen}
-			onClose
+			onClose={() => setAlertOpen(false)}
 			aria-labelledby='alert-dialog-title'
 			aria-describedby='alert-dialog-description'
 		>

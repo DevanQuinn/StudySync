@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import "../index.css"
 import { useParams } from 'react-router-dom';
-import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField} from '@mui/material';
+import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField, withTheme, withStyles, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Select} from '@mui/material';
 import RoomPomodoro from '../components/RoomPomodoro';
 import { useNavigate } from 'react-router-dom';
 import Draggable from 'react-draggable';
-import { doc, getDoc, getFirestore, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, deleteDoc, updateDoc, setDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth'; // Make sure to import getAuth
 
@@ -21,27 +21,51 @@ const videoCategories = {
   ],
   Chill: [
     'iicfmXFALM8', 'lTRiuFIWV54',  'HO6cbtdmkIc', 'ANkxRGvl1VY',
+    'sgEJ4sOwboM', 'b8K5sGFu1l4', 'hm7_T0RvnjY',
   ],
   Indie: [
-    
+    'nif7-fGMSAs', 'anPqAKBcsog', 'HxAkpLrW7cQ', 'L8hPtjGb3R0',
   ],
   Pop: [
-  
+    'HQtFR3mhzOY', '471IbdJ4ZOc', 
   ],
   Upbeat: [
-    'ixnqJm697-o', 
+    'ixnqJm697-o', 'ypHMIyXx4v0', '7EDWMYyqJqE',
   ],
   Speedrun: [
-
+    '-XFJoMRMM4k', 'b3TOVBNSJDA', 
   ]
   // Add more categories and videos as needed
 };
 
-const Chat = ({theme}) => {
+
+
+const Chat = ({theme, roomId}) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [activeDrags, setActiveDrags] = useState(0);
- 
+  
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: 'AIzaSyAOLFu9q6gvdcDoOJ0oPuQKPgDyOye_2uM',
+      authDomain: 'studysync-3fbd7.firebaseapp.com',
+      projectId: 'studysync-3fbd7',
+      storageBucket: 'studysync-3fbd7.appspot.com',
+      messagingSenderId: '885216959280',
+      appId: '1:885216959280:web:917a7216776b36e904c6f5',
+      measurementId: 'G-TS13EWHRMB',
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+  
+
+  const clearMessages = () => {
+    setMessages([]); // Clears the messages from the UI
+  };
+
   const onStart = () => {
     setActiveDrags(prevActiveDrags => prevActiveDrags + 1);
   };
@@ -50,10 +74,19 @@ const Chat = ({theme}) => {
     setActiveDrags(prevActiveDrags => prevActiveDrags - 1);
   };
 
-  const sendMessage = () => {
-    if (message) {
-      setMessages([...messages, message]);
-      setMessage('');
+  const sendMessage = async () => {
+    if (message.trim()) {
+      try {
+        const chatRef = doc(db, `studyrooms/${roomId}/chat`, new Date().toISOString()); // Creates a unique ID based on timestamp
+        await setDoc(chatRef, {
+          message: message,
+          timestamp: serverTimestamp(), // Firebase server timestamp
+        });
+        setMessages([...messages, message]);
+        setMessage('');
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
     }
   };
 
@@ -94,11 +127,13 @@ const Chat = ({theme}) => {
             />
           </Box>
           <Button variant="contained" onClick={sendMessage}>Send</Button>
+          <Button variant="outlined" onClick={clearMessages} sx={{ mt: 1 }}>Clear Messages</Button> 
         </Stack>
       </Box>
     </Draggable>
   );
 };
+
 
 
 const RoomDetailsPage = () => {
@@ -113,13 +148,28 @@ const RoomDetailsPage = () => {
   const togglePomodoro = () => setShowPomodoro(!showPomodoro);
   const { roomId } = useParams(); // Using useParams to get roomId from the route
   const [roomData, setRoomData] = useState(null); // State to hold room data
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [selectedFriends, setSelectedFriends] = useState([]);
+  const [allUsers, setAllUsers] = useState([]); // Assuming you fetch all users for inviting
 
-  const handleCategoryClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  // const handleCategoryClick = (event) => {
+  //   setAnchorEl(event.currentTarget);
+  // };
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  // Function to handle "Change Room" button click
+  const handleOpenCategoryMenu = () => {
+    setShowCategoryMenu(true); // Show the category menu
+  };
+
+  const handleSelectCategory = async (category) => {
+    // Function logic to change the room, similar to changeRoom
+    await changeRoom(category);
+    setShowCategoryMenu(false); // Hide the category menu after selection
   };
 
   // Your web app's Firebase configuration
@@ -138,7 +188,39 @@ const RoomDetailsPage = () => {
   const db = getFirestore(app);
   const auth = getAuth(app);
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const querySnapshot = await getDocs(collection(db, "users")); // Adjust path as necessary
+      const users = [];
+      querySnapshot.forEach((doc) => {
+        users.push(doc.data().username); // Or whatever field you're using
+      });
+      setAllUsers(users);
+    };
+  
+    fetchUsers();
+  }, []);
 
+  const sendInvitations = async () => {
+    try {
+      const user = auth.currentUser;
+      selectedFriends.forEach(async (friendDisplayName) => {
+        await addDoc(collection(db, "invitations"), {
+          invitedUserDisplayName: friendDisplayName,
+          roomId: roomId,
+          inviterUserId: user.displayName, // Or UID, depending on your preference
+        });
+      });
+      // Reset state and close dialog after sending invitations
+      setSelectedFriends([]);
+      setInviteDialogOpen(false);
+      console.log("Invitations sent successfully.");
+    } catch (error) {
+      console.error("Error sending invitations:", error);
+    }
+  };
+  
+  
   useEffect(() => {
     const fetchRoomData = async () => {
       const user = auth.currentUser;
@@ -175,13 +257,36 @@ const RoomDetailsPage = () => {
   }, [roomId, db, auth, navigate]);
   
 
-  const changeRoom = (category) => {
+  const changeRoom = async (category) => {
     // Select a random video URL from the specified category
     const videos = videoCategories[category];
     const randomIndex = Math.floor(Math.random() * videos.length);
-    setCurrentVideoUrl(videos[randomIndex]);
+    const newVideoUrl = videos[randomIndex];
+    setCurrentVideoUrl(newVideoUrl);
     handleClose(); // Close the category menu
+  
+    // Now update the video URL and category in the database
+    const user = auth.currentUser;
+    if (user) {
+      const userId = user.uid;
+      const roomRef = doc(db, `${userId}_studyrooms/${roomId}`);
+      
+      try {
+        // Update the video URL and category in the room document
+        await updateDoc(roomRef, {
+          videoCategory: category, // Field for video category
+          videoUrl: newVideoUrl // Assuming 'videoUrl' is the field name for video URL
+        });
+        console.log("Video URL and category updated successfully in the database.");
+      } catch (error) {
+        console.error("Error updating room details:", error);
+      }
+    } else {
+      console.log("User is not authenticated");
+      // Handle unauthenticated state, e.g., redirect to login
+    }
   };
+  
 
   const videoSrc = `https://www.youtube.com/embed/${currentVideoUrl}?playlist=${currentVideoUrl}&autoplay=1&controls=0&loop=1&modestbranding=1&mute=${isMuted ? '1' : '0'}&showinfo=0&rel=0&iv_load_policy=3`;
 
@@ -190,26 +295,43 @@ const RoomDetailsPage = () => {
   const handleExitAndDeleteRoom = async () => {
     const user = auth.currentUser;
     if (user) {
-      const userId = user.uid;
       try {
         // Define the room document reference
-        const roomRef = doc(db, `${userId}_studyrooms/${roomId}`);
-        // Delete the document
+        const roomRef = doc(db, `studyrooms/${roomId}`); // Adjusted for a more generic path if necessary
+        // Delete the room document
         await deleteDoc(roomRef);
         console.log(`Room ${roomId} deleted successfully`);
-        // Navigate to another page after deletion
+  
+        // Now, query and delete all invitations for this room
+        const invitationsRef = collection(db, 'invitations');
+        const q = query(invitationsRef, where('roomId', '==', roomId));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (document) => {
+          await deleteDoc(doc(db, 'invitations', document.id));
+        });
+        console.log(`All invitations for room ${roomId} deleted successfully`);
+  
+        // Navigate to another page after deletion and cleanup
         navigate('/dashboard'); // Adjust the navigation path as needed
       } catch (error) {
-        console.error("Error deleting room:", error);
+        console.error("Error during room exit and cleanup:", error);
       }
     } else {
       console.log("User is not authenticated");
       navigate('/signin'); // Redirect to signin page or handle unauthenticated state
     }
   };
+  
   //const editScreen = () => setShowEditMenu(!showEditMenu);
   // Theme toggle function
-  const toggleTheme = () => setIsLightMode(!isLightMode);
+ 
+   // Theme toggle function
+   const toggleTheme = () => {
+    setIsLightMode(!isLightMode);
+    // Apply the dark class to the body
+    document.body.classList.toggle('dark', !isLightMode);
+  };
+
 
   // Adjusted to include styles for the left side
   const themeStyles = {
@@ -236,7 +358,7 @@ const RoomDetailsPage = () => {
           Profiles & Hours
         </Typography>
 
-        <Chat theme={isLightMode ? 'light' : 'dark'} />
+        <Chat theme={isLightMode ? 'light' : 'dark'} roomId={roomId} />
       </div>
 
       <div className="body">
@@ -248,12 +370,59 @@ const RoomDetailsPage = () => {
       <div className="footer">
         <Button variant="contained" style={themeStyles.button} onClick={toggleVolume}>{isMuted ? 'Unmute' : 'Mute'}</Button>
         <Button variant="contained" style={themeStyles.button} onClick={togglePomodoro}>{showPomodoro ? 'Hide Timer' : 'Show Timer'}</Button>
-        <Button variant="contained" style={themeStyles.button}>Invite Friends</Button>
+        <Button variant="contained" style={themeStyles.button} onClick={() => setInviteDialogOpen(true)}>Invite Friends</Button>
         <Button variant="contained" style={themeStyles.button} onClick={handleExitAndDeleteRoom}>Exit Room</Button>
-        <Button variant="contained" style={themeStyles.button} onClick={handleCategoryClick}>Change Room</Button>
-        <Button variant="contained" style={themeStyles.button} onClick={toggleTheme}>
-            {isLightMode ? 'Dark Mode' : 'Light Mode'}
-        </Button>
+        <Button variant="contained" style={themeStyles.button} onClick={handleOpenCategoryMenu}>Change Room</Button>
+      
+        <Dialog open={inviteDialogOpen} onClose={() => setInviteDialogOpen(false)}>
+      <DialogTitle>Invite Friends</DialogTitle>
+      <DialogContent>
+        <FormControl fullWidth>
+          <InputLabel>Friends</InputLabel>
+          <Select
+            multiple
+            value={selectedFriends}
+            onChange={(event) => setSelectedFriends(event.target.value)}
+            renderValue={(selected) => selected.join(', ')}
+          >
+            {allUsers.map((user) => (
+              <MenuItem key={user} value={user}>
+                {user}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setInviteDialogOpen(false)}>Cancel</Button>
+        <Button onClick={sendInvitations}>Send Invites</Button>
+      </DialogActions>
+    </Dialog>
+      {/* Slide-up category menu */}
+      <Slide direction="up" in={showCategoryMenu} mountOnEnter unmountOnExit>
+        <Box sx={{ position: 'fixed', bottom: 0, width: '50%', zIndex: 1200}}>
+          <Typography variant="h6" sx={{ textAlign: 'center', padding: '10px 0' }}>
+            Select a Video Category
+          </Typography>
+          <Stack>
+            {Object.keys(videoCategories).map((category) => (
+              <Button key={category} onClick={() => handleSelectCategory(category)} sx={{ margin: '5px' }}>
+                {category}
+              </Button>
+            ))}
+          </Stack>
+        </Box>
+      </Slide>
+         {/* Light/Dark Toggle Button */}
+         <div>
+          <input type="checkbox" className="checkbox" id="checkbox" checked={!isLightMode} onChange={toggleTheme} />
+          <label htmlFor="checkbox" className="checkbox-label">
+            <i className="fas fa-moon"></i>
+            <i className="fas fa-sun"></i>
+            <span className="ball"></span>
+          </label>
+        </div>
+      
         <Menu
           id="simple-menu"
           anchorEl={anchorEl}
