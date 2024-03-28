@@ -19,17 +19,21 @@ export default function Pomodoro() {
   const [timer] = useState(create('10m'))
   const [time, setTime] = useState(timer.getFt())
   const [breakTime, setBreakTime] = useState(timer.getFt())
-  const [startTime, setStartTime] = useState(timer.getFt())  
+  const [startTime, setStartTime] = useState(timer.getFt())
+  const [lBreakTime, setLBreakTime] = useState(timer.getFt()) 
   const [study, setStudy] = useState("Study!")
   const [count, setCount] = useState(1)
+  let num = 0
   const handleSubmit = event => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const sTime = data.get('start-time');
-    const bTime = data.get('break-time');
+    const bTime = data.get('short-break-time');
+    const lBTime = data.get('long-break-time');
     timer.setStartTime(sTime);
     setTime(sTime);
     setBreakTime(bTime);
+    setLBreakTime(lBTime)
     setStartTime(sTime);
     setStudy("Study!")
     setCount(2)
@@ -44,20 +48,34 @@ export default function Pomodoro() {
        })
       .finish(() =>{
         console.log(count)
+        console.log(num)
         if(count % 2 === 0) {
           setTime(breakTime)
           setStudy("Break!")
+          num++
           timer.setStartTime(breakTime)
           setCount(1)
+        }
+        else if (count % 3 == 0) {
+          setTime(lBreakTime)
+          setStudy("Long Break!")
+          timer.setStartTime(lBreakTime)
+          setCount(1)
+          num = 0
         }
         else {
           setTime(startTime)
           setStudy("Study!")
           timer.setStartTime(startTime)
-          setCount(2)
+          if (num == 3) {
+            setCount(3)
+          }
+          else {
+            setCount(2)
+          }
         }
       })
- }, [breakTime, startTime, time])
+ }, [lBreakTime ,breakTime, startTime, time, num])
   return (
     <Container component="main" maxWidth="xs">
         <CssBaseline />

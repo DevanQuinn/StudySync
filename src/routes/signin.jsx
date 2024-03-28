@@ -17,7 +17,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
-  const handleSubmit = event => {
+  const handleSubmit = async event => {
       event.preventDefault();
       const data = new FormData(event.currentTarget);
       const email = data.get('email');
@@ -27,10 +27,9 @@ export default function SignIn() {
               // Signed in
               const user = userCredential.user;
               console.log(user);
+              window.location = "/";
           })
           .catch(error => {
-              const errorCode = error.code;
-              const errorMessage = error.message;
               alert(error.message);
           });
   };

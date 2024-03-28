@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile,} from 'firebase/auth';
-import { doc, setDoc, getFirestore, getDoc, DocumentSnapshot } from "firebase/firestore"
+import { doc, setDoc, getFirestore, getDoc} from "firebase/firestore"
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -11,6 +11,8 @@ import app from '../firebase';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
+import { v4 as uuid } from 'uuid';
+import { getStorage, ref as storageRef, uploadBytes } from 'firebase/storage';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Copyright from '../components/Copyright.jsx';
@@ -19,6 +21,14 @@ import { grey } from '@mui/material/colors';
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [newImage, setNewImage] = React.useState(null);
+  const [image, setImage] = useState();
+  const storage = getStorage(app);
+  const uploadImage = async imageUpload => {
+		const imageId = uuid();
+		const imageRef = storageRef(storage, `profile-pictures/${imageId}`);
+		await uploadBytes(imageRef, imageUpload);
+		return imageId;
+	};
   const handleSubmit = async event => {
       event.preventDefault();
       const data = new FormData(event.currentTarget);
@@ -40,9 +50,9 @@ export default function SignUp() {
             .then(async userCredential => {
                 // Signed in
                 const user = userCredential.user;
-                if(newImage != null) {
+                const imageID = image ? await uploadImage(image) : "default-avatar-icon-of-social-media-user-vector.jpg";
+                if(image != null) {
                   updateProfile(getAuth().currentUser, {
-                    photoURL: URL.createObjectURL(newImage),
                     displayName: username,
                   })
                 }
@@ -55,10 +65,12 @@ export default function SignUp() {
                 const db = getFirestore(app);
                 const docData = {
                   username: username,
-                  userID: user.uid
+                  userID: user.uid,
+                  pfpID: imageID,
+                  lower: username.toLowerCase()
                 }
                 await setDoc(doc(db, 'users', username), docData);
-                alert("Success! Please use the Go Back button to sign in.")
+                alert("Success!")
                 window.location = "/"
                 // ...
             })
@@ -147,14 +159,9 @@ export default function SignUp() {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setNewImage(e.target.files[0])}  
+                onChange={(e) => setImage(e.target.files[0])}  
               />
             </Typography>
-            {(() => {
-               if (newImage) {
-                  return <img src={URL.createObjectURL(newImage)} width={250} height={250} alt="profile" />;
-                }
-            })()}
             <Button
               type="submit"
               fullWidth
