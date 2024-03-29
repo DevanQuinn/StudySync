@@ -16,6 +16,8 @@ import AddFriend from './routes/AddFriend.jsx'; // Import your AddFriend compone
 
 import SpotifyPlaylists from './routes/SpotifyPlaylists.jsx';
 import Callback from './routes/Callback.jsx';
+
+import Chatbot from './routes/chatbot.jsx';
 import Pomodoro from './routes/pomodoro.jsx';
 
 import Firebase from './firebase.js';
@@ -40,7 +42,9 @@ const theme = createTheme({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 
+
 	<React.StrictMode>
+
 		<ThemeProvider theme={theme}>
 			<BrowserRouter>
 				<Routes>
@@ -153,6 +157,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 						}
 					/>
 					<Route
+						path='chatbot'
+						element={
+							<>
+								<Navbar />
+								<Chatbot />
+							</>
+						}
+					/>
+					<Route
 						path='posts'
 						element={
 							<>
@@ -176,5 +189,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>
-	</React.StrictMode>
 );

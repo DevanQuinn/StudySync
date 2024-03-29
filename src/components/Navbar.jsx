@@ -20,14 +20,15 @@ TODO LIST:
 const Navbar = () => {
 	const user = useUser();
 
-	const pages = [
-		{ title: 'Leaderboard', path: '/leaderboard' },
-		{ title: 'Dashboard', path: '/dashboard' },
-		{ title: 'Study Room', path: '/studyroom' },
-		{ title: 'Pomodoro', path: '/pomodoro' },
-		{ title: 'SpotifyPlaylists', path: '/SpotifyPlaylists' },
-		{ title: 'Flash Cards', path: '/flashcards' },
-    { title: 'AddFriend', path: '/AddFriend' }
+	const pages = [ 
+				{ title: 'Leaderboard', path: '/leaderboard'},
+				{ title: 'Dashboard', path: '/dashboard'},
+				{ title: 'Study Room', path: '/studyroom' },
+        		{ title: 'Pomodoro', path: '/pomodoro'},
+        {title: 'SpotifyPlaylists', path: '/SpotifyPlaylists'},
+        { title: 'Flash Cards', path: '/flashcards' },
+		{ title: 'Chat Bot', path: '/chatbot' },
+        { title: 'AddFriend', path: '/AddFriend' }
 	];
 	const [image, setImage] = useState();
 	const db = getFirestore(app);
