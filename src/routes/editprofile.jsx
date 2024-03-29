@@ -321,14 +321,14 @@ const EditProfile = () => {
                         control={<Switch checked={isPublicProfile} onChange={() => setIsPublicProfile(!isPublicProfile)} />}
                         label={isPublicProfile ? 'Public' : 'Private'}
                     /> */}
-                    <FormControlLabel
-                    control={<Switch checked={isPublicProfile} onChange={() => {
-                        const newVisibility = !isPublicProfile;
-                        console.log('New Profile Visibility:', newVisibility);
-                        setIsPublicProfile(newVisibility);
-                    }} />}
-                    label={isPublicProfile ? 'Public' : 'Private'}
-/>
+                    {/* <FormControlLabel
+                        control={<Switch checked={isPublicProfile} onChange={() => {
+                            const newVisibility = !isPublicProfile;
+                            console.log('New Profile Visibility:', newVisibility);
+                            setIsPublicProfile(newVisibility);
+                        }} />}
+                        label={isPublicProfile ? 'Public' : 'Private'}
+                    /> */}
                     <Button
                         type="submit"
                         fullWidth
