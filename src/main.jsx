@@ -41,10 +41,7 @@ const theme = createTheme({
 });
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-
-
 	<React.StrictMode>
-
 		<ThemeProvider theme={theme}>
 			<BrowserRouter>
 				<Routes>
@@ -185,8 +182,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					/>
 					<Route path='/room/:roomId' element={<RoomDetailsPage />} />{' '}
 					{/* No Navbar for /room */}
-          <Route path='/AddFriend' element={<><Navbar /><AddFriend /></>} /> {/* New route for AddFriend */}
+					<Route path='/AddFriend' element={<><Navbar /><AddFriend /></>} /> {/* New route for AddFriend */}
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>
+	</React.StrictMode>
 );
