@@ -26,6 +26,7 @@ const Navbar = () => {
         		{ title: 'Pomodoro', path: '/pomodoro'},
         {title: 'SpotifyPlaylists', path: '/SpotifyPlaylists'},
         { title: 'Flash Cards', path: '/flashcards' },
+		{ title: 'Chat Bot', path: '/chatbot' },
 	];
 	const [image, setImage] = useState();
 	const db = getFirestore(app);

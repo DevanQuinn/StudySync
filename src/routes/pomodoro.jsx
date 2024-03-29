@@ -20,7 +20,6 @@ export default function Pomodoro() {
   const [time, setTime] = useState(timer.getFt())
   const [breakTime, setBreakTime] = useState(timer.getFt())
   const [startTime, setStartTime] = useState(timer.getFt())
-  const [lBreakTime, setLBreakTime] = useState(timer.getFt()) 
   const [study, setStudy] = useState("Study!")
   const [count, setCount] = useState(1)
   let num = 0
@@ -29,11 +28,9 @@ export default function Pomodoro() {
     const data = new FormData(event.currentTarget);
     const sTime = data.get('start-time');
     const bTime = data.get('short-break-time');
-    const lBTime = data.get('long-break-time');
     timer.setStartTime(sTime);
     setTime(sTime);
     setBreakTime(bTime);
-    setLBreakTime(lBTime)
     setStartTime(sTime);
     setStudy("Study!")
     setCount(2)
@@ -56,26 +53,14 @@ export default function Pomodoro() {
           timer.setStartTime(breakTime)
           setCount(1)
         }
-        else if (count % 3 == 0) {
-          setTime(lBreakTime)
-          setStudy("Long Break!")
-          timer.setStartTime(lBreakTime)
-          setCount(1)
-          num = 0
-        }
         else {
           setTime(startTime)
           setStudy("Study!")
           timer.setStartTime(startTime)
-          if (num == 3) {
-            setCount(3)
-          }
-          else {
-            setCount(2)
-          }
+          setCount(2)
         }
       })
- }, [lBreakTime ,breakTime, startTime, time, num])
+ }, [breakTime, startTime, time])
   return (
     <Container component="main" maxWidth="xs">
         <CssBaseline />
@@ -124,15 +109,6 @@ export default function Pomodoro() {
         label="Short Break Time"
         type="text"
         id="short-break-time"
-        placeholder='10:00'
-        color='primary'
-      />
-        <TextField
-        margin='normal'
-        name='long-break-time'
-        label="Long Break Time"
-        type="text"
-        id="long-break-time"
         placeholder='10:00'
         color='primary'
       />
