@@ -8,6 +8,7 @@ import {
 	CssBaseline,
 	CircularProgress,
 	IconButton,
+	MenuItem
 } from '@mui/material';
 import {
 	query,
@@ -36,15 +37,20 @@ const Flashcards = () => {
 	const [flashcardList, setFlashcardList] = React.useState([]);
 	const [newQuestion, setNewQuestion] = React.useState('');
 	const [newAnswer, setNewAnswer] = React.useState('');
-	const [newImage, setNewImage] = React.useState('');
+	const [newImage, setNewImage] = React.useState(null);
 	const [newAudio, setNewAudio] = React.useState(null);
 	const [loading, setLoading] = React.useState(true);
+	const [isUserCards, setIsUserCards] = React.useState(true);
 	const [currentIndex, setCurrentIndex] = React.useState(0);
 	const [studyStartTime, setStudyStartTime] = React.useState(null);
 	const [displayDuration, setDisplayDuration] = React.useState(false);
 	const [studyDuration, setStudyDuration] = React.useState(0);
 	// flag to make a card count as studied when it has been flipped
 	const [cardStudied, setCardStudied] = React.useState(false);
+	// track flashcard sets that have been shared with the user
+	const [shareEmail, setShareEmail] = React.useState('');
+	const [sharedOptions, setSharedOptions] = React.useState([]);
+	const [selectedOption, setSelectedOption] = React.useState('');
 	const user = useUser(true);
 	const db = getFirestore(app);
 	const storage = getStorage();
@@ -52,12 +58,42 @@ const Flashcards = () => {
 	const progress = ((currentIndex + 1) / flashcardList.length) * 100;
 
 	const col = user
-		? collection(db, `flashcards/${user?.uid}/flashcards`)
+		? collection(db, `flashcards/${user?.email}/card-data`)
+		: null;
+
+	const sharedCol = user
+		? collection(db, `flashcards/${user?.email}/shared`)
 		: null;
 
 	const userStatsCol = user
-		? collection(db, `userStats/${user?.uid}/studyStats`)
+		? collection(db, `userStats/${user?.uid}/timeStudied`)
 		: null;
+
+	useEffect(() => {
+		fetchCards('My Flashcards');
+		fetchSharedList();
+	}, [user]);
+
+	const fetchSharedList = async () => {
+		if (!sharedCol) return;
+
+		try {
+			const snapshot = await getDocs(sharedCol);
+			const sharedList = ['My Flashcards'];
+			snapshot.forEach(doc => {
+				const data = doc.data();
+				sharedList.push(data.email);
+			});
+			sharedList
+			setSharedOptions(sharedList);
+			if (sharedList.length > 0) {
+				setSelectedOption(sharedList[0]);
+			}
+		} catch (error) {
+			console.error('Error fetching shared options:', error);
+		}
+	};
+
 
 	const uploadUserStats = async (startTime, endTime, durationMs, duration, numCardsStudied) => {
 		if (!userStatsCol) return;
@@ -73,10 +109,15 @@ const Flashcards = () => {
 		}
 	};
 
-	const fetchCards = async () => {
+	const fetchCards = async (email) => {
 		if (!col) return;
+
+		var c = collection(db, `flashcards/${email}/card-data`);
+		if (email === 'My Flashcards') {
+			c = col;
+		}
 		//sorting flashcards by time created at (i.e. appending new card to end of the collection)
-		const q = query(col, orderBy('createdAt'));
+		const q = query(c, orderBy('createdAt'));
 		const snapshot = await getDocs(q);
 		const queriedFlashcards = [];
 		snapshot.forEach(card => {
@@ -88,9 +129,38 @@ const Flashcards = () => {
 		setLoading(false);
 	};
 
-	useEffect(() => {
-		fetchCards();
-	}, [user]);
+	const handleChangedCards = async event => {
+		setSelectedOption(event.target.value);
+		console.log('selected options:', event.target.value);
+		fetchCards(event.target.value);
+	};
+
+	const doShareCards = async () => {
+		if (!sharedCol) return;
+
+		if (sharedOptions.includes(shareEmail)) {
+			setShareEmail('');
+			alert('User already has access to these flashcards');
+			return;
+		}
+
+		const shareData = { email: user.email }
+
+		console.log('shareData uploading:', shareData)
+
+		const addShareCol = user
+			? collection(db, `flashcards/${shareEmail}/shared`)
+			: null;
+
+		try {
+			await addDoc(addShareCol, shareData);
+		} catch (error) {
+			console.error('Error sharing flashcards:', error);
+		}
+
+		fetchSharedList();
+		setShareEmail('');
+	};
 
 	const uploadCard = async flashcard => {
 		//adding created at field to flashcard
@@ -98,7 +168,7 @@ const Flashcards = () => {
 			...flashcard,
 			createdAt: new Date(),
 		});
-		fetchCards();
+		fetchCards('My Flashcards');
 	};
 
 	const uploadImage = async imageToUpload => {
@@ -142,7 +212,7 @@ const Flashcards = () => {
 
 		setNewQuestion('');
 		setNewAnswer('');
-		setNewImage('');
+		setNewImage(null);
 		setNewAudio(null);
 
 		document.getElementById('questionImageSelector').value = null;
@@ -152,7 +222,7 @@ const Flashcards = () => {
 	const deleteFlashcard = id => {
 		// delete the document from Firestore
 		deleteDoc(doc(db, `flashcards/${user?.uid}/flashcards`, id)).then(() => {
-			fetchCards();
+			fetchCards('My Flashcards');
 			// if we reach the end of the list
 			if (currentIndex === flashcardList.length - 1) {
 				// we loop back to the beginning
@@ -206,6 +276,32 @@ const Flashcards = () => {
 		setCardStudied(value);
 	};
 
+	const handleSetNewImage = (event) => {
+		const file = event.target.files[0];
+		const limit = 1000000;
+
+		if (file && file.size > limit) {
+			alert('Selected file is exceeds limit! (1MB)');
+			document.getElementById('questionImageSelector').value = null;
+			return;
+		}
+
+		setNewImage(file)
+	};
+
+	const handleSetNewAudio = (event) => {
+		const file = event.target.files[0];
+		const limit = 1000000;
+
+		if (file && file.size > limit) {
+			alert('Selected file is exceeds limit! (1MB)');
+			document.getElementById('questionAudioSelector').value = null;
+			return;
+		}
+
+		setNewAudio(file)
+	};
+
 	return (
 		<Container component='main' maxWidth='xs' sx={{ mt: 10 }}>
 			<CssBaseline />
@@ -245,8 +341,10 @@ const Flashcards = () => {
 					</Box>
 				) : flashcardList.length === 0 ? (
 					// handling case with 0 cards
-					<Typography variant='h6' align='center' sx={{ mt: 4 }}>
-						No flashcards available. Add one to get started!
+					<Typography variant='h6' align='center' sx={{ mt: 4, mb: 5 }}>
+						No flashcards available.
+						<br />
+						Add one to get started!
 					</Typography>
 				) : (
 					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}>
@@ -258,6 +356,7 @@ const Flashcards = () => {
 									data={card}
 									deleteFlashcard={deleteFlashcard}
 									cardStudied={updateCardStudied}
+									isUserCards={isUserCards}
 								/>
 							</Box>
 						))}
@@ -297,6 +396,19 @@ const Flashcards = () => {
 					</Box>
 				)}
 
+				<TextField sx={{ mb: 6, mt: -1 }}
+					select
+					label="Load shared flashcards"
+					value={selectedOption}
+					onChange={handleChangedCards}
+					fullWidth
+					margin='normal'
+				>
+					{sharedOptions.map(option => (
+						<MenuItem key={option} value={option}>{option}</MenuItem>
+					))}
+				</TextField>
+
 				<Typography component='h1' variant='h5' align='center'>
 					Create Flashcards
 				</Typography>
@@ -304,11 +416,13 @@ const Flashcards = () => {
 				<Box component='form' onSubmit={addFlashcard}  >
 					<TextField
 						label='Question'
+						multiline
+						rows={4}
 						value={newQuestion}
 						onChange={e => setNewQuestion(e.target.value)}
 						fullWidth
 						margin='normal'
-						inputProps={{ maxLength: 50 }}
+						inputProps={{ maxLength: 300 }}
 					/>
 
 					<TextField
@@ -319,7 +433,7 @@ const Flashcards = () => {
 						onChange={e => setNewAnswer(e.target.value)}
 						fullWidth
 						margin='normal'
-						inputProps={{ maxLength: 200 }}
+						inputProps={{ maxLength: 300 }}
 					/>
 
 					<label>
@@ -329,7 +443,7 @@ const Flashcards = () => {
 							id='questionImageSelector'
 							type='file'
 							accept='image/*'
-							onChange={e => setNewImage(e.target.files[0])}
+							onChange={handleSetNewImage}
 						/>
 					</label>
 
@@ -342,7 +456,7 @@ const Flashcards = () => {
 							id='questionAudioSelector'
 							type='file'
 							accept='audio/*'
-							onChange={e => setNewAudio(e.target.files[0])}
+							onChange={handleSetNewAudio}
 						/>
 					</label>
 
@@ -350,6 +464,20 @@ const Flashcards = () => {
 						Add Flashcard
 					</Button>
 				</Box>
+
+				<TextField
+					label='Email address'
+					value={shareEmail}
+					onChange={e => setShareEmail(e.target.value)}
+					fullWidth
+					margin='normal'
+					inputProps={{ maxLength: 100 }}
+				/>
+
+				<Button variant='contained' onClick={doShareCards} sx={{ mt: 2, mb: 5 }}>
+					Share flashcards with user
+				</Button>
+
 			</Box>
 		</Container>
 	);
