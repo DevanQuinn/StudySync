@@ -37,8 +37,10 @@ const Flashcards = () => {
 	const [flashcardList, setFlashcardList] = React.useState([]);
 	const [newQuestion, setNewQuestion] = React.useState('');
 	const [newAnswer, setNewAnswer] = React.useState('');
-	const [newImage, setNewImage] = React.useState(null);
-	const [newAudio, setNewAudio] = React.useState(null);
+	const [newQuestionImage, setQuestionNewImage] = React.useState(null);
+	const [newQuestionAudio, setQuestionNewAudio] = React.useState(null);
+	const [newAnswerImage, setNewAnswerImage] = React.useState(null);
+	const [newAnswerAudio, setNewAnswerAudio] = React.useState(null);
 	const [loading, setLoading] = React.useState(true);
 	const [isUserCards, setIsUserCards] = React.useState(true);
 	const [currentIndex, setCurrentIndex] = React.useState(0);
@@ -226,32 +228,46 @@ const Flashcards = () => {
 		/* avoids page reload when card submitted */
 		event.preventDefault();
 
-		var imagePath = 'unset';
-		if (newImage != null) {
-			imagePath = await uploadImage(newImage);
+		var questionImagePath = 'unset';
+		if (newQuestionImage != null) {
+			questionImagePath = await uploadImage(newQuestionImage);
+		}
+		var questionAudioPath = 'unset';
+		if (newQuestionAudio != null) {
+			questionAudioPath = await uploadAudio(newQuestionAudio);
 		}
 
-		var audioPath = 'unset';
-		if (newAudio != null) {
-			audioPath = await uploadAudio(newAudio);
+		var answerImagePath = 'unset';
+		if (newAnswerImage != null) {
+			answerImagePath = await uploadImage(newAnswerImage);
+		}
+		var answerAudioPath = 'unset';
+		if (newAnswerAudio != null) {
+			answerAudioPath = await uploadAudio(newAnswerAudio);
 		}
 
 		const newFlashcard = {
 			question: newQuestion,
 			answer: newAnswer,
-			image: imagePath,
-			audio: audioPath,
+			questionImage: questionImagePath,
+			questionAudio: questionAudioPath,
+			answerImage: answerImagePath,
+			answerAudio: answerAudioPath
 		};
 
 		uploadCard(newFlashcard);
 
 		setNewQuestion('');
 		setNewAnswer('');
-		setNewImage(null);
-		setNewAudio(null);
+		setQuestionNewImage(null);
+		setQuestionNewAudio(null);
+		setNewAnswerImage(null);
+		setNewAnswerAudio(null);
 
 		document.getElementById('questionImageSelector').value = null;
 		document.getElementById('questionAudioSelector').value = null;
+		document.getElementById('answerImageSelector').value = null;
+		document.getElementById('answerAudioSelector').value = null;
 	};
 
 	const deleteFlashcard = id => {
@@ -312,7 +328,7 @@ const Flashcards = () => {
 		setCardStudied(value);
 	};
 
-	const handleSetNewImage = (event) => {
+	const handleQuestionSetNewImage = (event) => {
 		const file = event.target.files[0];
 		const limit = 1000000;
 
@@ -322,10 +338,10 @@ const Flashcards = () => {
 			return;
 		}
 
-		setNewImage(file)
+		setQuestionNewImage(file)
 	};
 
-	const handleSetNewAudio = (event) => {
+	const handleQuestionSetNewAudio = (event) => {
 		const file = event.target.files[0];
 		const limit = 1000000;
 
@@ -335,11 +351,37 @@ const Flashcards = () => {
 			return;
 		}
 
-		setNewAudio(file)
+		setQuestionNewAudio(file)
+	};
+
+	const handleAnswerSetNewImage = (event) => {
+		const file = event.target.files[0];
+		const limit = 1000000;
+
+		if (file && file.size > limit) {
+			alert('Selected file is exceeds limit! (1MB)');
+			document.getElementById('answerImageSelector').value = null;
+			return;
+		}
+
+		setNewAnswerImage(file)
+	};
+
+	const handleAnswerSetNewAudio = (event) => {
+		const file = event.target.files[0];
+		const limit = 1000000;
+
+		if (file && file.size > limit) {
+			alert('Selected file is exceeds limit! (1MB)');
+			document.getElementById('answerAudioSelector').value = null;
+			return;
+		}
+
+		setNewAnswerAudio(file)
 	};
 
 	return (
-		<Container component='main' maxWidth='xs' sx={{ mt: 10 }}>
+		<Container component='main' maxWidth='sm' sx={{ mt: 10 }}>
 			<CssBaseline />
 			<Box sx={{ maxWidth: 600 }}>
 				<Typography component='h1' variant='h5' align='center'>
@@ -461,6 +503,32 @@ const Flashcards = () => {
 						inputProps={{ maxLength: 200 }}
 					/>
 
+					<label>
+						{/* added spacing */}
+						Attach question image:&nbsp;
+						<input
+							id='questionImageSelector'
+							type='file'
+							accept='image/*'
+							onChange={handleQuestionSetNewImage}
+						/>
+					</label>
+
+					<br />
+
+					<label>
+						{/* added spacing */}
+						Attach question audio:&nbsp;
+						<input
+							id='questionAudioSelector'
+							type='file'
+							accept='audio/*'
+							onChange={handleQuestionSetNewAudio}
+						/>
+					</label>
+
+					<br />
+
 					<TextField
 						label='Answer'
 						multiline
@@ -474,12 +542,12 @@ const Flashcards = () => {
 
 					<label>
 						{/* added spacing */}
-						Attach Image:&nbsp;
+						Attach answer image:&nbsp;
 						<input
-							id='questionImageSelector'
+							id='answerImageSelector'
 							type='file'
 							accept='image/*'
-							onChange={handleSetNewImage}
+							onChange={handleAnswerSetNewImage}
 						/>
 					</label>
 
@@ -487,14 +555,16 @@ const Flashcards = () => {
 
 					<label>
 						{/* added spacing */}
-						Attach Audio:&nbsp;
+						Attach answer audio:&nbsp;
 						<input
-							id='questionAudioSelector'
+							id='answerAudioSelector'
 							type='file'
 							accept='audio/*'
-							onChange={handleSetNewAudio}
+							onChange={handleAnswerSetNewAudio}
 						/>
 					</label>
+
+					<br />
 
 					<Button type='submit' variant='contained' sx={{ mt: 2, mb: 4 }}>
 						Add Flashcard

@@ -6,8 +6,10 @@ import ReactPlayer from 'react-player';
 const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 	const [flipped, setFlipped] = useState(false);
 	const [flipText, setFlipText] = useState('Reveal Answer');
-	const [imageBlob, setImageBlob] = useState(null);
-	const [audioBlob, setAudioBlob] = useState(null);
+	const [questionImageBlob, setQuestionImageBlob] = useState(null);
+	const [questionAudioBlob, setQuestionAudioBlob] = useState(null);
+	const [answerImageBlob, setAnswerImageBlob] = useState(null);
+	const [answerAudioBlob, setAnswerAudioBlob] = useState(null);
 
 	const toggleFlip = () => {
 		setFlipped(!flipped);
@@ -22,35 +24,66 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 
 	useEffect(() => {
 		// loading the image's StorageReference from the flashcard
-		const loadImageBlob = async () => {
-			if (data.image && data.image != 'unset') {
+		const loadQuestionImageBlob = async () => {
+			if (data.questionImage && data.questionImage != 'unset') {
 				const storage = getStorage();
-				const pathReference = ref(storage, data.image);
+				const pathReference = ref(storage, data.questionImage);
 				try {
 					// getting the binary data from the StorageReference path
 					const blob = await getBlob(pathReference);
-					setImageBlob(blob);
+					setQuestionImageBlob(blob);
 				} catch (error) {
-					console.error('Error loading image blob:', error);
+					console.error('Error loading questionImage blob:', error);
 				}
 			}
 		};
 
 		// loading the audio's StorageReference from the flashcard
-		const loadAudioBlob = async () => {
-			if (data.audio && data.audio !== 'unset') {
+		const loadQuestionAudioBlob = async () => {
+			if (data.questionAudio && data.questionAudio !== 'unset') {
 				const storage = getStorage();
-				const pathReference = ref(storage, data.audio);
+				const pathReference = ref(storage, data.questionAudio);
 				try {
 					const blob = await getBlob(pathReference);
-					setAudioBlob(blob);
+					setQuestionAudioBlob(blob);
 				} catch (error) {
-					console.error('Error loading audio blob:', error);
+					console.error('Error loading questionAudio blob:', error);
 				}
 			}
 		};
-		loadImageBlob();
-		loadAudioBlob();
+
+		const loadAnswerImageBlob = async () => {
+			if (data.answerImage && data.answerImage != 'unset') {
+				const storage = getStorage();
+				const pathReference = ref(storage, data.answerImage);
+				try {
+					// getting the binary data from the StorageReference path
+					const blob = await getBlob(pathReference);
+					setAnswerImageBlob(blob);
+				} catch (error) {
+					console.error('Error loading answerImage blob:', error);
+				}
+			}
+		};
+
+		// loading the audio's StorageReference from the flashcard
+		const loadAnswerAudioBlob = async () => {
+			if (data.answerAudio && data.answerAudio !== 'unset') {
+				const storage = getStorage();
+				const pathReference = ref(storage, data.answerAudio);
+				try {
+					const blob = await getBlob(pathReference);
+					setAnswerAudioBlob(blob);
+				} catch (error) {
+					console.error('Error loading answerAudio blob:', error);
+				}
+			}
+		};
+
+		loadQuestionImageBlob();
+		loadQuestionAudioBlob();
+		loadAnswerImageBlob();
+		loadAnswerAudioBlob();
 	}, [data.image, data.audio]);
 
 
@@ -76,26 +109,51 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 			{flipped ? (
 				<>
 					<Typography variant='h6'>{data.answer}</Typography>
-				</>
-			) : (
-				<>
-					<Typography variant='h6'>{data.question}</Typography>
 					{(() => {
-						if (imageBlob) {
+						if (answerImageBlob) {
 							return (
 								<img
-									src={URL.createObjectURL(imageBlob)}
+									src={URL.createObjectURL(answerImageBlob)}
 									style={{ maxWidth: '50%', maxHeight: '50%', height: 'auto', width: 'auto' }}
 								/>
 							);
 						}
 					})()}
 					{(() => {
-						if (audioBlob) {
+						if (answerAudioBlob) {
 							return (
 								<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
 									<ReactPlayer
-										url={URL.createObjectURL(audioBlob)}
+										url={URL.createObjectURL(answerAudioBlob)}
+										type='audio/mpeg'
+										controls
+										width="320px"
+										height="30px"
+									/>
+								</Box>
+							);
+						}
+					})()}
+				</>
+			) : (
+				<>
+					<Typography variant='h6'>{data.question}</Typography>
+					{(() => {
+						if (questionImageBlob) {
+							return (
+								<img
+									src={URL.createObjectURL(questionImageBlob)}
+									style={{ maxWidth: '50%', maxHeight: '50%', height: 'auto', width: 'auto' }}
+								/>
+							);
+						}
+					})()}
+					{(() => {
+						if (questionAudioBlob) {
+							return (
+								<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+									<ReactPlayer
+										url={URL.createObjectURL(questionAudioBlob)}
 										type='audio/mpeg'
 										controls
 										width="320px"
