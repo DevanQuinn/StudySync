@@ -159,11 +159,11 @@ const EditProfile = () => {
             studyGoals: studyGoals,
             profilePicture: imagePath
         }
-        
+
         await uploadProfileData(newData);
         setProfileData(newData);
 
-        console.log('New data:', newData);
+        alert('Profile updated successfully!');
     };
 
     return (
@@ -259,20 +259,14 @@ const EditProfile = () => {
                                 Select Image
                             </Button>
                         </label>
-                        {imageUrl && (
-                            <div style={{ flex: '1', marginLeft: '1rem', display: 'flex', alignItems: 'center' }}>
-                                <div style={{ width: '200px', height: '200px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <img src={imageUrl} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                                </div>
-                            </div>
-                        )}
-                        {!imageUrl && imageBlob && (
-                            <div style={{ flex: '1', marginLeft: '1rem', display: 'flex', alignItems: 'center' }}>
-                                <div style={{ width: '200px', height: '200px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <img src={URL.createObjectURL(imageBlob)} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                                </div>
-                            </div>
-                        )}
+                        <div style={{ flex: '1', marginLeft: '1rem', display: 'flex', width: '200px', height: '200px', border: '1px solid black', justifyContent: 'center', alignItems: 'center' }}>
+                            {imageUrl && (
+                                <img src={imageUrl} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', justifyContent: 'center', alignItems: 'center' }} />
+                            )}
+                            {!imageUrl && imageBlob && (
+                                <img src={URL.createObjectURL(imageBlob)} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', justifyContent: 'center', alignItems: 'center' }} />
+                            )}
+                        </div>
                     </div>
 
                     <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
