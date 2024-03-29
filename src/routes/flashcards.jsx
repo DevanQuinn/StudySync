@@ -19,8 +19,13 @@ import {
 	deleteDoc,
 	orderBy
 } from 'firebase/firestore';
+
+//import { db } from '../firebase';
+const db = getFirestore(firebaseApp);
+
 import app from '../firebase';
 import { getStorage, ref, uploadBytes } from 'firebase/storage';
+
 import FlashCard from '../components/FlashCard';
 import useUser from '../hooks/useUser';
 import { v4 as uuid } from 'uuid';
