@@ -141,6 +141,7 @@ const Flashcards = () => {
 		} else {
 			setIsUserCards(false);
 		}
+		setCurrentIndex(0);
 		fetchCards(event.target.value);
 	};
 
