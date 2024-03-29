@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import CreatePost from '../components/CreatePost';
+import CreatePost from '../components/posts/CreatePost';
 import {
 	Accordion,
 	AccordionSummary,
@@ -21,10 +21,10 @@ import {
 } from 'firebase/firestore';
 import app from '../firebase';
 import useUser from '../hooks/useUser';
-import Post from '../components/Post';
-import TagSearch from '../components/TagSearch';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material';
 import moment from 'moment';
+import Post from '../components/posts/Post';
+import TagSearch from '../components/posts/TagSearch';
 
 const Posts = () => {
 	const [posts, setPosts] = useState([]);

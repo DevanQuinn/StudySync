@@ -19,14 +19,15 @@ export default function Pomodoro() {
   const [timer] = useState(create('10m'))
   const [time, setTime] = useState(timer.getFt())
   const [breakTime, setBreakTime] = useState(timer.getFt())
-  const [startTime, setStartTime] = useState(timer.getFt())  
+  const [startTime, setStartTime] = useState(timer.getFt())
   const [study, setStudy] = useState("Study!")
   const [count, setCount] = useState(1)
+  let num = 0
   const handleSubmit = event => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const sTime = data.get('start-time');
-    const bTime = data.get('break-time');
+    const bTime = data.get('short-break-time');
     timer.setStartTime(sTime);
     setTime(sTime);
     setBreakTime(bTime);
@@ -44,9 +45,11 @@ export default function Pomodoro() {
        })
       .finish(() =>{
         console.log(count)
+        console.log(num)
         if(count % 2 === 0) {
           setTime(breakTime)
           setStudy("Break!")
+          num++
           timer.setStartTime(breakTime)
           setCount(1)
         }
@@ -102,10 +105,10 @@ export default function Pomodoro() {
       />
        <TextField
         margin='normal'
-        name='break-time'
-        label="Break Time"
+        name='short-break-time'
+        label="Short Break Time"
         type="text"
-        id="break-time"
+        id="short-break-time"
         placeholder='10:00'
         color='primary'
       />

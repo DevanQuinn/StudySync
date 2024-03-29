@@ -27,13 +27,14 @@ const TagSearch = () => {
 
 	const handleSubmit = e => {
 		e.preventDefault();
-		setTags([...tags, ...input.split(' ')]);
+		const trimmedInput = input.trim();
+		if (!trimmedInput.length || trimmedInput == ' ') return;
+		setTags([...tags, ...trimmedInput.split(' ')]);
 		setInput('');
 	};
 
 	const deleteTag = index => {
-		const newTags = tags.filter((tag, idx) => idx != index);
-		setTags(newTags);
+		setTags(tags => tags.filter((tag, idx) => idx != index));
 	};
 
 	const updatePosts = async () => {

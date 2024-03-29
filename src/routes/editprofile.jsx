@@ -28,6 +28,24 @@ const EditProfile = () => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageUrl, setImageUrl] = useState(null);
     const favoritesOptions = ['Leaderboard', 'Study Room', 'Timer', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards'];
+    const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
+
+    // Load profile visibility setting from localStorage on component mount
+    useEffect(() => {
+        const storedVisibility = localStorage.getItem('isPublicProfile');
+        if (storedVisibility !== null) {
+            setIsPublicProfile(JSON.parse(storedVisibility));
+        }
+    }, []);
+
+    // Save profile visibility setting to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('isPublicProfile', JSON.stringify(isPublicProfile));
+    }, [isPublicProfile]);
+    const uploadPublicProfileData = async profile => {
+		await addDoc(col, profile);
+		//fetchProfileData();
+	};
 
     const fetchProfileData = async () => {
         if (docRef && !fetchProfileDataCalled.current) {
@@ -118,6 +136,13 @@ const EditProfile = () => {
         } catch (err) {
             alert(`Failed to update password.\n${err}`);
         }
+        uploadPublicProfileData(newData);
+        console.log({
+            favorites: selectedFavorites,
+            studyGoals: data.get('studyGoals'),
+            profilePicture: data.get('profilePicture'),
+            isPublicProfile: isPublicProfile, // Include the value of isPublicProfile in the form data
+        });
     };
 
     const uploadImage = async imageToUpload => {
@@ -289,6 +314,21 @@ const EditProfile = () => {
                             </Grid>
                         ))}
                     </Grid>
+                    <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
+                        Profile Visibility
+                    </Typography>
+                    {/* <FormControlLabel
+                        control={<Switch checked={isPublicProfile} onChange={() => setIsPublicProfile(!isPublicProfile)} />}
+                        label={isPublicProfile ? 'Public' : 'Private'}
+                    /> */}
+                    <FormControlLabel
+                    control={<Switch checked={isPublicProfile} onChange={() => {
+                        const newVisibility = !isPublicProfile;
+                        console.log('New Profile Visibility:', newVisibility);
+                        setIsPublicProfile(newVisibility);
+                    }} />}
+                    label={isPublicProfile ? 'Public' : 'Private'}
+/>
                     <Button
                         type="submit"
                         fullWidth
