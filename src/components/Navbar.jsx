@@ -74,7 +74,11 @@ const Navbar = () => {
 					sx={{mr : 2}}
 				/>
 				<Typography sx={{ mr: 2 }} color='textPrimary'>
-					<Link to='/signin'>{user ? user.displayName : 'Sign In'}</Link>
+					{user ? (
+						<Link to={'/posts'}>{user.displayName}</Link>
+					) : (
+						<Link to={'/signin'}>Sign In</Link>
+					)}
 				</Typography>
 				<Typography sx={{ mr: 2 }} color='textPrimary'>
 					<Link to='/editprofile'>Edit Profile</Link>
