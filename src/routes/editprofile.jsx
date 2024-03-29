@@ -1,41 +1,107 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link, TextField, Typography } from '@mui/material';
 import useUser from '../hooks/useUser';
 import {
-	query,
-	getFirestore,
-	collection,
-	getDocs,
-	doc,
-	addDoc,
-	deleteDoc,
+    getFirestore,
+    getDoc,
+    doc,
+    setDoc,
 } from 'firebase/firestore';
+import { getAuth, reauthenticateWithCredential, updatePassword, EmailAuthProvider } from 'firebase/auth';
+import { getStorage, getBlob, ref, uploadBytes } from 'firebase/storage';
 import app from '../firebase';
+import { v4 as uuid } from 'uuid';
 
 const EditProfile = () => {
+    const auth = getAuth(app);
     const user = useUser(true);
     const db = getFirestore(app);
-    const col = user
-		? collection(db, `profile-data/${user?.uid}/data`)
-		: null;
+    const docRef = user ? doc(db, `profile-data`, user.uid) : null;
 
+    const fetchProfileDataCalled = useRef(false);
+    const storage = getStorage();
+    const [userEmail, setUserEmail] = useState('');
+    const [imageBlob, setImageBlob] = useState(null);
+    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', profilePicture: 'unset' });
     const [studyGoals, setStudyGoals] = useState('');
     const [selectedFavorites, setSelectedFavorites] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [imageUrl, setImageUrl] = useState(null);
     const favoritesOptions = ['Leaderboard', 'Study Room', 'Timer', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards'];
+    const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
 
-    const uploadProfileData = async profile => {
+    // Load profile visibility setting from localStorage on component mount
+    useEffect(() => {
+        const storedVisibility = localStorage.getItem('isPublicProfile');
+        if (storedVisibility !== null) {
+            setIsPublicProfile(JSON.parse(storedVisibility));
+        }
+    }, []);
+
+    // Save profile visibility setting to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('isPublicProfile', JSON.stringify(isPublicProfile));
+    }, [isPublicProfile]);
+    const uploadPublicProfileData = async profile => {
 		await addDoc(col, profile);
 		//fetchProfileData();
 	};
 
     const fetchProfileData = async () => {
-		if (!col) return;
-		const q = query(col);
-		const snapshot = await getDocs(q);
-        const data = snapshot.docs[0].data;
-        console.log('fetched data',data);
-	};
+        if (docRef && !fetchProfileDataCalled.current) {
+            fetchProfileDataCalled.current = true;
+            console.log('docRef:', docRef);
+            const docSnapshot = await getDoc(docRef);
+            if (docSnapshot.exists()) {
+                const docData = docSnapshot.data();
+                setProfileData(docData);
+                console.log('fetched data:', docData);
+            }
+        }
+    };
+
+    useEffect(() => {
+        fetchProfileData();
+    }, [docRef]);
+
+    useEffect(() => {
+        if (user) {
+            setUserEmail(user.email);
+        }
+    }, [user]);
+
+
+    useEffect(() => {
+        setStudyGoals(profileData.studyGoals);
+        setSelectedFavorites(profileData.favorites);
+
+        const loadImageBlob = async () => {
+            if (profileData.profilePicture && profileData.profilePicture != 'unset') {
+                const storage = getStorage();
+                const pathReference = ref(storage, profileData.profilePicture);
+                try {
+                    // getting the binary data from the StorageReference path
+                    const blob = await getBlob(pathReference);
+                    setImageBlob(blob);
+                } catch (error) {
+                    console.error('Error loading image blob:', error);
+                }
+            }
+        };
+
+        loadImageBlob();
+    }, [profileData]);
+
+    useEffect(() => {
+
+    }, [imageBlob]);
+
+    const uploadProfileData = async profile => {
+        if (user) {
+            const docRef = doc(db, `profile-data/`, `${user.uid}`);
+            await setDoc(docRef, profile);
+        }
+    };
 
     const handleCheckboxChange = (event) => {
         const { value } = event.target;
@@ -46,35 +112,83 @@ const EditProfile = () => {
         }
     };
 
-    const handleSubmit = (event) => {
+    const handleChangePassword = async (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
 
-        var newData = {
-            favorites: selectedFavorites,
-            studyGoals: data.get('studyGoals'),
-            profilePicture: data.get('profilePicture'),
+        const oldPassword = data.get('oldPassword');
+        const newPassword = data.get('newPassword');
+        const confirmNewPassword = data.get('confirmNewPassword');
+
+        if (newPassword !== confirmNewPassword) {
+            alert('New passwords do not match!');
+            return;
         }
-        uploadProfileData(newData);
+
+        try {
+            const user = auth.currentUser;
+
+            // confirm the user's current password before allowing them to change
+            const credential = EmailAuthProvider.credential(user.email, oldPassword);
+            await reauthenticateWithCredential(user, credential);
+            await updatePassword(user, newPassword);
+            alert('Password updated successfully!');
+        } catch (err) {
+            alert(`Failed to update password.\n${err}`);
+        }
+        uploadPublicProfileData(newData);
         console.log({
             favorites: selectedFavorites,
             studyGoals: data.get('studyGoals'),
             profilePicture: data.get('profilePicture'),
+            isPublicProfile: isPublicProfile, // Include the value of isPublicProfile in the form data
         });
     };
 
-    const handleChangePassword = (event) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-            newPassword: data.get('newPassword'),
-            confirmNewPassword: data.get('confirmNewPassword'),
-        });
+    const uploadImage = async imageToUpload => {
+        const imageId = uuid();
+        const storageRef = ref(storage, `profile-images/${imageId}`);
+        await uploadBytes(storageRef, imageToUpload);
+
+        return storageRef.fullPath;
     };
 
     const handleImageChange = (event) => {
         const file = event.target.files[0];
-        setSelectedImage(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setSelectedImage(file);
+            setImageUrl(reader.result);
+        };
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleStudyGoalsChange = (event) => {
+        setStudyGoals(event.target.value);
+    }
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        var imagePath = 'unset';
+        if (selectedImage != null) {
+            imagePath = await uploadImage(selectedImage);
+        } else {
+            imagePath = profileData.profilePicture;
+        }
+
+        var newData = {
+            favorites: selectedFavorites,
+            studyGoals: studyGoals,
+            profilePicture: imagePath
+        }
+
+        await uploadProfileData(newData);
+        setProfileData(newData);
+
+        alert('Profile updated successfully!');
     };
 
     return (
@@ -95,6 +209,15 @@ const EditProfile = () => {
                     Change Password
                 </Typography>
                 <form onSubmit={handleChangePassword} noValidate sx={{ mt: 1 }}>
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        name='oldPassword'
+                        label="Old Password"
+                        type="password"
+                        id="oldPassword"
+                        placeholder='Old Password'
+                    />
                     <TextField
                         margin="normal"
                         fullWidth
@@ -134,10 +257,12 @@ const EditProfile = () => {
                         name='studyGoals'
                         label="Study Goals"
                         id="studyGoals"
-                        placeholder='Edit your study goals'
+                        placeholder={studyGoals ? '' : 'Edit your study goals'}
+                        value={studyGoals}
+                        onChange={handleStudyGoalsChange}
                     />
                     <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
-                    Change Profile Picture
+                        Change Profile Picture
                     </Typography>
                     <input
                         accept="image/*"
@@ -146,42 +271,64 @@ const EditProfile = () => {
                         type="file"
                         onChange={handleImageChange}
                     />
-                    <label htmlFor="profilePicture">
-                        <Button
-                            variant="contained"
-                            component="span"
-                            fullWidth
-                            color="primary"
-                            sx={{ mt: 3 }}
-                        >
-                            Select Image
-                        </Button>
-                    </label>
-                    {selectedImage && (
-                        <Typography variant="body2" sx={{ mt: 1 }}>
-                            {selectedImage.name}
-                        </Typography>
-                    )}
+
+                    <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center' }}>
+                        <label htmlFor="profilePicture">
+                            <Button
+                                variant="contained"
+                                component="span"
+                                fullWidth
+                                color="primary"
+                                sx={{ width: '100%' }}
+                            >
+                                Select Image
+                            </Button>
+                        </label>
+                        <div style={{ flex: '1', marginLeft: '1rem', display: 'flex', width: '200px', height: '200px', border: '1px solid black', justifyContent: 'center', alignItems: 'center' }}>
+                            {imageUrl && (
+                                <img src={imageUrl} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', justifyContent: 'center', alignItems: 'center' }} />
+                            )}
+                            {!imageUrl && imageBlob && (
+                                <img src={URL.createObjectURL(imageBlob)} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', justifyContent: 'center', alignItems: 'center' }} />
+                            )}
+                        </div>
+                    </div>
+
                     <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
-                    Edit Favorites
+                        Edit Favorites
                     </Typography>
                     <Grid container spacing={1}>
-                    {favoritesOptions.map((option, index) => (
-                        <Grid item xs={6} key={index} style={{ display: 'flex', alignItems: 'flex-start' }}>
-                            <FormControlLabel
-                                key={index}
-                                control={
-                                    <Checkbox
-                                        value={option}
-                                        onChange={handleCheckboxChange}
-                                        checked={selectedFavorites.includes(option)}
-                                    />
-                                }
-                                label={option}
-                            />
-                        </Grid>
-                    ))}
+                        {favoritesOptions.map((option, index) => (
+                            <Grid item xs={6} key={index} style={{ display: 'flex', alignItems: 'flex-start' }}>
+                                <FormControlLabel
+                                    key={index}
+                                    control={
+                                        <Checkbox
+                                            value={option}
+                                            onChange={handleCheckboxChange}
+                                            checked={selectedFavorites.includes(option)}
+                                        />
+                                    }
+                                    label={option}
+                                />
+                            </Grid>
+                        ))}
                     </Grid>
+                    <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
+                        Profile Visibility
+                    </Typography>
+                    {/* <FormControlLabel
+                        control={<Switch checked={isPublicProfile} onChange={() => setIsPublicProfile(!isPublicProfile)} />}
+                        label={isPublicProfile ? 'Public' : 'Private'}
+                    /> */}
+                    {/* <FormControlLabel
+                        control={<Switch checked={isPublicProfile} onChange={() => {
+                            const newVisibility = !isPublicProfile;
+                            console.log('New Profile Visibility:', newVisibility);
+                            setIsPublicProfile(newVisibility);
+                        }} />}
+                        label={isPublicProfile ? 'Public' : 'Private'}
+                    /> */}
                     <Button
                         type="submit"
                         fullWidth
