@@ -2,16 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { getBlob, getStorage, ref } from "firebase/storage";
 
-const FlashCard = ({ data, deleteFlashcard, cardStudied}) => {
+const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
+	const [flipped, setFlipped] = useState(false);
+	const [flipText, setFlipText] = useState('Reveal Answer');
+	const [imageBlob, setImageBlob] = useState(null);
+	const [audioBlob, setAudioBlob] = useState(null);
 
 	const toggleFlip = () => {
 		setFlipped(!flipped);
+		if (flipped) {
+			setFlipText('Reveal Answer');
+		} else {
+			setFlipText('Show Question');
+		}
+
 		cardStudied(true);
 	}
-	
-	const [flipped, setFlipped] = React.useState(false);
-	const [imageBlob, setImageBlob] = useState(null);
-	const [audioBlob, setAudioBlob] = useState(null);
 
 	useEffect(() => {
 		// loading the image's StorageReference from the flashcard
@@ -49,7 +55,7 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied}) => {
 
 	return (
 		<Box
-			onClick={toggleFlip}
+			//onClick={toggleFlip}
 			border={1}
 			borderColor='grey'
 			borderRadius={2}
@@ -58,16 +64,16 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied}) => {
 			flexDirection='column'
 			alignItems='center'
 			alignSelf='center'
+			justifyContent='space-between'
 			sx={{
 				width: '100%',
 				height: '300px',
 				overflow: 'auto',
-			  }}
+			}}
 		>
 			{flipped ? (
 				<>
 					<Typography variant='h6'>{data.answer}</Typography>
-					<Button onClick={toggleFlip}>Show Question</Button>
 				</>
 			) : (
 				<>
@@ -77,7 +83,7 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied}) => {
 							return (
 								<img
 									src={URL.createObjectURL(imageBlob)}
-									style={{ maxWidth: '60%', maxHeight: '60%', height: 'auto', width: 'auto'}}
+									style={{ maxWidth: '60%', maxHeight: '60%', height: 'auto', width: 'auto' }}
 								/>
 							);
 						}
@@ -95,15 +101,30 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied}) => {
 							);
 						}
 					})()}
-
-					<Button onClick={toggleFlip}>Reveal Answer</Button>
 				</>
 			)}
-			{ /* stopping delete click from flipping the card before deleting itself */}
-			<Button onClick={(event) => {
-				event.stopPropagation();
-				deleteFlashcard(data.id);
-			}}>Delete</Button>
+
+			<div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+				<Button
+					onClick={toggleFlip}
+					sx={{ mb: -1, ml: -1, border: 1 }}
+					style={{ alignSelf: 'flex-start' }} // Anchor to bottom-left
+				>
+					{flipText}
+				</Button>
+				{isUserCards && (
+					<Button
+						sx={{ mb: -1, mr: -1, border: 1 }}
+						onClick={(event) => {
+							event.stopPropagation(); //stops clicking delete from flipping the card before deleting
+							deleteFlashcard(data.id);
+						}}
+						style={{ alignSelf: 'flex-end' }} // Anchor to bottom-right
+					>
+						Delete
+					</Button>
+				)}
+			</div>
 		</Box>
 	);
 };

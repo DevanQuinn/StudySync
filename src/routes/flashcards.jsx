@@ -70,6 +70,7 @@ const Flashcards = () => {
 		: null;
 
 	useEffect(() => {
+		setIsUserCards(true);
 		fetchCards('My Flashcards');
 		fetchSharedList();
 	}, [user]);
@@ -112,8 +113,10 @@ const Flashcards = () => {
 	const fetchCards = async (email) => {
 		if (!col) return;
 
+		setIsUserCards(false);
 		var c = collection(db, `flashcards/${email}/card-data`);
 		if (email === 'My Flashcards') {
+			setIsUserCards(true);
 			c = col;
 		}
 		//sorting flashcards by time created at (i.e. appending new card to end of the collection)
@@ -132,6 +135,11 @@ const Flashcards = () => {
 	const handleChangedCards = async event => {
 		setSelectedOption(event.target.value);
 		console.log('selected options:', event.target.value);
+		if (event.target.value == 'My Flashcards') {
+			setIsUserCards(true);
+		} else {
+			setIsUserCards(false);
+		}
 		fetchCards(event.target.value);
 	};
 
@@ -168,6 +176,7 @@ const Flashcards = () => {
 			...flashcard,
 			createdAt: new Date(),
 		});
+		setIsUserCards(true);
 		fetchCards('My Flashcards');
 	};
 
@@ -222,6 +231,7 @@ const Flashcards = () => {
 	const deleteFlashcard = id => {
 		// delete the document from Firestore
 		deleteDoc(doc(db, `flashcards/${user?.uid}/flashcards`, id)).then(() => {
+			setIsUserCards(false);
 			fetchCards('My Flashcards');
 			// if we reach the end of the list
 			if (currentIndex === flashcardList.length - 1) {
@@ -315,8 +325,8 @@ const Flashcards = () => {
 						variant='contained'
 						color='primary'
 						onClick={startStudySession}
-						//disable if study session in progress (not  null)
-						disabled={!!studyStartTime}
+						//disable if study session in progress (not null)
+						disabled={studyStartTime}
 					>
 						Start Study Session
 					</Button>
@@ -398,7 +408,7 @@ const Flashcards = () => {
 
 				<TextField sx={{ mb: 6, mt: -1 }}
 					select
-					label="Load shared flashcards"
+					label="Load flashcard sets"
 					value={selectedOption}
 					onChange={handleChangedCards}
 					fullWidth
