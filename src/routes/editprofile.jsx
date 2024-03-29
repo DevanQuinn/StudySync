@@ -22,8 +22,21 @@ const EditProfile = () => {
     const [studyGoals, setStudyGoals] = useState('');
     const [selectedFavorites, setSelectedFavorites] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
     const favoritesOptions = ['Leaderboard', 'Study Room', 'Timer', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards'];
 
+    // Load profile visibility setting from localStorage on component mount
+    useEffect(() => {
+        const storedVisibility = localStorage.getItem('isPublicProfile');
+        if (storedVisibility !== null) {
+            setIsPublicProfile(JSON.parse(storedVisibility));
+        }
+    }, []);
+
+    // Save profile visibility setting to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('isPublicProfile', JSON.stringify(isPublicProfile));
+    }, [isPublicProfile]);
     const uploadProfileData = async profile => {
 		await addDoc(col, profile);
 		//fetchProfileData();
@@ -60,6 +73,7 @@ const EditProfile = () => {
             favorites: selectedFavorites,
             studyGoals: data.get('studyGoals'),
             profilePicture: data.get('profilePicture'),
+            isPublicProfile: isPublicProfile, // Include the value of isPublicProfile in the form data
         });
     };
 
@@ -137,7 +151,7 @@ const EditProfile = () => {
                         placeholder='Edit your study goals'
                     />
                     <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
-                    Change Profile Picture
+                        Change Profile Picture
                     </Typography>
                     <input
                         accept="image/*"
@@ -163,25 +177,40 @@ const EditProfile = () => {
                         </Typography>
                     )}
                     <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
-                    Edit Favorites
+                        Edit Favorites
                     </Typography>
                     <Grid container spacing={1}>
-                    {favoritesOptions.map((option, index) => (
-                        <Grid item xs={6} key={index} style={{ display: 'flex', alignItems: 'flex-start' }}>
-                            <FormControlLabel
-                                key={index}
-                                control={
-                                    <Checkbox
-                                        value={option}
-                                        onChange={handleCheckboxChange}
-                                        checked={selectedFavorites.includes(option)}
-                                    />
-                                }
-                                label={option}
-                            />
-                        </Grid>
-                    ))}
+                        {favoritesOptions.map((option, index) => (
+                            <Grid item xs={6} key={index} style={{ display: 'flex', alignItems: 'flex-start' }}>
+                                <FormControlLabel
+                                    key={index}
+                                    control={
+                                        <Checkbox
+                                            value={option}
+                                            onChange={handleCheckboxChange}
+                                            checked={selectedFavorites.includes(option)}
+                                        />
+                                    }
+                                    label={option}
+                                />
+                            </Grid>
+                        ))}
                     </Grid>
+                    <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
+                        Profile Visibility
+                    </Typography>
+                    {/* <FormControlLabel
+                        control={<Switch checked={isPublicProfile} onChange={() => setIsPublicProfile(!isPublicProfile)} />}
+                        label={isPublicProfile ? 'Public' : 'Private'}
+                    /> */}
+                    <FormControlLabel
+                    control={<Switch checked={isPublicProfile} onChange={() => {
+                        const newVisibility = !isPublicProfile;
+                        console.log('New Profile Visibility:', newVisibility);
+                        setIsPublicProfile(newVisibility);
+                    }} />}
+                    label={isPublicProfile ? 'Public' : 'Private'}
+/>
                     <Button
                         type="submit"
                         fullWidth

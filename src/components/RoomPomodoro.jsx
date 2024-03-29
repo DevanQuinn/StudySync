@@ -2,6 +2,7 @@ import * as React from 'react';
 import { create } from 'timrjs';
 import { useState, useEffect } from 'react';
 import { Stack, Button, TextField, Typography, Box, Container, CssBaseline } from '@mui/material';
+import Draggable from 'react-draggable';
 
 export default function RoomPomodoro() {
   const [timer] = useState(create('10m'));
@@ -45,6 +46,7 @@ export default function RoomPomodoro() {
   }, [timer, count, breakTime, startTime]);
 
   return (
+  <Draggable>
     <Container component="main" maxWidth="xs" sx={{ padding: 1 }}>
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, backdropFilter: 'blur(10px)', backgroundColor: 'rgba(255, 255, 255, 0.75)',
@@ -91,5 +93,6 @@ export default function RoomPomodoro() {
         </form>
       </Box>
     </Container>
+    </Draggable>
   );
 }

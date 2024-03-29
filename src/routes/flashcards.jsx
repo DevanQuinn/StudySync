@@ -324,7 +324,7 @@ const Flashcards = () => {
 						/>
 					</label>
 
-					<Button type='submit' variant='contained' sx={{ mt: 2, mb: 4}}>
+					<Button type='submit' variant='contained' sx={{ mt: 2, mb: 4 }}>
 						Add Flashcard
 					</Button>
 				</Box>
