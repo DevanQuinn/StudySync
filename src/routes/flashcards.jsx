@@ -62,12 +62,14 @@ const Flashcards = () => {
 	const uploadUserStats = async (startTime, endTime, durationMs, duration, numCardsStudied) => {
 		if (!userStatsCol) return;
 
-		const statsData = { startTime, endTime, durationMs, duration, numCardsStudied };
+		if (numCardsStudied > 0) {
+			const statsData = { startTime, endTime, durationMs, duration, numCardsStudied };
 
-		try {
-			await addDoc(userStatsCol, statsData);
-		} catch (error) {
-			console.error('Error uploading user statistics:', error);
+			try {
+				await addDoc(userStatsCol, statsData);
+			} catch (error) {
+				console.error('Error uploading user statistics:', error);
+			}
 		}
 	};
 
@@ -344,7 +346,7 @@ const Flashcards = () => {
 						/>
 					</label>
 
-					<Button type='submit' variant='contained' sx={{ mt: 2, mb: 4}}>
+					<Button type='submit' variant='contained' sx={{ mt: 2, mb: 4 }}>
 						Add Flashcard
 					</Button>
 				</Box>
