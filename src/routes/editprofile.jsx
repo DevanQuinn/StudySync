@@ -192,7 +192,7 @@ const EditProfile = () => {
     };
 
     return (
-        <Container component="main" maxWidth="xs">
+        <Container component="main" maxWidth="xs" sx={{ mt: 10 }}>
             <CssBaseline />
             <div
                 sx={{
@@ -202,19 +202,13 @@ const EditProfile = () => {
                     alignItems: 'center',
                 }}
             >
-                <Typography component="h1" variant="h5">
+                <Typography component="h1" variant="h5" sx={{ mt: 5 }}>
                     Edit Profile
                 </Typography>
-                <form onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-                    <TextField
-                        margin="normal"
-                        fullWidth
-                        name='favorites'
-                        label="Favorites"
-                        id="favorites"
-                        autoFocus
-                        placeholder='Edit your favorites'
-                    />
+                <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
+                    Change Password
+                </Typography>
+                <form onSubmit={handleChangePassword} noValidate sx={{ mt: 1 }}>
                     <TextField
                         margin="normal"
                         fullWidth
@@ -242,9 +236,24 @@ const EditProfile = () => {
                         id="confirmNewPassword"
                         placeholder='Confirm New Password'
                     />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                    >
+                        Set new password
+                    </Button>
+                </form>
+                <form onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                    <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
+                        Set Study Goals
+                    </Typography>
                     <TextField
                         margin="normal"
                         fullWidth
+                        multiline
+                        rows={4}
                         name='studyGoals'
                         label="Study Goals"
                         id="studyGoals"
@@ -252,17 +261,17 @@ const EditProfile = () => {
                         value={studyGoals}
                         onChange={handleStudyGoalsChange}
                     />
-
                     <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
                         Change Profile Picture
                     </Typography>
                     <input
                         accept="image/*"
                         style={{ display: 'none' }}
-
                         id="profilePicture"
-                        placeholder='Enter URL for profile picture'
+                        type="file"
+                        onChange={handleImageChange}
                     />
+
                     <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center' }}>
                         <label htmlFor="profilePicture">
                             <Button
@@ -331,7 +340,7 @@ const EditProfile = () => {
                 </form>
                 <Grid container>
                     <Grid item xs>
-                        <Link href="/" variant="body2">
+                        <Link href="/" variant="body2" paddingBottom="10pt">
                             Go Back
                         </Link>
                     </Grid>
