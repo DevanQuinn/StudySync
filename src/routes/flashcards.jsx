@@ -85,7 +85,7 @@ const Flashcards = () => {
 				const data = doc.data();
 				sharedList.push(data.email);
 			});
-			sharedList
+
 			setSharedOptions(sharedList);
 			if (sharedList.length > 0) {
 				setSelectedOption(sharedList[0]);
@@ -94,7 +94,6 @@ const Flashcards = () => {
 			console.error('Error fetching shared options:', error);
 		}
 	};
-
 
 	const uploadUserStats = async (startTime, endTime, durationMs, duration, numCardsStudied) => {
 		if (!userStatsCol) return;
@@ -143,10 +142,37 @@ const Flashcards = () => {
 		fetchCards(event.target.value);
 	};
 
+	async function getEmailSharedList(email) {
+		const emailCol = user
+			? collection(db, `flashcards/${email}/shared`)
+			: null;
+
+		if (!emailCol) return;
+
+		try {
+			const snapshot = await getDocs(emailCol);
+			const sharedList = [];
+			snapshot.forEach(doc => {
+				const data = doc.data();
+				sharedList.push(data.email);
+			});
+
+			if (sharedList.length == 0) {
+				return false;
+			}
+			if (sharedList.includes(user.email)) {
+				return true;
+			}
+		} catch (error) {
+			console.error('Error fetching shared emails:', error);
+		}
+		return false;
+	};
+
 	const doShareCards = async () => {
 		if (!sharedCol) return;
 
-		if (sharedOptions.includes(shareEmail)) {
+		if (await getEmailSharedList(shareEmail)) {
 			setShareEmail('');
 			alert('User already has access to these flashcards');
 			return;
@@ -201,7 +227,7 @@ const Flashcards = () => {
 		event.preventDefault();
 
 		var imagePath = 'unset';
-		if (newImage != '') {
+		if (newImage != null) {
 			imagePath = await uploadImage(newImage);
 		}
 
@@ -230,7 +256,7 @@ const Flashcards = () => {
 
 	const deleteFlashcard = id => {
 		// delete the document from Firestore
-		deleteDoc(doc(db, `flashcards/${user?.uid}/flashcards`, id)).then(() => {
+		deleteDoc(doc(db, `flashcards/${user?.email}/card-data`, id)).then(() => {
 			setIsUserCards(false);
 			fetchCards('My Flashcards');
 			// if we reach the end of the list
@@ -432,7 +458,7 @@ const Flashcards = () => {
 						onChange={e => setNewQuestion(e.target.value)}
 						fullWidth
 						margin='normal'
-						inputProps={{ maxLength: 300 }}
+						inputProps={{ maxLength: 200 }}
 					/>
 
 					<TextField
@@ -443,7 +469,7 @@ const Flashcards = () => {
 						onChange={e => setNewAnswer(e.target.value)}
 						fullWidth
 						margin='normal'
-						inputProps={{ maxLength: 300 }}
+						inputProps={{ maxLength: 200 }}
 					/>
 
 					<label>

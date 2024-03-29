@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { getBlob, getStorage, ref } from "firebase/storage";
+import ReactPlayer from 'react-player';
 
 const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 	const [flipped, setFlipped] = useState(false);
@@ -67,6 +68,7 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 			justifyContent='space-between'
 			sx={{
 				width: '100%',
+				//minHeight: '300px',
 				height: '300px',
 				overflow: 'auto',
 			}}
@@ -83,7 +85,7 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 							return (
 								<img
 									src={URL.createObjectURL(imageBlob)}
-									style={{ maxWidth: '60%', maxHeight: '60%', height: 'auto', width: 'auto' }}
+									style={{ maxWidth: '50%', maxHeight: '50%', height: 'auto', width: 'auto' }}
 								/>
 							);
 						}
@@ -91,13 +93,15 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 					{(() => {
 						if (audioBlob) {
 							return (
-								<audio controls>
-									<source
-										src={URL.createObjectURL(audioBlob)}
+								<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+									<ReactPlayer
+										url={URL.createObjectURL(audioBlob)}
 										type='audio/mpeg'
+										controls
+										width="320px"
+										height="30px"
 									/>
-									Your browser does not support the audio element.
-								</audio>
+								</Box>
 							);
 						}
 					})()}
@@ -108,7 +112,7 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 				<Button
 					onClick={toggleFlip}
 					sx={{ mb: -1, ml: -1, border: 1 }}
-					style={{ alignSelf: 'flex-start' }} // Anchor to bottom-left
+					style={{ alignSelf: 'flex-start' }}
 				>
 					{flipText}
 				</Button>
@@ -119,7 +123,7 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 							event.stopPropagation(); //stops clicking delete from flipping the card before deleting
 							deleteFlashcard(data.id);
 						}}
-						style={{ alignSelf: 'flex-end' }} // Anchor to bottom-right
+						style={{ alignSelf: 'flex-end' }}
 					>
 						Delete
 					</Button>
