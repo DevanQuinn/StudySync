@@ -16,7 +16,7 @@ import {
 	deleteDoc,
 } from 'firebase/firestore';
 import app from '../firebase.js';
-import useUser from '../hooks/useUser';
+import useUser from '../hooks/useUser.jsx';
 import '../components/tasklistlist.css';
 /*
 TODO LIST:
@@ -24,7 +24,7 @@ TODO LIST:
 	* debug the above procedure
 */
 
-function Dashboard() {
+function TasklistsPage() {
 	const [showPomodoro, setShowPomodoro] = useState(false);
 	const togglePomodoro = () => setShowPomodoro(!showPomodoro);
 	const defaultPreferences = {color:"#FFFFFF"};
@@ -65,4 +65,4 @@ function Dashboard() {
 	)
 }
 
-export default Dashboard;
+export default TasklistsPage;
