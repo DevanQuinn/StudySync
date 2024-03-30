@@ -3,6 +3,7 @@ import { create } from 'timrjs';
 import { useState, useEffect } from 'react';
 import { Stack, Button, TextField, Typography, Box, Container, CssBaseline } from '@mui/material';
 import Draggable from 'react-draggable';
+import TimerBar from './TimerBar.jsx';
 
 export default function RoomPomodoro() {
   const [timer] = useState(create('10m'));
@@ -11,6 +12,7 @@ export default function RoomPomodoro() {
   const [startTime, setStartTime] = useState('25m'); // Default study time
   const [study, setStudy] = useState("Study!");
   const [count, setCount] = useState(1);
+  const [percentDone, setPercentDone] = useState(0);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -26,8 +28,9 @@ export default function RoomPomodoro() {
   };
 
   useEffect(() => {
-    timer.ticker(({ formattedTime }) => {
+    timer.ticker(({ formattedTime, percentDone }) => {
       setTime(formattedTime);
+      setPercentDone(percentDone);
     }).finish(() => {
       if (count % 2 === 0) {
         setTime(breakTime);
@@ -90,6 +93,7 @@ export default function RoomPomodoro() {
           <Button fullWidth variant="contained" sx={{ mt: 1, mb: 2, fontSize: '0.75rem', padding: '6px 12px' }} type="submit">
             Set
           </Button>
+          <TimerBar percentDone={percentDone} studyState={study}/>
         </form>
       </Box>
     </Container>

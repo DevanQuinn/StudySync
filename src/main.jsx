@@ -4,6 +4,8 @@ import App from './App.jsx';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
 import './index.css';
+import Posts from './routes/posts.jsx';
+import UserPosts from './routes/userposts.jsx';
 import Navbar from './components/Navbar.jsx';
 import Tasklists from './routes/tasklistPage.jsx';
 import Leaderboard from './routes/leaderboard.jsx';
