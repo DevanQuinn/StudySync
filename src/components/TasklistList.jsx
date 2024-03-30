@@ -34,8 +34,6 @@ function TasklistList() {
 	const user = useUser(false);
 
 	useEffect(() => {
-		console.log('props updated. rerendering dashboard.');
-		console.log(tasks);
 	}, [JSON.stringify(tasks)]);
 
 	useEffect(() => {
@@ -58,14 +56,10 @@ function TasklistList() {
 	};
 
 	const deleteByIndex = id => {
-		console.log(tasklistsList);
-		console.log('deleting index ' + id);
 		const newTasklistsList = tasklistsList.filter(tasklist => {
 			if (tasklist.id != id) {
-				console.log('tasklist passed. ID: ' + tasklist.id);
 				return true;
 			}
-			console.log('tasklist failed. ID: ' + tasklist.id);
 			return false;
 		});
 		console.log(newTasklistsList);
@@ -105,9 +99,6 @@ function TasklistList() {
 	const SaveState = () => {
 		if (user) {
 			setDoc(doc(db, 'users', user.uid), {}, { merge: true }).then(() => {
-				//first ensure the user's information is in the database
-				//Clear what data the database currently has
-				console.log('attempting to clear database of user tasks');
 				const tasklistsRef = collection(db, 'users', user.uid, 'tasklists');
 				const tasklistsQuery = query(tasklistsRef);
 				getDocs(tasklistsQuery)

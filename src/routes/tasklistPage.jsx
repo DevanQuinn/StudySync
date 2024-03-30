@@ -10,6 +10,7 @@ import {
 	getFirestore,
 	collection,
 	getDocs,
+	getDoc,
 	setDoc,
 	doc,
 	addDoc,
@@ -33,12 +34,30 @@ function TasklistsPage() {
 	const db = getFirestore(app)
 	const user = useUser(false);
 
+	const savePreferences = () => {
+		if (user) {
+			const docRef = doc(db, 'users', user.uid);
+			console.log("saving user prefs");
+			console.log(preferences);
+			setDoc(docRef, {preferences:preferences}, {merge:true});
+		}
+	}
+
 	const updatePreferences = prefObj => {
+		savePreferences(prefObj);
 		setPreferences(prefObj);
 	};
 
+
 	useEffect(() => {
-		//load user preferences into local state
+		if (user) {
+			const docRef = doc(db, 'users', user.uid);
+			setDoc(docRef, {}, {merge:true}).then(() => {
+				getDoc(docRef).then((doc) => {
+					setPreferences({color:doc.data().preferences.color});
+				})
+			})
+		}
 	}, [user])
 
 	useEffect(() => {
@@ -47,8 +66,6 @@ function TasklistsPage() {
 			document.body.style.backgroundColor = "#FFFFFF";
 		}
 	}, [preferences]);
-
-
 
 	return (
 		<div>
