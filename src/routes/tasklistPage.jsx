@@ -69,7 +69,11 @@ function TasklistsPage() {
 
 	return (
 		<div>
-			<Fab color="primary" aria-label="add" onClick={togglePomodoro} sx={{top: 450, left: 675 }}>
+			<Fab color="primary" aria-label="add" onClick={togglePomodoro} style={{
+				position: "fixed",
+				bottom: 10,
+				right: 10
+				}}>
 				<AddIcon />
 			</Fab>
 			<Slide direction="up" in={showPomodoro} mountOnEnter unmountOnExit>

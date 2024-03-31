@@ -1,5 +1,5 @@
 import Tasklist from '../components/Tasklist.jsx';
-import Button from '../components/Button.jsx';
+import Button from '@mui/material/Button';
 import React, { useState, useEffect } from 'react';
 import { Task } from '@mui/icons-material';
 import { nanoid } from 'nanoid';
@@ -80,7 +80,7 @@ function TasklistList() {
 		let newTasksArray = tasks[tasklistID];
 		newTasksArray = newTasksArray.filter(task => {
 			if (task.taskID == taskID) {
-				task.completed = true;
+				task.completed = !(task.completed);
 			}
 			return true;
 		});
