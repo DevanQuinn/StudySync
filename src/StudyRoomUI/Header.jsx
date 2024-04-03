@@ -12,8 +12,18 @@ import FormHelperText from '@mui/material/FormHelperText';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, doc, getDoc} from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, doc, getDoc, serverTimestamp, updateDoc, setDoc, deleteDoc} from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
+
+
+/*
+TODO
+- The room gets correctly deleted from the database
+when they exit the room
+- The invitation gets deleted when a user declines
+- The invitiation gets deleted from the db when a user accepts
+- Multiple invitations work.
+*/
 
 const Header = () => {
   const [open, setOpen] = useState(false);
@@ -67,12 +77,51 @@ const Header = () => {
     }
   }, [invitations]);
 
-  const handleAcceptInvitation = () => {
+  /*
+  const handleAcceptInvitation = async () => {
     if (currentInvitation && currentInvitation.roomId) {
-      navigate(`/room/${currentInvitation.roomId}`);
+      const roomId = currentInvitation.roomId;
+      // Navigate to the room
+      navigate(`/room/${currentInvitation.roomId}`, { state: { videoCategory: currentInvitation.videoCategory } });
+      // Call a function to add the current user to the room's subcollection 'roomUsers'
+    
+      await addUserToRoom(currentInvitation.creator_id, currentInvitation.roomId, auth.currentUser.displayName);
+      // Here, you might also want to handle the deletion of the accepted invitation from the 'invitations' collection
+      // TODO
       setInvitationDialogOpen(false); // Close the dialog upon accepting
     }
   };
+  */
+  const handleAcceptInvitation = async (invitation) => {
+    if (invitation && invitation.roomId && auth.currentUser) {
+      const roomId = invitation.roomId;
+      const userDisplayName = auth.currentUser.displayName;
+      const uid = currentInvitation.inviterUid;
+      const collectionName = `${uid}_studyrooms`;
+    
+      try {
+        // Add the current user to the room's subcollection 'roomUsers'
+        await addUserToRoom(collectionName, roomId, userDisplayName);
+  
+        // Optionally delete the accepted invitation from the 'invitations' collection
+        // This requires you to know the document ID of the invitation
+        const invitationRef = doc(db, "invitations", currentInvitation.id);
+        await deleteDoc(invitationRef);
+  
+        // Navigate to the room
+        navigate(`/room/${roomId}`, { state: { inviterUid: invitation.inviterUid, videoCategory: invitation.videoCategory } });
+
+        
+        setInvitationDialogOpen(false); // Close the dialog upon accepting
+      } catch (error) {
+        console.error("Error handling the invitation:", error);
+        // Handle errors, such as displaying a message to the user
+      }
+    }
+  };
+  
+
+
   const handleCloseInvitationDialog = () => {
     setInvitationDialogOpen(false);
   };
@@ -100,21 +149,21 @@ const Header = () => {
   }, [auth.currentUser]);
   
   
-  
-  // Handler to navigate to the room based on invitation
-const handleJoinRoom = async (roomId) => {
-  const roomRef = doc(db, `${roomId}_studyrooms`, roomId); // Adjust the path according to your database structure
-  const docSnap = await getDoc(roomRef);
 
-  if (docSnap.exists()) {
-    // If the room exists, navigate to the room
-    navigate(`/room/${roomId}`);
-  } else {
-    // If the room does not exist, show an error message
-    // This could be a state-based message shown in the UI, an alert, or a custom modal/dialog
-    alert("The creator of the room has left, and the room no longer exists.");
+const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
+  // Correct path to target a document within the roomUsers subcollection
+  const userRef = doc(db, `${collectionName}/${roomId}/roomUsers/${userDisplayName}`);
+
+  try {
+    await setDoc(userRef, {
+      joinTime: serverTimestamp(),
+    });
+    console.log(`Successfully added ${userDisplayName} to room ${roomId}`);
+  } catch (error) {
+    console.error(userRef)
   }
 };
+
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -125,10 +174,13 @@ const handleJoinRoom = async (roomId) => {
     if (user) {
       const collectionName = `${user.uid}_studyrooms`;
       const studyRoomData = {
+        creator_id: user.displayName,
         videoCategory,
-        videoUrl: null, // Assume you define this somewhere
+        videoUrl: null, 
       };
-  
+
+    
+      //try to add the invitiations to the invitations in the database
       try {
         const docRef = await addDoc(collection(db, collectionName), studyRoomData);
         // Send invitations using displayName
@@ -137,8 +189,16 @@ const handleJoinRoom = async (roomId) => {
             invitedUserDisplayName: friendDisplayName, // Assuming this matches exactly with users' displayNames
             roomId: docRef.id,
             inviterUserId: user.displayName, // Correctly using 'user' here
+            videoUrl: null, //include the video url from the original room
+            inviterUid: user.uid,
           });
         });
+
+
+        // also add the user to the room.
+        addUserToRoom(collectionName, docRef.id, user.displayName);
+        
+        //navigate to the new room after all the data has been added to the firebase
         navigate(`/room/${docRef.id}`, { state: { ...studyRoomData } });
       } catch (error) {
         console.error("Error adding document: ", error);
@@ -161,6 +221,8 @@ const handleJoinRoom = async (roomId) => {
       typeof value === 'string' ? value.split(',') : value,
     );
   };
+
+  
   
 
   // Customized button styles
@@ -185,7 +247,7 @@ const handleJoinRoom = async (roomId) => {
         </button>
 
         {invitations.map(invitation => (
-        <div key={invitation.id} onClick={() => handleJoinRoom(invitation.roomId)}>
+        <div key={invitation.id} onClick={() => handleAcceptInvitation(invitation)}>
           You've been invited by {invitation.inviterUserId} to join a study room.
         </div>
         ))}
@@ -246,8 +308,9 @@ const handleJoinRoom = async (roomId) => {
 </DialogContent>
 <DialogActions>
   <Button onClick={handleCloseInvitationDialog}>Decline</Button>
-  <Button onClick={handleAcceptInvitation} color="primary">Join Room</Button>
+  <Button onClick={() => handleAcceptInvitation(currentInvitation)} color="primary">Join Room</Button>
 </DialogActions>
+
 </Dialog>
 
     </header>

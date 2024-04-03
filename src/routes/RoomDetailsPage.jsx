@@ -8,7 +8,47 @@ import Draggable from 'react-draggable';
 import { doc, getDoc, getFirestore, deleteDoc, updateDoc, setDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth'; // Make sure to import getAuth
+import { useLocation } from 'react-router-dom';
 
+ // Your web app's Firebase configuration
+ const firebaseConfig = {
+  apiKey: 'AIzaSyAOLFu9q6gvdcDoOJ0oPuQKPgDyOye_2uM',
+  authDomain: 'studysync-3fbd7.firebaseapp.com',
+  projectId: 'studysync-3fbd7',
+  storageBucket: 'studysync-3fbd7.appspot.com',
+  messagingSenderId: '885216959280',
+  appId: '1:885216959280:web:917a7216776b36e904c6f5',
+  measurementId: 'G-TS13EWHRMB',
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+/*
+TODO
+
+- Update the chat in the correct collection
+- Think about making an author for each chat so that 
+the current authors chats are in blue and everyone elses is in grey
+- Make sure that the chat is updated in the db and read from so updated synchronously
+- Update the profile and hours with profile pictures when users enter the room
+- Make sure the users that join and are not the creatorID do not have access to the change room, and
+the invite friends.
+- The creator can change the video and the video url gets updated in the db, so each
+user will be reading for it consistently, or get a notification if its changed, idk
+- Toggle voice for everyone?
+- When the person exits the room, there time studied gets added to Nilisha's statistics for the leadorboard
+
+
+- When a user that is not the creator leaves the room, it removes them from the study room.
+- TODO Nilisha takes current time - join time and adds that to their study time.
+
+Update the room for the new video... and once all the users and time stamps are added
+add it to the profile side bar, 
+once all that is done do the toggle and the chat
+*/
 
 // Categories and their associated video URLs
 const videoCategories = {
@@ -40,26 +80,13 @@ const videoCategories = {
 
 
 
+
 const Chat = ({theme, roomId}) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [activeDrags, setActiveDrags] = useState(0);
   
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: 'AIzaSyAOLFu9q6gvdcDoOJ0oPuQKPgDyOye_2uM',
-      authDomain: 'studysync-3fbd7.firebaseapp.com',
-      projectId: 'studysync-3fbd7',
-      storageBucket: 'studysync-3fbd7.appspot.com',
-      messagingSenderId: '885216959280',
-      appId: '1:885216959280:web:917a7216776b36e904c6f5',
-      measurementId: 'G-TS13EWHRMB',
-    };
-  
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+   
   
 
   const clearMessages = () => {
@@ -136,6 +163,8 @@ const Chat = ({theme, roomId}) => {
 
 
 
+
+
 const RoomDetailsPage = () => {
   const [isMuted, setIsMuted] = useState(true);
   const iframeRef = useRef(null);
@@ -152,11 +181,13 @@ const RoomDetailsPage = () => {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedFriends, setSelectedFriends] = useState([]);
   const [allUsers, setAllUsers] = useState([]); // Assuming you fetch all users for inviting
-
+  const location = useLocation();
+  const { inviterUid, videoCategory } = location.state || {};
+  const [roomUsers, setRoomUsers] = useState([]);
+  
   // const handleCategoryClick = (event) => {
   //   setAnchorEl(event.currentTarget);
   // };
-
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -165,6 +196,66 @@ const RoomDetailsPage = () => {
   const handleOpenCategoryMenu = () => {
     setShowCategoryMenu(true); // Show the category menu
   };
+
+  
+
+  const calculateTimeSpent = (joinTime) => {
+    if (!joinTime || !joinTime.toDate) {
+      console.warn("joinTime is null or not a valid Firestore timestamp");
+      return 0; // Return 0 or some default value indicating no time spent
+    }
+  
+    const now = new Date();
+    const joinedAt = joinTime.toDate(); // Convert Firestore Timestamp to JavaScript Date
+    const spentMilliseconds = now - joinedAt;
+    return Math.round(spentMilliseconds / 1000 / 60); // Convert to minutes
+  };
+
+
+
+  useEffect(() => {
+
+    const fetchAndUpdateTimeSpent = async () => {
+      // Assuming collectionName and roomId are defined and accessible
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        console.error("User authentication is required.");
+        return;
+      }
+  
+      const userId = inviterUid || currentUser.uid;
+
+      try {
+        const usersSnapshot = await getDocs(collection(db, `${userId}_studyrooms/${roomId}/roomUsers`));
+        const usersWithTime = [];
+        usersSnapshot.forEach((doc) => {
+          const userData = doc.data();
+          console.log("Fetched user data: ", userData); // Debug log
+          if (userData.joinTime) { // Ensure joinTime is present
+            const timeSpent = calculateTimeSpent(userData.joinTime);
+            usersWithTime.push({ ...userData, timeSpent });
+          }
+        });
+        
+        setRoomUsers(usersWithTime); // Update state with fetched and processed users
+      } catch (error) {
+        console.error("Error fetching room users: ", error);
+      }
+    };
+    
+    // Call the function once initially to populate the data immediately
+    fetchAndUpdateTimeSpent();
+  
+    const intervalId = setInterval(() => {
+      fetchAndUpdateTimeSpent(); // This will update the state every minute
+    }, 60000); // Every minute
+  
+    return () => clearInterval(intervalId); // Cleanup on component unmount
+  }, []); // Ensure this runs only once when the component mounts
+  
+  
+  
+  
 
   const handleSelectCategory = async (category) => {
     // Function logic to change the room, similar to changeRoom
@@ -187,6 +278,7 @@ const RoomDetailsPage = () => {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
+
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -220,41 +312,44 @@ const RoomDetailsPage = () => {
     }
   };
   
-  
+
   useEffect(() => {
+    // Example usage of inviterUid to fetch room data or any other required data
     const fetchRoomData = async () => {
-      const user = auth.currentUser;
-      if (!user) {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
         console.error("User not authenticated");
-        navigate('/login'); // Redirect to login or handle unauthenticated state
+        navigate('/login');
         return;
       }
-
-      const userId = user.uid;
-      console.log(`Fetching room data for room ID: ${roomId} under user ID: ${userId}`); // Debug statement
-
+      // Use inviterUid if present, otherwise fall back to the current user's UID
+      const userId = inviterUid || currentUser.uid;
       try {
         const roomRef = doc(db, `${userId}_studyrooms/${roomId}`);
         const docSnap = await getDoc(roomRef);
         if (docSnap.exists()) {
-          console.log("Room data found:", docSnap.data()); // Debug statement
-          setRoomData(docSnap.data());
-
-          // Use the videoCategory from roomData to select the initial video URL
-          const initialVideoCategory = docSnap.data().videoCategory;
-          const initialVideoUrl = videoCategories[initialVideoCategory]?.[0]; // Use the first video URL from the selected category
-          setCurrentVideoUrl(initialVideoUrl);
-          // Assuming you have a logic to select the initial video based on the room data
+          console.log("Room data found:", docSnap.data());
+          setRoomData(docSnap.data())
+          
+          // Logic to select a random video from the category
+        const categoryVideos = videoCategories[docSnap.data().videoCategory];
+        if (categoryVideos) {
+          const randomIndex = Math.floor(Math.random() * categoryVideos.length);
+          setCurrentVideoUrl(categoryVideos[randomIndex]);
+        }
+    
         } else {
-          console.log("No such room exists!");
+          console.error("No such room exists");
+          // Handle the error - maybe redirect to a "room not found" page or back to dashboard
         }
       } catch (error) {
         console.error("Error fetching room data:", error);
+        // Handle the error appropriately
       }
     };
 
     fetchRoomData();
-  }, [roomId, db, auth, navigate]);
+  }, [roomId, inviterUid, auth, navigate, db]);
   
 
   const changeRoom = async (category) => {
@@ -351,12 +446,21 @@ const RoomDetailsPage = () => {
     }
   };
 
+const isCreator = auth.currentUser?.displayName === roomData?.creator_id;
+
+
   return (
     <section className="layout" style={themeStyles.layout}>
        <div className="leftSide" style={themeStyles.leftSide}>
         <Typography variant="h5" component="h2" className="font-bold">
           Profiles & Hours
         </Typography>
+        {/* Render each user and their time spent */}
+        <div>
+          {roomUsers.map((user, index) => (
+            <Typography key={index}>{`${user.displayName}: ${user.timeSpent} minutes`}</Typography>
+          ))}
+        </div>
 
         <Chat theme={isLightMode ? 'light' : 'dark'} roomId={roomId} />
       </div>
@@ -370,9 +474,18 @@ const RoomDetailsPage = () => {
       <div className="footer">
         <Button variant="contained" style={themeStyles.button} onClick={toggleVolume}>{isMuted ? 'Unmute' : 'Mute'}</Button>
         <Button variant="contained" style={themeStyles.button} onClick={togglePomodoro}>{showPomodoro ? 'Hide Timer' : 'Show Timer'}</Button>
-        <Button variant="contained" style={themeStyles.button} onClick={() => setInviteDialogOpen(true)}>Invite Friends</Button>
+        {isCreator && (
+        <>
+          <Button variant="contained" style={themeStyles.button} onClick={() => setInviteDialogOpen(true)}>
+            Invite Friends
+          </Button>
+          <Button variant="contained" style={themeStyles.button} onClick={handleOpenCategoryMenu}>
+            Change Room
+          </Button>
+        </>
+      )}
         <Button variant="contained" style={themeStyles.button} onClick={handleExitAndDeleteRoom}>Exit Room</Button>
-        <Button variant="contained" style={themeStyles.button} onClick={handleOpenCategoryMenu}>Change Room</Button>
+       
       
         <Dialog open={inviteDialogOpen} onClose={() => setInviteDialogOpen(false)}>
       <DialogTitle>Invite Friends</DialogTitle>
@@ -385,8 +498,8 @@ const RoomDetailsPage = () => {
             onChange={(event) => setSelectedFriends(event.target.value)}
             renderValue={(selected) => selected.join(', ')}
           >
-            {allUsers.map((user) => (
-              <MenuItem key={user} value={user}>
+            {allUsers.map((user, index) => (
+              <MenuItem key={user + index} value={user}>
                 {user}
               </MenuItem>
             ))}
