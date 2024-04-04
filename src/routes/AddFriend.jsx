@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { db } from './src/firebase.js';
-import { collection, onSnapshot, doc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, doc, setDoc } from "firebase/firestore";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import NotificationFeedback from './src/components/NotificationFeedback.jsx';
+import NotificationFeedback from '../components/NotificationFeedback.jsx';
+import app from '../firebase';
+
+const db = getFirestore(app);
 
 const FriendDropdown = ({ friends, setSelectedFriend, inviteFriend }) => {
   const handleSelectChange = (event) => {

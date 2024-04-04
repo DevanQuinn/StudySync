@@ -135,7 +135,7 @@ export default function SignUp() {
               fullWidth
               name="confirm-password"
               label="Confirm Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               id="confirm-password"
               placeholder='Confirm Password'
               color='primary'

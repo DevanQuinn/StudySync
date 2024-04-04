@@ -67,7 +67,9 @@ const ViewComments = ({ postId, editable }) => {
 			content: input,
 			created: serverTimestamp(),
 		};
-		await addDoc(col, comment);
+		const document = await addDoc(col, comment);
+		comment.id = document.id;
+		comment.self = true;
 		setComments([comment, ...comments]);
 		setInput(' ');
 	};

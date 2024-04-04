@@ -4,8 +4,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
 import './index.css';
 import Navbar from './components/Navbar.jsx';
-
-import App from './App.jsx';
 import Dashboard from './routes/dashboard.jsx';
 import Leaderboard from './routes/leaderboard.jsx';
 import SignIn from './routes/signin.jsx';
@@ -16,6 +14,7 @@ import SpotifyPlaylists from './routes/SpotifyPlaylists.jsx';
 import Callback from './routes/Callback.jsx';
 import Chatbot from './routes/chatbot.jsx';
 import Pomodoro from './routes/pomodoro.jsx';
+import Firebase from './firebase.js';
 import EditProfile from './routes/editprofile.jsx';
 import Flashcards from './routes/flashcards.jsx';
 import StudyRoomUI from './routes/StudyRoomUI.jsx';
@@ -24,163 +23,163 @@ import Posts from './routes/posts.jsx';
 import UserPosts from './routes/userposts.jsx';
 
 const theme = createTheme({
-    palette: {
-        primary: {
-            main: '#20c997',
-        },
-        secondary: {
-            main: '#B0DCCD',
-        },
+  palette: {
+    primary: {
+      main: '#20c997',
     },
+    secondary: {
+      main: '#B0DCCD',
+    },
+  },
 });
 
-ReactDOM.render(
-    <React.StrictMode>
-        <ThemeProvider theme={theme}>
-            <BrowserRouter>
-                <Routes>
-                    <Route
-                        path='/'
-                        element={
-                            <>
-                                <Navbar />
-                                <App />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/dashboard'
-                        element={
-                            <>
-                                <Navbar />
-                                <Dashboard />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/leaderboard'
-                        element={
-                            <>
-                                <Navbar />
-                                <Leaderboard />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/signin'
-                        element={
-                            <>
-                                <Navbar />
-                                <SignIn />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/forgotpass'
-                        element={
-                            <>
-                                <Navbar />
-                                <ForgotPass />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/signup'
-                        element={
-                            <>
-                                <Navbar />
-                                <SignUp />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/editprofile'
-                        element={
-                            <>
-                                <Navbar />
-                                <EditProfile />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/flashcards'
-                        element={
-                            <>
-                                <Navbar />
-                                <Flashcards />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/pomodoro'
-                        element={
-                            <>
-                                <Navbar />
-                                <Pomodoro />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/SpotifyPlaylists'
-                        element={
-                            <>
-                                <Navbar />
-                                <SpotifyPlaylists />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/Callback'
-                        element={
-                            <>
-                                <Navbar />
-                                <Callback />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/studyroom/*'
-                        element={
-                            <>
-                                <Navbar />
-                                <StudyRoomUI />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/chatbot'
-                        element={
-                            <>
-                                <Navbar />
-                                <Chatbot />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/posts'
-                        element={
-                            <>
-                                <Navbar />
-                                <Posts />
-                            </>
-                        }
-                    />
-                    <Route
-                        path='/:username/posts'
-                        element={
-                            <>
-                                <Navbar />
-                                <UserPosts />
-                            </>
-                        }
-                    />
-                    <Route path='/room/:roomId' element={<RoomDetailsPage />} />
-                    {/* No Navbar for /room */}
-                    <Route path='/AddFriend' element={<><Navbar /><AddFriend /></>} />
-                    {/* New route for AddFriend */}
-                </Routes>
-            </BrowserRouter>
-        </ThemeProvider>
-    </React.StrictMode>,
-    document.getElementById('root')
+ReactDOM.createRoot(document.getElementById('root')).render(
+	<React.StrictMode>
+		<ThemeProvider theme={theme}>
+			<BrowserRouter>
+				<Routes>
+
+					<Route
+						path='/'
+						element={
+							<>
+								<Navbar />
+								<App />
+							</>
+						}
+					/>
+					<Route
+						path='dashboard'
+						element={
+							<>
+								<Navbar />
+								<Dashboard />
+							</>
+						}
+					/>
+					<Route
+						path='leaderboard'
+						element={
+							<>
+								<Navbar />
+								<Leaderboard />
+							</>
+						}
+					/>
+					<Route
+						path='signin'
+						element={
+							<>
+								<Navbar />
+								<SignIn />
+							</>
+						}
+					/>
+					<Route
+						path='forgotpass'
+						element={
+							<>
+								<Navbar />
+								<ForgotPass />
+							</>
+						}
+					/>
+					<Route
+						path='signup'
+						element={
+							<>
+								<Navbar />
+								<SignUp />
+							</>
+						}
+					/>
+					<Route
+						path='editprofile'
+						element={
+							<>
+								<Navbar />
+								<EditProfile />
+							</>
+						}
+					/>
+					<Route
+						path='flashcards'
+						element={
+							<>
+								<Navbar />
+								<Flashcards />
+							</>
+						}
+					/>
+					<Route
+						path='pomodoro'
+						element={
+							<>
+								<Navbar />
+								<Pomodoro />
+							</>
+						}
+					/>
+					<Route
+						path='SpotifyPlaylists'
+						element={
+							<>
+								<Navbar />
+								<SpotifyPlaylists />
+							</>
+						}
+					/>
+					<Route
+						path='Callback'
+						element={
+							<>
+								<Navbar />
+								<Callback />
+							</>
+						}
+					/>
+					<Route
+						path='studyroom/*'
+						element={
+							<>
+								<Navbar />
+								<StudyRoomUI />
+							</>
+						}
+					/>
+					<Route
+						path='chatbot'
+						element={
+							<>
+								<Navbar />
+								<Chatbot />
+							</>
+						}
+					/>
+					<Route
+						path='posts'
+						element={
+							<>
+								<Navbar />
+								<Posts />
+							</>
+						}
+					/>
+					<Route
+						path=':username/posts'
+						element={
+							<>
+								<Navbar />
+								<UserPosts />
+							</>
+						}
+					/>
+					<Route path='/room/:roomId' element={<RoomDetailsPage />} />{' '}
+					{/* No Navbar for /room */}
+					<Route path='/AddFriend' element={<><Navbar /><AddFriend /></>} /> {/* New route for AddFriend */}
+				</Routes>
+			</BrowserRouter>
+		</ThemeProvider>
+	</React.StrictMode>
+
 );
