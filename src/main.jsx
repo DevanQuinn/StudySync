@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
 import './index.css';
+import App from './App';
 import Navbar from './components/Navbar.jsx';
 import Dashboard from './routes/dashboard.jsx';
 import Leaderboard from './routes/leaderboard.jsx';
