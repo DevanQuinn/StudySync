@@ -22,6 +22,8 @@ import EditProfile from './routes/editprofile.jsx';
 import Flashcards from './routes/flashcards.jsx';
 import StudyRoomUI from './routes/StudyRoomUI.jsx';
 import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
+import Posts from './routes/posts.jsx';
+import UserPosts from './routes/userposts.jsx';
 
 const theme = createTheme({
   palette: {

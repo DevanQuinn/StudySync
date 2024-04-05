@@ -36,7 +36,7 @@ const Posts = () => {
 	const db = getFirestore(app);
 
 	const userStatsCol = user
-		? collection(db, `userStats/${user?.uid}/studyStats`)
+		? collection(db, `userStats/${user?.uid}/timeStudied`)
 		: null;
 
 	const fetchPosts = async () => {
