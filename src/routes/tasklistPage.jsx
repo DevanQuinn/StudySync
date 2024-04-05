@@ -35,11 +35,17 @@ function TasklistsPage() {
 	const user = useUser(false);
 
 	const savePreferences = () => {
+		var username;
 		if (user) {
-			const docRef = doc(db, 'users', user.uid);
-			console.log("saving user prefs");
-			console.log(preferences);
-			setDoc(docRef, {preferences:preferences}, {merge:true});
+			const q = query(collection(db, "users"), where("userID", "==", user.uid));
+			getDocs(q).then(userssnapshot => {
+				userssnapshot.forEach(user => {
+					username = user.data().username;
+				})
+			}).then(() => {
+				const docRef = doc(db, 'users', username);
+				setDoc(docRef, {preferences:preferences}, {merge:true});
+			})
 		}
 	}
 
@@ -50,11 +56,20 @@ function TasklistsPage() {
 
 
 	useEffect(() => {
+		var username;
 		if (user) {
-			const docRef = doc(db, 'users', user.uid);
-			setDoc(docRef, {}, {merge:true}).then(() => {
-				getDoc(docRef).then((doc) => {
-					setPreferences({color:doc.data().preferences.color});
+			const q = query(collection(db, "users"), where("userID", "==", user.uid));
+			getDocs(q).then(userssnapshot => {
+				userssnapshot.forEach(user => {
+					console.log(user.data().username);
+					username = user.data().username;
+				})
+			}).then(() => {
+				const docRef = doc(db, 'users', username);
+				setDoc(docRef, {}, {merge:true}).then(() => {
+					getDoc(docRef).then((doc) => {
+						setPreferences({color:doc.data().preferences.color});
+					})
 				})
 			})
 		}
