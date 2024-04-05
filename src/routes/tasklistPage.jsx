@@ -36,48 +36,48 @@ function TasklistsPage() {
 
 	const savePreferences = () => {
 		var username;
-		if (user) {
-			const q = query(collection(db, "users"), where("userID", "==", user.uid));
-			getDocs(q).then(userssnapshot => {
-				userssnapshot.forEach(user => {
-					username = user.data().username;
+		if (user) { //if logged in
+			const q = query(collection(db, "users"), where("userID", "==", user.uid)); //set up username query
+			getDocs(q).then(userssnapshot => { //get username
+				userssnapshot.forEach(user => { //should only run once if userIDs are unique
+					username = user.data().username; //save username
 				})
-			}).then(() => {
-				const docRef = doc(db, 'users', username);
-				setDoc(docRef, {preferences:preferences}, {merge:true});
+			}).then(() => { //with username
+				const docRef = doc(db, 'users', username); //find user object. Usernames should be unique.
+				setDoc(docRef, {preferences:preferences}, {merge:true}); //update preferences
 			})
 		}
 	}
 
-	const updatePreferences = prefObj => {
+	const updatePreferences = prefObj => { //callback for configurator panel
 		savePreferences(prefObj);
 		setPreferences(prefObj);
 	};
 
 
-	useEffect(() => {
+	useEffect(() => { //loads user preferences
 		var username;
-		if (user) {
-			const q = query(collection(db, "users"), where("userID", "==", user.uid));
+		if (user) { //if logged in
+			const q = query(collection(db, "users"), where("userID", "==", user.uid)); //get user
 			getDocs(q).then(userssnapshot => {
-				userssnapshot.forEach(user => {
+				userssnapshot.forEach(user => { //should only run once if userID is unique
 					console.log(user.data().username);
 					username = user.data().username;
 				})
-			}).then(() => {
-				const docRef = doc(db, 'users', username);
-				setDoc(docRef, {}, {merge:true}).then(() => {
-					getDoc(docRef).then((doc) => {
-						setPreferences({color:doc.data().preferences.color});
+			}).then(() => { //with username
+				const docRef = doc(db, 'users', username); //find user object. usernames should be unique
+				setDoc(docRef, {}, {merge:true}).then(() => { //ensure that user object exists before trying to write to its properties
+					getDoc(docRef).then((doc) => { //get that users properties
+						setPreferences({color:doc.data().preferences.color}); //set the frontends properties equal to the database properties
 					})
 				})
 			})
 		}
 	}, [user])
 
-	useEffect(() => {
+	useEffect(() => { //dynamically update user page based on properties change
 		document.body.style.backgroundColor = preferences.color;
-		return () => {
+		return () => { //cleanup function to return background to default color on page unmount
 			document.body.style.backgroundColor = "#FFFFFF";
 		}
 	}, [preferences]);
