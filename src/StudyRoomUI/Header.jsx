@@ -156,6 +156,7 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
 
   try {
     await setDoc(userRef, {
+      displayName: userDisplayName,
       joinTime: serverTimestamp(),
     });
     console.log(`Successfully added ${userDisplayName} to room ${roomId}`);
@@ -222,6 +223,21 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
     );
   };
 
+  const handleDeclineInvitation = async (invitation) => {
+    if (invitation) {
+      try {
+        // Delete the declined invitation from the 'invitations' collection
+        const invitationRef = doc(db, "invitations", invitation.id);
+        await deleteDoc(invitationRef);
+  
+        console.log("Invitation declined and deleted from the database.");
+        setInvitationDialogOpen(false); // Close the dialog upon declining
+      } catch (error) {
+        console.error("Error declining the invitation:", error);
+        // Optionally handle errors, such as displaying a message to the user
+      }
+    }
+  };
   
   
 
@@ -307,7 +323,7 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
   <p>{currentInvitation ? `You've been invited by ${currentInvitation.inviterUserId} to join a study room.` : ''}</p>
 </DialogContent>
 <DialogActions>
-  <Button onClick={handleCloseInvitationDialog}>Decline</Button>
+  <Button onClick={() => handleDeclineInvitation(currentInvitation)}>Decline</Button>
   <Button onClick={() => handleAcceptInvitation(currentInvitation)} color="primary">Join Room</Button>
 </DialogActions>
 
