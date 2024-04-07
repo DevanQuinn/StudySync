@@ -19,6 +19,7 @@ import {
 import app from '../firebase.js';
 import useUser from '../hooks/useUser.jsx';
 import '../components/tasklistlist.css';
+import TreeDisplayBanner from '../components/treeDisplayBanner.jsx';
 /*
 TODO LIST:
 	* store all tasks in the dashboard component and pass as props the relevant tasks to the tasklist
@@ -95,7 +96,8 @@ function TasklistsPage() {
        		 	<Box sx={{ position: 'fixed', bottom: 60, right: 0, zIndex: 1100 }}><RoomPomodoro /></Box>
       		</Slide>
 			<DashboardConfigurator initialPreference={preferences} preferenceCallback={updatePreferences}/>
-			<TasklistList className="component-wrapper"/>	
+			<TasklistList className="component-wrapper"/>
+			<TreeDisplayBanner inittrees={[0,0,0,0,0]}/>
 		</div>
 		
 	)
