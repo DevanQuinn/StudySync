@@ -2,11 +2,10 @@ import ProgressBar from "@ramonak/react-progress-bar";
 import treeImages from './treeImages.jsx'
 import {Button} from '@mui/material'
 import {useState, useEffect} from 'react'
-const TimerBar = ({percentDone, studyState}) => {
+const TimerBar = ({percentDone, studyState, treeSelection, updateTreeSelection}) => {
     const [disableButton, updateDisableButton] = useState(false); //lock for tree selections
     const [timerNeverStarted, updateTimerNeverStarted] = useState(true); //flag to help keep tree selection buttons unlocked on initial load
     const [treeProgress, updateTreeProgress] = useState(0); //state to control tree growth progress
-    const [treeSelection, updateTreeSelection] = useState(0) //state to control which tree is growing
     const maxTrees = treeImages.length; //number of trees in imported tree array. Not hardcoded.
     const decrementTreeSelection = () => { //selector button function for tree selection
         if (treeSelection == 0) {

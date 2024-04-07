@@ -4,6 +4,20 @@ import { useState, useEffect } from 'react';
 import { Stack, Button, TextField, Typography, Box, Container, CssBaseline } from '@mui/material';
 import Draggable from 'react-draggable';
 import TimerBar from './TimerBar.jsx';
+import useUser from '../hooks/useUser.jsx';
+import {
+	query,
+	where,
+	getFirestore,
+	collection,
+	getDocs,
+	getDoc,
+	setDoc,
+	doc,
+	addDoc,
+	deleteDoc,
+} from 'firebase/firestore';
+import app from '../firebase.js';
 
 export default function RoomPomodoro() {
   const [timer] = useState(create('10m'));
@@ -13,7 +27,9 @@ export default function RoomPomodoro() {
   const [study, setStudy] = useState("Study!");
   const [count, setCount] = useState(1);
   const [percentDone, setPercentDone] = useState(0);
-
+  const [treeSelection, updateTreeSelection] = useState(0);
+  const user = useUser();
+  const db = getFirestore(app);
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -26,7 +42,6 @@ export default function RoomPomodoro() {
     setStudy("Study!");
     setCount(2);
   };
-
   useEffect(() => {
     timer.ticker(({ formattedTime, percentDone }) => {
       setTime(formattedTime);
@@ -37,16 +52,49 @@ export default function RoomPomodoro() {
         setStudy("Break!");
         timer.setStartTime(breakTime);
         setCount(1);
+        if (user) {
+          //console.log("You just grew a tree! It's been added to your garden.");
+          addTreeToGarden(treeSelection, 1);
+        }
       } else {
-        setTime(startTime);
-        setStudy("Study!");
-        timer.setStartTime(startTime);
-        setCount(2);
+      setTime(startTime);
+      setStudy("Study!");
+      timer.setStartTime(startTime);
+      setCount(2);
       }
     });
-
     return () => timer.stop(); // Cleanup timer on component unmount
   }, [timer, count, breakTime, startTime]);
+  
+  const addTreeToGarden = (treeType, quantity) => {
+    if (user) {
+      var username;
+      if (user) { //if logged in
+        const q = query(collection(db, "users"), where("userID", "==", user.uid)); //set up username query
+        getDocs(q).then(userssnapshot => { //get username
+          userssnapshot.forEach(user => { //should only run once if userIDs are unique
+            username = user.data().username; //save username
+          })
+        }).then(() => { //with username
+          getDoc(doc(db, "users", username)).then(usersnapshot => {
+            if (usersnapshot.data().trees == undefined || usersnapshot.data().trees[treeType] == undefined) {
+              setDoc(doc(db, "users", username), 
+                {trees : 
+                  {[treeType] : Number(quantity)}},
+                {merge:true}
+              )
+            } else {
+              setDoc(doc(db, "users", username), 
+                {trees : 
+                  {[treeType] : (Number(usersnapshot.data().trees[treeType]) + Number(quantity))}},
+                {merge:true}
+              )
+            }
+          })
+        })
+      }
+    }
+  }
 
   return (
   <Draggable>
@@ -93,7 +141,7 @@ export default function RoomPomodoro() {
           <Button fullWidth variant="contained" sx={{ mt: 1, mb: 2, fontSize: '0.75rem', padding: '6px 12px' }} type="submit">
             Set
           </Button>
-          <TimerBar percentDone={percentDone} studyState={study}/>
+          <TimerBar percentDone={percentDone} studyState={study} treeSelection={treeSelection} updateTreeSelection={updateTreeSelection}/>
         </form>
       </Box>
     </Container>
