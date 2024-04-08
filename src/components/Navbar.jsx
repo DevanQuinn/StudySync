@@ -28,7 +28,8 @@ const Navbar = () => {
         {title: 'SpotifyPlaylists', path: '/SpotifyPlaylists'},
         { title: 'Flash Cards', path: '/flashcards' },
 		{ title: 'Chat Bot', path: '/chatbot' },
-        { title: 'AddFriend', path: '/AddFriend' }
+        { title: 'AddFriend', path: '/AddFriend' },
+		{ title: 'Profile Page', path: '/profilePage'}
 	];
 	const [image, setImage] = useState();
 	const db = getFirestore(app);
