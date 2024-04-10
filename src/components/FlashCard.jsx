@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { getBlob, getStorage, ref } from "firebase/storage";
-import ReactPlayer from 'react-player';
+//import ReactPlayer from 'react-player';
 
 const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 	const [flipped, setFlipped] = useState(false);
@@ -123,13 +123,13 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 						if (answerAudioBlob) {
 							return (
 								<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-									<ReactPlayer
+									{/* <ReactPlayer
 										url={URL.createObjectURL(answerAudioBlob)}
 										type='audio/mpeg'
 										controls
 										width="320px"
 										height="30px"
-									/>
+									/> */}
 								</Box>
 							);
 						}
@@ -152,13 +152,13 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 						if (questionAudioBlob) {
 							return (
 								<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-									<ReactPlayer
+									{/* <ReactPlayer
 										url={URL.createObjectURL(questionAudioBlob)}
 										type='audio/mpeg'
 										controls
 										width="320px"
 										height="30px"
-									/>
+									/> */}
 								</Box>
 							);
 						}

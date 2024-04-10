@@ -16,7 +16,7 @@ const EditProfile = () => {
     const auth = getAuth(app);
     const user = useUser(true);
     const db = getFirestore(app);
-    const docRef = user ? doc(db, `profile-data`, user.uid) : null;
+    const docRef = user ? doc(db, `users`, user.displayName) : null;
 
     const fetchProfileDataCalled = useRef(false);
     const storage = getStorage();
@@ -77,8 +77,9 @@ const EditProfile = () => {
 
         const loadImageBlob = async () => {
             if (profileData.profilePicture && profileData.profilePicture != 'unset') {
+                
                 const storage = getStorage();
-                const pathReference = ref(storage, profileData.profilePicture);
+                const pathReference = ref(storage, `profile-pictures/${data.pfpID}`);
                 try {
                     // getting the binary data from the StorageReference path
                     const blob = await getBlob(pathReference);

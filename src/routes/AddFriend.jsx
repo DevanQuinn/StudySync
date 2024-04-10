@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, onSnapshot, doc, setDoc } from "firebase/firestore";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+//import { ToastContainer, toast } from 'react-toastify';
+//import 'react-toastify/dist/ReactToastify.css';
 import NotificationFeedback from '../components/NotificationFeedback.jsx';
 import app from '../firebase';
 
@@ -80,7 +80,7 @@ const App1 = () => {
       setIsSendingToSelf(false);
       // Logic to send friend request to selectedFriend
       // For now, just display a toast
-      toast.success(`Friend request sent to ${selectedFriend.name}`);
+      //toast.success(`Friend request sent to ${selectedFriend.name}`);
     }
   };
 
@@ -89,7 +89,7 @@ const App1 = () => {
       const userDocRef = doc(db, 'usersNew', "Sai Monish"); // Change "Your Name" to your actual name
       const friendsCount = accept ? 1 : 0;
       await setDoc(userDocRef, { friendsCount });
-      toast.success(`Friend request ${accept ? 'accepted' : 'rejected'}`);
+      //toast.success(`Friend request ${accept ? 'accepted' : 'rejected'}`);
       setShowConfirmation(false);
       console.log('Friend request processed successfully');
     } catch (error) {
@@ -129,7 +129,7 @@ const App1 = () => {
         </div>
       )}
 
-      <ToastContainer />
+      //<ToastContainer />
     </div>
   );
 };
