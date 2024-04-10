@@ -18,10 +18,6 @@ import { initializeApp } from 'firebase/app';
 
 /*
 TODO
-- The room gets correctly deleted from the database
-when they exit the room
-- The invitation gets deleted when a user declines
-- The invitiation gets deleted from the db when a user accepts
 - Multiple invitations work.
 */
 

@@ -30,29 +30,14 @@ const auth = getAuth(app);
 /*
 TODO
 
-- Update the chat in the correct collection
-- Think about making an author for each chat so that 
-the current authors chats are in blue and everyone elses is in grey
-- Make sure that the chat is updated in the db and read from so updated synchronously
 - Update the profile and hours with profile pictures when users enter the room
-- Make sure the users that join and are not the creatorID do not have access to the change room, and
-the invite friends.
-- The creator can change the video and the video url gets updated in the db, so each
-user will be reading for it consistently, or get a notification if its changed, idk
 - Toggle voice for everyone?
 - When the person exits the room, there time studied gets added to Nilisha's statistics for the leadorboard
-
-
-- When a user that is not the creator leaves the room, it removes them from the study room.
 - TODO Nilisha takes current time - join time and adds that to their study time.
-
-Update the room for the new video... and once all the users and time stamps are added
-add it to the profile side bar, 
-once all that is done do the toggle and the chat
 */
 
 // Categories and their associated video URLs
-const videoCategories = {
+export const videoCategories = {
   Lofi: [
     'jfKfPfyJRdk', 'SllpB3W5f6s', 'FxJ3zPUU6Y4', 'A_nRzRZQqv0', 
   ],
