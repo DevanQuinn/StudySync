@@ -4,6 +4,20 @@ import TasklistList from '../components/TasklistList.jsx'
 import RoomPomodoro from '../components/RoomPomodoro.jsx';
 import AddIcon from '@mui/icons-material/Add';
 import { Fab, Box, Slide } from '@mui/material';
+import {
+	query,
+	where,
+	getFirestore,
+	collection,
+	getDocs,
+	setDoc,
+	doc,
+	addDoc,
+	deleteDoc,
+} from 'firebase/firestore';
+import app from '../firebase.js';
+import useUser from '../hooks/useUser';
+import '../components/tasklistlist.css';
 /*
 TODO LIST:
 	* store all tasks in the dashboard component and pass as props the relevant tasks to the tasklist
@@ -13,17 +27,29 @@ TODO LIST:
 function Dashboard() {
 	const [showPomodoro, setShowPomodoro] = useState(false);
 	const togglePomodoro = () => setShowPomodoro(!showPomodoro);
-	const defaultPreferences = {color:"#000000"};
+	const defaultPreferences = {color:"#FFFFFF"};
 	//should load preferences from user doc and reflect them
 	const [preferences, setPreferences] = useState(defaultPreferences);
+	const db = getFirestore(app)
+	const user = useUser(false);
 
 	const updatePreferences = prefObj => {
 		setPreferences(prefObj);
 	};
 
 	useEffect(() => {
+		//load user preferences into local state
+	}, [user])
+
+	useEffect(() => {
 		document.body.style.backgroundColor = preferences.color;
-	}, [preferences])
+		return () => {
+			document.body.style.backgroundColor = "#FFFFFF";
+		}
+	}, [preferences]);
+
+
+
 	return (
 		<div>
 			<Fab color="primary" aria-label="add" onClick={togglePomodoro} sx={{top: 450, left: 675 }}>
@@ -33,7 +59,7 @@ function Dashboard() {
        		 	<Box><RoomPomodoro /></Box>
       		</Slide>
 			<DashboardConfigurator initialPreference={preferences} preferenceCallback={updatePreferences}/>
-			<TasklistList/>	
+			<TasklistList className="component-wrapper"/>	
 		</div>
 		
 	)
