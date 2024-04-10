@@ -20,6 +20,7 @@ import app from '../firebase.js';
 import useUser from '../hooks/useUser.jsx';
 import '../components/tasklistlist.css';
 import TreeDisplayBanner from '../components/treeDisplayBanner.jsx';
+import TreeDisplaySelector from '../components/treeDisplaySelector.jsx';
 /*
 TODO LIST:
 	* store all tasks in the dashboard component and pass as props the relevant tasks to the tasklist
@@ -62,7 +63,6 @@ function TasklistsPage() {
 			const q = query(collection(db, "users"), where("userID", "==", user.uid)); //get user
 			getDocs(q).then(userssnapshot => {
 				userssnapshot.forEach(user => { //should only run once if userID is unique
-					console.log(user.data().username);
 					username = user.data().username;
 				})
 			}).then(() => { //with username
@@ -98,6 +98,7 @@ function TasklistsPage() {
 			<DashboardConfigurator initialPreference={preferences} preferenceCallback={updatePreferences}/>
 			<TasklistList className="component-wrapper"/>
 			<TreeDisplayBanner inittrees={[0,0,0,0,0]}/>
+			<TreeDisplaySelector/>
 		</div>
 		
 	)

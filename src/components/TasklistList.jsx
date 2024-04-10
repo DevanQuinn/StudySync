@@ -38,13 +38,9 @@ function TasklistList() {
 
 	useEffect(() => {
 		if (user) {
-			console.log('attempting to load state');
-			console.log(user.uid);
 			const q = query(collection(db, "users"), where("userID", "==", user.uid));
 			getDocs(q).then((snapshot) => {
-				console.log(snapshot);
 				snapshot.forEach((doc) => {
-					console.log(doc.data().username);
 					loadState(doc.data().username);
 				})
 			})
@@ -58,7 +54,6 @@ function TasklistList() {
 			setTasklists(newTasklistsList);
 			let newTasks = tasks;
 			newTasks[id] = [];
-			console.log(newTasks);
 			setTasks(newTasks);
 		} else {
 			alert('The maximum number of tasklists is 10!');
@@ -72,7 +67,6 @@ function TasklistList() {
 			}
 			return false;
 		});
-		console.log(newTasklistsList);
 		setTasklists(newTasklistsList);
 	};
 
@@ -133,7 +127,6 @@ function TasklistList() {
 					}).then(() => {
 						//add new up-to-date data to the database
 						tasklistsList.forEach(tasklist => {
-							console.log('attempting to save to database');
 							setDoc(
 								doc(db, 'users', username, 'tasklists', tasklist.id),
 								{ title: tasklist.title },
@@ -163,7 +156,6 @@ function TasklistList() {
 			);
 			getDocs(tasklistsQuery).then(tasklistsSnapshot => {
 				tasklistsSnapshot.forEach(tasklistsDoc => {
-					console.log(tasklistsDoc.data());
 					newTasklists = [...newTasklists, { title: tasklistsDoc.data().title, id: tasklistsDoc.id },
 					];
 					setTasklists(JSON.parse(JSON.stringify(newTasklists)));
@@ -235,23 +227,6 @@ function CreateTasklist({ addTasklist }) {
 				placeholder='Add a new tasklist'
 				onChange={e => setValue(e.target.value)}
 			/>
-		</form>
-	);
-}
-
-function LoadUserTasks({ handleLoad }) {
-	const [formValues, setFormValues] = useState({ tasklists: '', tasks: '' });
-
-	const handleSubmit = e => {
-		console.log('handling submit');
-		e.preventDefault();
-		if (!formValues) return;
-		handleLoad();
-	};
-
-	return (
-		<form onSubmit={handleSubmit}>
-			<button type='submit'>load</button>
 		</form>
 	);
 }

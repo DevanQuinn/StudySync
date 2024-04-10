@@ -19,8 +19,18 @@ import {
 } from 'firebase/firestore';
 import app from '../firebase.js';
 
+/*
+  There is a bug with this component.
+  Finishing a timer is supposed to send one signal to the database that the tree has grown.
+  However, one signal is sent for every timer that has previously been "set", and previously set timers retain which tree they are growing.
+  It is almost as if the "set" button creates a new timer without deleting the previous one, and each time the new timer finishes, the finish signal
+  on all previous timers is also sent.
+
+  This bug is mitigated by passing the functionality of adding trees to the database down to the TimerBar component, but I could forsee it causing
+  a memory leak for huge study sessions.
+*/
 export default function RoomPomodoro() {
-  const [timer] = useState(create('10m'));
+  const [timer] = useState(create('10m')); //I think when the component re-renders, the timer is being re-created.
   const [time, setTime] = useState(timer.getFt());
   const [breakTime, setBreakTime] = useState('5m'); // Default break time
   const [startTime, setStartTime] = useState('25m'); // Default study time
@@ -30,6 +40,7 @@ export default function RoomPomodoro() {
   const [treeSelection, updateTreeSelection] = useState(0);
   const user = useUser();
   const db = getFirestore(app);
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -42,6 +53,7 @@ export default function RoomPomodoro() {
     setStudy("Study!");
     setCount(2);
   };
+
   useEffect(() => {
     timer.ticker(({ formattedTime, percentDone }) => {
       setTime(formattedTime);
@@ -52,10 +64,7 @@ export default function RoomPomodoro() {
         setStudy("Break!");
         timer.setStartTime(breakTime);
         setCount(1);
-        if (user) {
-          //console.log("You just grew a tree! It's been added to your garden.");
-          addTreeToGarden(treeSelection, 1);
-        }
+
       } else {
       setTime(startTime);
       setStudy("Study!");
@@ -141,7 +150,7 @@ export default function RoomPomodoro() {
           <Button fullWidth variant="contained" sx={{ mt: 1, mb: 2, fontSize: '0.75rem', padding: '6px 12px' }} type="submit">
             Set
           </Button>
-          <TimerBar percentDone={percentDone} studyState={study} treeSelection={treeSelection} updateTreeSelection={updateTreeSelection}/>
+          <TimerBar percentDone={percentDone} studyState={study} treeSelection={treeSelection} updateTreeSelection={updateTreeSelection} addTreeToGarden={addTreeToGarden}/>
         </form>
       </Box>
     </Container>

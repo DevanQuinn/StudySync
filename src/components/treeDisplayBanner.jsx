@@ -11,9 +11,9 @@ const treeDisplayBanner = ({inittrees}) => { //trees should be an array of ints,
 
     return (
         <div>
-            {trees.map((tree) => {
+            {trees.map((tree, index) => {
                 return(
-                    <img src={treeImages[tree].tree} style={{width:'10wv', height:'10vw'}}/>
+                    <img key={index} src={treeImages[tree].tree} style={{width:'10wv', height:'10vw'}}/>
                 )
             })}
         </div>
