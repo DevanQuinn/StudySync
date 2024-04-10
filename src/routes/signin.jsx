@@ -17,6 +17,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = React.useState('');
   const handleSubmit = async event => {
       event.preventDefault();
       const data = new FormData(event.currentTarget);

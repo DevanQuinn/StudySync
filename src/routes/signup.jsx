@@ -163,6 +163,7 @@ export default function SignUp() {
               />
             </Typography>
             <Button
+              data-testid="sign-up-button"
               type="submit"
               fullWidth
               variant="contained"
