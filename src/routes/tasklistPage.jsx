@@ -21,11 +21,6 @@ import useUser from '../hooks/useUser.jsx';
 import '../components/tasklistlist.css';
 import TreeDisplayBanner from '../components/treeDisplayBanner.jsx';
 import TreeDisplaySelector from '../components/treeDisplaySelector.jsx';
-/*
-TODO LIST:
-	* store all tasks in the dashboard component and pass as props the relevant tasks to the tasklist
-	* debug the above procedure
-*/
 
 function TasklistsPage() {
 	const [showPomodoro, setShowPomodoro] = useState(false);
@@ -84,7 +79,7 @@ function TasklistsPage() {
 	}, [preferences]);
 
 	return (
-		<div>
+		<div className="tasklist-page-wrapper">
 			<Fab color="primary" aria-label="add" onClick={togglePomodoro} style={{
 				position: "fixed",
 				bottom: 10,

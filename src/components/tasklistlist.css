@@ -16,3 +16,8 @@
     color: black;
     background-color: gray;
   }
+
+  .tasklist-page-wrapper {
+    margin-top: 10vh;
+    margin-bottom: 10vh;
+  }
