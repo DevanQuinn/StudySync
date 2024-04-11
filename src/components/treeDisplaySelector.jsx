@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react'
+import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link, TextField, Typography } from '@mui/material';
 import {
 	query,
 	where,
@@ -37,7 +38,7 @@ const TreeDisplaySelector = () => {
         }
     }, [user])
     
-    useEffect(()=>{}, treeInventory);
+    useEffect(()=>{}, [treeInventory]);
 
     useEffect(() => {
         var tempVirtualInventory = treeInventory;
@@ -70,17 +71,19 @@ const TreeDisplaySelector = () => {
                 <div>
                     {[0,1,2,3,4].map((numouter, index) => {
                         return (
-                            <select key={index} name={"tree"+numouter} onChange={(e)=>{onDropdownUpdate(numouter, e.target.value)}}>
-                                <option value="none" selected disabled hidden>Select a tree for slot {numouter+1}</option>
-                                {Object.entries(virtualInventory).map((num)=>{
+                            <select defaultValue="none" key={index} name={"tree"+numouter} onChange={(e)=>{onDropdownUpdate(numouter, e.target.value)}}>
+                                <option value="none" disabled hidden>Select a tree for slot {numouter+1}</option>
+                                {Object.entries(virtualInventory).map((num, index)=>{
                                     if (num[1] > 0) {
                                         return (
-                                            <option>{num[0]}</option>
+                                            <option key={index} value={num[0]}>
+                                                    {num[0]} - Left in inventory: {num[1]}
+                                            </option>
                                         )
                                     }
                                     else {
                                         return (
-                                            <option disabled>{num[0]}</option>
+                                            <option key={index} disabled>{num[0]} - None left in inventory!</option>
                                         )
                                     }
                                 })}
@@ -88,7 +91,7 @@ const TreeDisplaySelector = () => {
                         )
                     })}
                 </div>
-                <button type="submit"> funnybutton </button>
+                <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}> Select these trees </Button>
             </form>
             {Object.values(currentSelection).map((tree, index) => {
                 return(
