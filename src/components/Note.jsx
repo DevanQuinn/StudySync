@@ -18,20 +18,79 @@ import {
 	AppBar,
 	Toolbar,
 	Container,
+	TextField,
 } from '@mui/material';
 import { Color } from '@tiptap/extension-color';
 import ListItem from '@tiptap/extension-list-item';
 import TextStyle from '@tiptap/extension-text-style';
-import { EditorProvider, useCurrentEditor } from '@tiptap/react';
+import { EditorProvider, NodePos, useCurrentEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import React from 'react';
+import { MuiColorInput } from 'mui-color-input';
+import React, { useEffect, useState } from 'react';
 
 const MenuBar = () => {
 	const { editor } = useCurrentEditor();
+	const [fontSize, setFontSize] = useState(0);
+	const [color, setColor] = useState('#000000');
 
 	if (!editor) {
 		return null;
 	}
+
+	useEffect(() => {
+		if (!editor) return;
+
+		const handleSelectionUpdate = ({ editor }) => {
+			const { color } = editor.getAttributes('textStyle');
+			if (color) setColor(color);
+			else setColor('#000000');
+
+			if (editor.isActive('paragraph')) {
+				setFontSize(0);
+				return;
+			}
+			for (let i = 1; i <= 6; i++) {
+				if (editor.isActive('heading', { level: i })) {
+					setFontSize(i);
+					return;
+				}
+			}
+		};
+
+		editor.on('selectionUpdate', handleSelectionUpdate);
+
+		return () => {
+			editor.off('selectionUpdate', handleSelectionUpdate);
+		};
+	}, [editor]);
+
+	const handleFontChange = value => {
+		setFontSize(value);
+		if (value === 0) {
+			editor
+				.chain()
+				.focus()
+				.setParagraph()
+				.run();
+			return;
+		}
+		editor
+			.chain()
+			.focus()
+			.toggleHeading({ level: value })
+			.run();
+		setFontSize(value);
+	};
+
+	const handleColorChange = event => {
+		const { value } = event.target;
+		setColor(value);
+		editor
+			.chain()
+			.focus()
+			.setColor(value)
+			.run();
+	};
 
 	return (
 		<AppBar position='relative' color='default'>
@@ -120,41 +179,17 @@ const MenuBar = () => {
 					labelId='demo-simple-select-label'
 					id='demo-simple-select'
 					label='Size'
+					value={fontSize}
+					onChange={e => handleFontChange(e.target.value)}
 				>
-					<MenuItem value={'paragraph'}>P</MenuItem>
-					<MenuItem value={'1'}>H1</MenuItem>
-					<MenuItem value={'2'}>H2</MenuItem>
-					<MenuItem value={'3'}>H3</MenuItem>
-					<MenuItem value={'4'}>H4</MenuItem>
-					<MenuItem value={'5'}>H5</MenuItem>
-					<MenuItem value={'6'}>H6</MenuItem>
+					<MenuItem value={0}>P</MenuItem>
+					<MenuItem value={1}>H1</MenuItem>
+					<MenuItem value={2}>H2</MenuItem>
+					<MenuItem value={3}>H3</MenuItem>
+					<MenuItem value={4}>H4</MenuItem>
+					<MenuItem value={5}>H5</MenuItem>
+					<MenuItem value={6}>H6</MenuItem>
 				</Select>
-				<IconButton
-					onClick={() =>
-						editor
-							.chain()
-							.focus()
-							.setParagraph()
-							.run()
-					}
-					className={editor.isActive('paragraph') ? 'is-active' : ''}
-				>
-					paragraph
-				</IconButton>
-				<IconButton
-					onClick={() =>
-						editor
-							.chain()
-							.focus()
-							.toggleHeading({ level: 1 })
-							.run()
-					}
-					className={
-						editor.isActive('heading', { level: 1 }) ? 'is-active' : ''
-					}
-				>
-					h1
-				</IconButton>
 				<IconButton
 					onClick={() =>
 						editor
@@ -219,22 +254,14 @@ const MenuBar = () => {
 				>
 					<Redo color={editor.isActive('redo') ? 'primary' : 'action'} />
 				</IconButton>
-				<Button
-					onClick={() =>
-						editor
-							.chain()
-							.focus()
-							.setColor('#958DF1')
-							.run()
-					}
-					className={
-						editor.isActive('textStyle', { color: '#958DF1' })
-							? 'is-active'
-							: ''
-					}
-				>
-					purple
-				</Button>
+				<TextField
+					type='color'
+					sx={{ width: 50 }}
+					value={color}
+					// onChange={e => setColor(e.target.value)}
+					onInput={handleColorChange}
+				/>
+				{/* <MuiColorInput format='hex' value={color} onChange={setColor} /> */}
 			</Toolbar>
 		</AppBar>
 	);
