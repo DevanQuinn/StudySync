@@ -2,6 +2,8 @@ import { AppBar, Avatar, Button, Container, Toolbar, Typography } from '@mui/mat
 import { Link } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import Logo from './Logo';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import IconButton from '@mui/material/IconButton';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { deleteDoc, doc, getDoc, getFirestore, updateDoc } from 'firebase/firestore';
 import app from '../firebase';
@@ -70,6 +72,9 @@ const Navbar = () => {
 					component='div'
 					sx={{ flexGrow: 1 }}
 				></Typography>
+				<IconButton sx={{flexGrow: .1}}>
+					<SmartToyIcon />
+				</IconButton>
 				<Avatar
 					src={user ? (image) : (null)}
 					sx={{mr : 2}}
