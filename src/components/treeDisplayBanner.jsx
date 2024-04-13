@@ -34,7 +34,9 @@ const treeDisplayBanner = () => { //trees should be an array of ints, each repre
 				const docRef = doc(db, 'users', username); //find user object. usernames should be unique
 				setDoc(docRef, {}, {merge:true}).then(() => { //ensure that user object exists before trying to write to its properties
 					getDoc(docRef).then((doc) => { //get that users properties
-						updateTrees(doc.data().treeSelection)
+						if (doc.data().treeSelection != undefined) {
+							updateTrees(doc.data().treeSelection)
+						}
                     }); //set the frontends properties equal to the database properties
 				})
 			})

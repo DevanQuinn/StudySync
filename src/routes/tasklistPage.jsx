@@ -64,7 +64,9 @@ function TasklistsPage() {
 				const docRef = doc(db, 'users', username); //find user object. usernames should be unique
 				setDoc(docRef, {}, {merge:true}).then(() => { //ensure that user object exists before trying to write to its properties
 					getDoc(docRef).then((doc) => { //get that users properties
-						setPreferences({color:doc.data().preferences.color}); //set the frontends properties equal to the database properties
+						if (doc.data().preferences != undefined) {
+							setPreferences({color:doc.data().preferences.color}); //set the frontends properties equal to the database properties
+						}
 					})
 				})
 			})
@@ -92,8 +94,6 @@ function TasklistsPage() {
       		</Slide>
 			<DashboardConfigurator initialPreference={preferences} preferenceCallback={updatePreferences}/>
 			<TasklistList className="component-wrapper"/>
-			<TreeDisplayBanner inittrees={[0,0,0,0,0]}/>
-			<TreeDisplaySelector/>
 		</div>
 		
 	)

@@ -38,7 +38,8 @@ export default function RoomPomodoro() {
   const [count, setCount] = useState(1);
   const [percentDone, setPercentDone] = useState(0);
   const [treeSelection, updateTreeSelection] = useState(0);
-  const user = useUser();
+  const [disableStartButton, updateDisableStartButton] = useState(false);
+  const user = useUser(false);
   const db = getFirestore(app);
 
   const handleSubmit = (event) => {
@@ -75,7 +76,7 @@ export default function RoomPomodoro() {
     return () => timer.stop(); // Cleanup timer on component unmount
   }, [timer, count, breakTime, startTime]);
   
-  const addTreeToGarden = (treeType, quantity) => {
+  const addTreeToGarden = (treeType, quantity, studySeconds) => {
     if (user) {
       var username;
       if (user) { //if logged in
@@ -83,13 +84,16 @@ export default function RoomPomodoro() {
         getDocs(q).then(userssnapshot => { //get username
           userssnapshot.forEach(user => { //should only run once if userIDs are unique
             username = user.data().username; //save username
+            console.log(username);
+            console.log(user.uid);
           })
         }).then(() => { //with username
           getDoc(doc(db, "users", username)).then(usersnapshot => {
+            console.log(usersnapshot);
             if (usersnapshot.data().trees == undefined || usersnapshot.data().trees[treeType] == undefined) {
               setDoc(doc(db, "users", username), 
-                {trees : 
-                  {[treeType] : Number(quantity)}},
+                {trees : {[treeType] : Number(quantity)},
+                },
                 {merge:true}
               )
             } else {
@@ -98,6 +102,11 @@ export default function RoomPomodoro() {
                   {[treeType] : (Number(usersnapshot.data().trees[treeType]) + Number(quantity))}},
                 {merge:true}
               )
+            }
+            if (usersnapshot.data().totalStudySeconds == undefined ) {
+              setDoc(doc(db, "users", username), {totalStudySeconds : {studySeconds}}, {merge:true});
+            } else {
+              setDoc(doc(db, "users", username), {totalStudySeconds : usersnapshot.data().totalStudySeconds + studySeconds}, {merge:true})
             }
           })
         })
@@ -120,7 +129,7 @@ export default function RoomPomodoro() {
         </Typography>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 1, width: '100%' }}>
           <Stack direction="row" spacing={2} justifyContent="center">
-            <Button variant="contained" sx={{ fontSize: '0.75rem', padding: '6px 12px' }} onClick={() => timer.start()}>
+            <Button disabled={disableStartButton} variant="contained" sx={{ fontSize: '0.75rem', padding: '6px 12px' }} onClick={() => timer.start()}>
               Start
             </Button>
             <Button variant="contained" sx={{ fontSize: '0.75rem', padding: '6px 12px' }} onClick={() => timer.pause()}>
@@ -150,7 +159,15 @@ export default function RoomPomodoro() {
           <Button fullWidth variant="contained" sx={{ mt: 1, mb: 2, fontSize: '0.75rem', padding: '6px 12px' }} type="submit">
             Set
           </Button>
-          <TimerBar percentDone={percentDone} studyState={study} treeSelection={treeSelection} updateTreeSelection={updateTreeSelection} addTreeToGarden={addTreeToGarden}/>
+          <TimerBar 
+            percentDone={percentDone} 
+            studyState={study} 
+            treeSelection={treeSelection} 
+            updateTreeSelection={updateTreeSelection} 
+            addTreeToGarden={addTreeToGarden} 
+            studyTime={timer.getStartTime()}
+            disableStartButtonFunc={(val) => updateDisableStartButton(val)}  
+          />
         </form>
       </Box>
     </Container>

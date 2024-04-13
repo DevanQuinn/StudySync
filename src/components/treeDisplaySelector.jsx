@@ -32,7 +32,9 @@ const TreeDisplaySelector = () => {
 			const q = query(collection(db, "users"), where("userID", "==", user.uid)); //set up username query
 			getDocs(q).then(userssnapshot => { //get username
 				userssnapshot.forEach(user => { //should only run once if userIDs are unique
-					updateTreeInventory(user.data().trees); //save username
+                    if (user.data().trees) {
+					    updateTreeInventory(user.data().trees); //save username
+                    }
 				})
 			})
         }
