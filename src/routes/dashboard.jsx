@@ -56,7 +56,7 @@ function Dashboard() {
 				<AddIcon />
 			</Fab>
 			<Slide direction="up" in={showPomodoro} mountOnEnter unmountOnExit>
-       		 	<Box><RoomPomodoro /></Box>
+       		 	<Box sx={{ position: 'fixed', bottom: 60, right: 0, zIndex: 1100 }}><RoomPomodoro /></Box>
       		</Slide>
 			<DashboardConfigurator initialPreference={preferences} preferenceCallback={updatePreferences}/>
 			<TasklistList className="component-wrapper"/>	
