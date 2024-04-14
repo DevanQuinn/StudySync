@@ -5,13 +5,39 @@ import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField, withT
 import RoomPomodoro from '../components/RoomPomodoro';
 import { useNavigate } from 'react-router-dom';
 import Draggable from 'react-draggable';
-import { doc, getDoc, getFirestore, deleteDoc, updateDoc, setDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, deleteDoc, updateDoc, setDoc, serverTimestamp, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth'; // Make sure to import getAuth
+import { useLocation } from 'react-router-dom';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 
+ // Your web app's Firebase configuration
+ const firebaseConfig = {
+  apiKey: 'AIzaSyAOLFu9q6gvdcDoOJ0oPuQKPgDyOye_2uM',
+  authDomain: 'studysync-3fbd7.firebaseapp.com',
+  projectId: 'studysync-3fbd7',
+  storageBucket: 'studysync-3fbd7.appspot.com',
+  messagingSenderId: '885216959280',
+  appId: '1:885216959280:web:917a7216776b36e904c6f5',
+  measurementId: 'G-TS13EWHRMB',
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+/*
+TODO
+
+- Update the profile and hours with profile pictures when users enter the room
+- Toggle voice for everyone?
+- When the person exits the room, there time studied gets added to Nilisha's statistics for the leadorboard
+- TODO Nilisha takes current time - join time and adds that to their study time.
+*/
 
 // Categories and their associated video URLs
-const videoCategories = {
+export const videoCategories = {
   Lofi: [
     'jfKfPfyJRdk', 'SllpB3W5f6s', 'FxJ3zPUU6Y4', 'A_nRzRZQqv0', 
   ],
@@ -40,28 +66,14 @@ const videoCategories = {
 
 
 
+
 const Chat = ({theme, roomId}) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [activeDrags, setActiveDrags] = useState(0);
+  const { inviterUid, videoCategory } = location.state || {};
   
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: 'AIzaSyAOLFu9q6gvdcDoOJ0oPuQKPgDyOye_2uM',
-      authDomain: 'studysync-3fbd7.firebaseapp.com',
-      projectId: 'studysync-3fbd7',
-      storageBucket: 'studysync-3fbd7.appspot.com',
-      messagingSenderId: '885216959280',
-      appId: '1:885216959280:web:917a7216776b36e904c6f5',
-      measurementId: 'G-TS13EWHRMB',
-    };
-  
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-  
-
+   
   const clearMessages = () => {
     setMessages([]); // Clears the messages from the UI
   };
@@ -74,15 +86,37 @@ const Chat = ({theme, roomId}) => {
     setActiveDrags(prevActiveDrags => prevActiveDrags - 1);
   };
 
+  useEffect(() => {
+    const currentUser = auth.currentUser;
+    const userId = inviterUid || currentUser.uid;
+
+    const q = query(collection(db, `${inviterUid}_studyrooms/${roomId}/chat`), orderBy('timestamp')); 
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const messages = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+        setMessages(messages);
+    });
+
+    return () => unsubscribe(); // Clean up on unmount
+}, [roomId, db]);
+
   const sendMessage = async () => {
-    if (message.trim()) {
+    const currentUser = auth.currentUser;
+    const userId = inviterUid || currentUser.uid;
+
+
+    if (message.trim() && currentUser) {
       try {
-        const chatRef = doc(db, `studyrooms/${roomId}/chat`, new Date().toISOString()); // Creates a unique ID based on timestamp
+        const chatRef = doc(db, `${inviterUid}_studyrooms/${roomId}/chat`, new Date().toISOString()); // Creates a unique ID based on timestamp
         await setDoc(chatRef, {
+          sender: currentUser.displayName,
           message: message,
           timestamp: serverTimestamp(), // Firebase server timestamp
         });
-        setMessages([...messages, message]);
+        
+      //  setMessages([...messages, {text: message, sender: currentUser.displayName}]); 
         setMessage('');
       } catch (error) {
         console.error("Error sending message:", error);
@@ -93,7 +127,7 @@ const Chat = ({theme, roomId}) => {
   const dragHandlers = {onStart: onStart, onStop: onStop};
 
   return (
-    
+    /*
     <Draggable handle=".handle" {...dragHandlers}>
       <Box sx={{
         position: 'fixed', 
@@ -101,20 +135,23 @@ const Chat = ({theme, roomId}) => {
         left: 0, 
         zIndex: 1100, 
         width: 300, 
+       // maxHeight: '50vh',
         backgroundColor: theme === 'light' ? '#FFF' : '#333', // Use theme prop for background color
         padding: '10px', 
         borderRadius: '10px', 
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', 
-        overflow: 'auto',
+        overflowY: 'auto',
         color: theme === 'light' ? '#000' : '#FFF', // Adjust text color based on theme
       }}>
-        {/* Draggable handle */}
+
         <Box className="handle" sx={{cursor: 'move', backgroundColor: '#f0f0f0', padding: '10px', borderRadius: '5px'}}>
           <strong>Drag Me</strong>
         </Box>
         <Stack spacing={2}>
-          {messages.map((msg, index) => (
-            <Box key={index} sx={{ wordWrap: 'break-word' }}>{msg}</Box>
+          {messages.map((msg) => (
+            <Box key={msg.id} sx={{ wordWrap: 'break-word' }}>
+              <strong>{msg.sender}:</strong> {msg.message}
+            </Box>
           ))}
           <Box>
             <TextField 
@@ -131,8 +168,53 @@ const Chat = ({theme, roomId}) => {
         </Stack>
       </Box>
     </Draggable>
+    */
+
+    <Draggable handle=".handle" {...dragHandlers}>
+  <Box sx={{
+      position: 'fixed', 
+      bottom: 0, 
+      left: 0, 
+      zIndex: 1100, 
+      width: 300,
+      backgroundColor: theme === 'light' ? '#FFF' : '#333', // Use theme prop for background color
+      padding: '10px', 
+      borderRadius: '10px', 
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      color: theme === 'light' ? '#000' : '#FFF', // Adjust text color based on theme
+    }}>
+    {/* Draggable handle */}
+    <Box className="handle" sx={{cursor: 'move', backgroundColor: '#f0f0f0', padding: '10px', borderRadius: '5px'}}>
+      <strong>Drag Me</strong>
+    </Box>
+    <Box sx={{ maxHeight: '50vh', overflowY: 'auto' }}> {/* This Box wraps the messages and allows for scrolling */}
+      <Stack spacing={2}>
+        {messages.map((msg) => (
+          <Box key={msg.id} sx={{ wordWrap: 'break-word' }}>
+            <strong>{msg.sender}:</strong> {msg.message}
+          </Box>
+        ))}
+      </Stack>
+    </Box>
+    <Box sx={{ mt: 1 }}> {/* Separate Box for input to stay fixed at the bottom */}
+      <TextField 
+        fullWidth
+        variant="outlined"
+        size="small"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Type a message..."
+      />
+      <Button variant="contained" onClick={sendMessage} sx={{ mt: 1 }}>Send</Button>
+      <Button variant="outlined" onClick={clearMessages} sx={{ mt: 1 }}>Clear Messages</Button>
+    </Box>
+  </Box>
+</Draggable>
+
   );
 };
+
+
 
 
 
@@ -152,11 +234,13 @@ const RoomDetailsPage = () => {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedFriends, setSelectedFriends] = useState([]);
   const [allUsers, setAllUsers] = useState([]); // Assuming you fetch all users for inviting
-
+  const location = useLocation();
+  const { inviterUid, videoCategory } = location.state || {};
+  const [roomUsers, setRoomUsers] = useState([]);
+  
   // const handleCategoryClick = (event) => {
   //   setAnchorEl(event.currentTarget);
   // };
-
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -165,6 +249,97 @@ const RoomDetailsPage = () => {
   const handleOpenCategoryMenu = () => {
     setShowCategoryMenu(true); // Show the category menu
   };
+
+  
+
+  const calculateTimeSpent = (joinTime) => {
+    if (!joinTime || !joinTime.toDate) {
+      console.warn("joinTime is null or not a valid Firestore timestamp");
+      return 0; // Return 0 or some default value indicating no time spent
+    }
+  
+    const now = new Date();
+    const joinedAt = joinTime.toDate(); // Convert Firestore Timestamp to JavaScript Date
+    const spentMilliseconds = now - joinedAt;
+    return Math.round(spentMilliseconds / 1000 / 60); // Convert to minutes
+  };
+
+
+
+  useEffect(() => {
+
+    const fetchAndUpdateTimeSpent = async () => {
+      // Assuming collectionName and roomId are defined and accessible
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        console.error("User authentication is required.");
+        return;
+      }
+  
+      const userId = inviterUid || currentUser.uid;
+
+      
+  const roomUsersRef = collection(db, `${userId}_studyrooms/${roomId}/roomUsers`);
+    try {
+      const snapshot = await getDocs(roomUsersRef);
+      const usersWithTime = [];
+      snapshot.forEach((doc) => {
+        const userData = doc.data();
+
+        console.log("UserData " + userData.displayName);
+    
+        // Assuming `joinTime` is stored as a Firebase timestamp in the document
+        const timeSpent = calculateTimeSpent(userData.joinTime);
+        usersWithTime.push({ displayName: userData.displayName, timeSpent }); // Ensure you're pushing the correct user identifier
+      });
+
+      setRoomUsers(usersWithTime); // Update your state to render the UI with fetched data
+    } catch (error) {
+      console.error("Error fetching room users:", error);
+    }
+  };
+
+  fetchAndUpdateTimeSpent();
+
+  // You might not need to set this interval if you only want to fetch data once when the component mounts
+  const intervalId = setInterval(fetchAndUpdateTimeSpent, 60000); // Refresh every minute if needed
+
+  return () => clearInterval(intervalId); // Cleanup on unmount
+}, []); // Ensure the useEffect dependencies are correctly set
+  
+// useEffect(() => {
+//   const fetchUsers = async () => {
+//     const querySnapshot = await getDocs(collection(db, "users"));
+//     const users = [];
+//     querySnapshot.forEach((doc) => {
+//       users.push(doc.data().username);
+//     });
+//     setAllUsers(users);
+//   };
+
+//   fetchUsers();
+// }, [db]);
+
+// const sendInvitations = async () => {
+//   const roomId = roomId;
+//   const user = auth.currentUser;
+
+//   if (user) {
+//     selectedFriends.forEach(async (friendDisplayName) => {
+//       await addDoc(collection(db, "invitations"), {
+//         invitedUserDisplayName: friendDisplayName,
+//         roomId,
+//         inviterUserId: user.displayName,
+//         // Additional fields as needed
+//       });
+//     });
+    
+//     // Reset state and close dialog after sending invitations
+//     setSelectedFriends([]);
+//     setInviteDialogOpen(false);
+//   }
+// };
+  
 
   const handleSelectCategory = async (category) => {
     // Function logic to change the room, similar to changeRoom
@@ -187,6 +362,7 @@ const RoomDetailsPage = () => {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
+
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -220,42 +396,48 @@ const RoomDetailsPage = () => {
     }
   };
   
-  
+
   useEffect(() => {
+    // Example usage of inviterUid to fetch room data or any other required data
     const fetchRoomData = async () => {
-      const user = auth.currentUser;
-      if (!user) {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
         console.error("User not authenticated");
-        navigate('/login'); // Redirect to login or handle unauthenticated state
+        navigate('/login');
         return;
       }
-
-      const userId = user.uid;
-      console.log(`Fetching room data for room ID: ${roomId} under user ID: ${userId}`); // Debug statement
-
+      // Use inviterUid if present, otherwise fall back to the current user's UID
+      const userId = inviterUid || currentUser.uid;
       try {
         const roomRef = doc(db, `${userId}_studyrooms/${roomId}`);
         const docSnap = await getDoc(roomRef);
         if (docSnap.exists()) {
-          console.log("Room data found:", docSnap.data()); // Debug statement
-          setRoomData(docSnap.data());
+          console.log("Room data found:", docSnap.data());
+          setRoomData(docSnap.data())
 
-          // Use the videoCategory from roomData to select the initial video URL
-          const initialVideoCategory = docSnap.data().videoCategory;
-          const initialVideoUrl = videoCategories[initialVideoCategory]?.[0]; // Use the first video URL from the selected category
-          setCurrentVideoUrl(initialVideoUrl);
-          // Assuming you have a logic to select the initial video based on the room data
+          
+          
+          // Logic to select a random video from the category
+        const categoryVideos = videoCategories[docSnap.data().videoCategory];
+        if (categoryVideos) {
+          const randomIndex = Math.floor(Math.random() * categoryVideos.length);
+          setCurrentVideoUrl(categoryVideos[randomIndex]);
+        }
+    
         } else {
-          console.log("No such room exists!");
+          console.error("No such room exists");
+          // Handle the error - maybe redirect to a "room not found" page or back to dashboard
         }
       } catch (error) {
         console.error("Error fetching room data:", error);
+        // Handle the error appropriately
       }
     };
 
     fetchRoomData();
-  }, [roomId, db, auth, navigate]);
-  
+  }, [roomId, inviterUid, auth, navigate, db]);;
+
+
 
   const changeRoom = async (category) => {
     // Select a random video URL from the specified category
@@ -351,12 +533,21 @@ const RoomDetailsPage = () => {
     }
   };
 
+const isCreator = auth.currentUser?.displayName === roomData?.creator_id;
+
+
   return (
     <section className="layout" style={themeStyles.layout}>
        <div className="leftSide" style={themeStyles.leftSide}>
         <Typography variant="h5" component="h2" className="font-bold">
           Profiles & Hours
         </Typography>
+        {/* Render each user and their time spent */}
+        <div>
+          {roomUsers.map((user, index) => (
+            <Typography key={index}>{`${user.displayName}: ${user.timeSpent} minutes`}</Typography>
+          ))}
+        </div>
 
         <Chat theme={isLightMode ? 'light' : 'dark'} roomId={roomId} />
       </div>
@@ -370,9 +561,20 @@ const RoomDetailsPage = () => {
       <div className="footer">
         <Button variant="contained" style={themeStyles.button} onClick={toggleVolume}>{isMuted ? 'Unmute' : 'Mute'}</Button>
         <Button variant="contained" style={themeStyles.button} onClick={togglePomodoro}>{showPomodoro ? 'Hide Timer' : 'Show Timer'}</Button>
-        <Button variant="contained" style={themeStyles.button} onClick={() => setInviteDialogOpen(true)}>Invite Friends</Button>
+        {isCreator && (
+        <>
+          <Button variant="contained" style={themeStyles.button} onClick={() => setInviteDialogOpen(true)}>
+            Invite Friends
+          </Button>
+        </>
+        )}
+          <Button variant="contained" style={themeStyles.button} onClick={handleOpenCategoryMenu}>
+            Change Room
+          </Button>
+        
+      
         <Button variant="contained" style={themeStyles.button} onClick={handleExitAndDeleteRoom}>Exit Room</Button>
-        <Button variant="contained" style={themeStyles.button} onClick={handleOpenCategoryMenu}>Change Room</Button>
+       
       
         <Dialog open={inviteDialogOpen} onClose={() => setInviteDialogOpen(false)}>
       <DialogTitle>Invite Friends</DialogTitle>
@@ -385,8 +587,8 @@ const RoomDetailsPage = () => {
             onChange={(event) => setSelectedFriends(event.target.value)}
             renderValue={(selected) => selected.join(', ')}
           >
-            {allUsers.map((user) => (
-              <MenuItem key={user} value={user}>
+            {allUsers.map((user, index) => (
+              <MenuItem key={user + index} value={user}>
                 {user}
               </MenuItem>
             ))}
@@ -399,6 +601,7 @@ const RoomDetailsPage = () => {
       </DialogActions>
     </Dialog>
       {/* Slide-up category menu */}
+{/*       
       <Slide direction="up" in={showCategoryMenu} mountOnEnter unmountOnExit>
         <Box sx={{ position: 'fixed', bottom: 0, width: '50%', zIndex: 1200}}>
           <Typography variant="h6" sx={{ textAlign: 'center', padding: '10px 0' }}>
@@ -412,7 +615,7 @@ const RoomDetailsPage = () => {
             ))}
           </Stack>
         </Box>
-      </Slide>
+      </Slide> */}
          {/* Light/Dark Toggle Button */}
          <div>
           <input type="checkbox" className="checkbox" id="checkbox" checked={!isLightMode} onChange={toggleTheme} />
@@ -422,8 +625,56 @@ const RoomDetailsPage = () => {
             <span className="ball"></span>
           </label>
         </div>
-      
-        <Menu
+        
+{/* Slide-up category menu with enhanced styling */}
+<Slide direction="up" in={showCategoryMenu} mountOnEnter unmountOnExit>
+  <Box 
+    sx={{ 
+      position: 'fixed', 
+      bottom: 0, 
+      width: '100%', // Full width for better visibility
+      zIndex: 1200,
+      background: (theme) => theme.palette.mode === 'dark' ? 
+        'linear-gradient(145deg, #424242, #616161)' : // Dark mode gradient
+        'linear-gradient(145deg, #ffffff, #e0e0e0)', // Light mode gradient
+      boxShadow: '0px -2px 10px rgba(0,0,0,0.3)', // Shadow for depth, adjusted for upward direction
+      borderTopLeftRadius: '20px', // Slightly larger rounded corners for the top
+      borderTopRightRadius: '20px',
+      p: 2, // Padding around the content
+      color: (theme) => theme.palette.text.primary, // Text color from theme
+    }}>
+    <Typography variant="h6" sx={{ textAlign: 'center', mb: 2, fontWeight: 'bold' }}>
+      Select a Video Category
+    </Typography>
+    <Stack direction="row" justifyContent="center" flexWrap="wrap" spacing={2}>
+      {Object.keys(videoCategories).map((category) => (
+        <Button 
+          key={category} 
+          onClick={() => handleSelectCategory(category)} 
+          variant="contained" // Using contained for a more pronounced look
+          startIcon={<VideoLibraryIcon />} // Assuming you have an icon for categories
+          sx={{ 
+            boxShadow: '0px 4px 10px rgba(0,0,0,0.2)', // Button shadow for depth
+            textTransform: 'none', // Avoid uppercase text
+            background: (theme) => theme.palette.mode === 'dark' ? 
+              'linear-gradient(145deg, #616161, #424242)' : // Button gradient for dark mode
+              'linear-gradient(145deg, #e0e0e0, #ffffff)', // Button gradient for light mode
+            color: (theme) => theme.palette.mode === 'dark' ? '#FFF' : '#000', // Button text color
+            '&:hover': { // Hover state for button
+              background: (theme) => theme.palette.mode === 'dark' ? 
+                'linear-gradient(145deg, #757575, #616161)' : 
+                'linear-gradient(145deg, #f5f5f5, #e0e0e0)',
+            },
+          }}
+        >
+          {category}
+        </Button>
+      ))}
+    </Stack>
+  </Box>
+</Slide>
+
+        {/* <Menu
           id="simple-menu"
           anchorEl={anchorEl}
           keepMounted
@@ -434,6 +685,7 @@ const RoomDetailsPage = () => {
             <MenuItem key={category} onClick={() => changeRoom(category)}>{category}</MenuItem>
           ))}
         </Menu>
+         */}
       </div>
 
       <Slide direction="up" in={showPomodoro} mountOnEnter unmountOnExit>
