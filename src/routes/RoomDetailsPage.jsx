@@ -67,7 +67,7 @@ export const videoCategories = {
 
 
 
-const Chat = ({theme, roomId}) => {
+const Chat = ({theme, roomId, chatCount, setChatCount}) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [activeDrags, setActiveDrags] = useState(0);
@@ -118,6 +118,7 @@ const Chat = ({theme, roomId}) => {
         
       //  setMessages([...messages, {text: message, sender: currentUser.displayName}]); 
         setMessage('');
+        setChatCount(chatCount + 1);
       } catch (error) {
         console.error("Error sending message:", error);
       }
@@ -238,6 +239,7 @@ const RoomDetailsPage = () => {
   const { inviterUid, videoCategory } = location.state || {};
   const [roomUsers, setRoomUsers] = useState([]);
   const [roomJoinTime, setRoomJoinTime] = useState(0);
+  const [chatCount, setChatCount] = useState(0);
   
   // const handleCategoryClick = (event) => {
   //   setAnchorEl(event.currentTarget);
@@ -482,8 +484,6 @@ const RoomDetailsPage = () => {
       try {
         // Define the room document reference
         const roomRef = doc(db, `studyrooms/${roomId}`); // Adjusted for a more generic path if necessary
-
-
         const now = new Date();
         const durationMs = now - roomJoinTime;
 
@@ -491,8 +491,7 @@ const RoomDetailsPage = () => {
           ? collection(db, `userStats/${user?.uid}/studyRoomTimes`)
           : null;
 
-        const statsData = { durationMs };
-
+        const statsData = { durationMs, chatCount };
         try {
           await addDoc(studyRoomCol, statsData);
         } catch (error) {
@@ -568,7 +567,7 @@ const isCreator = auth.currentUser?.displayName === roomData?.creator_id;
           ))}
         </div>
 
-        <Chat theme={isLightMode ? 'light' : 'dark'} roomId={roomId} />
+        <Chat theme={isLightMode ? 'light' : 'dark'} roomId={roomId} chatCount={chatCount} setChatCount={setChatCount} />
       </div>
 
       <div className="body">
