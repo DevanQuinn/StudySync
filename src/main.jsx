@@ -33,14 +33,6 @@ const theme = createTheme({
 			main: '#B0DCCD',
 		},
 	},
-	palette: {
-		primary: {
-			main: '#20c997',
-		},
-		secondary: {
-			main: '#B0DCCD',
-		},
-	},
 });
 
 ReactDOM.createRoot(document.getElementById('root')).render(

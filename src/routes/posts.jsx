@@ -38,9 +38,11 @@ import {
 import moment from 'moment';
 import Post from '../components/posts/Post';
 import TagSearch from '../components/posts/TagSearch';
+import MyNotes from '../components/MyNotes';
 
 const Posts = () => {
 	const [posts, setPosts] = useState([]);
+	const [noteCount, setNoteCount] = useState('...');
 	const user = useUser();
 	const [loading, setLoading] = useState(true);
 	const [totalTimeStudied, setTotalTimeStudied] = useState([]);
@@ -143,7 +145,7 @@ const Posts = () => {
 		);
 
 	return (
-		<Container component='main' maxWidth='lg' sx={{ mt: 14 }}>
+		<Container component='main' maxWidth='lg' sx={{ mt: 14, mb: 10 }}>
 			<CssBaseline />
 			<Typography variant='h4' sx={{ mb: 2 }}>
 				User's Study Statistics
@@ -231,16 +233,32 @@ const Posts = () => {
 			<Typography variant='h4' sx={{ mb: 2 }}>
 				Notes
 			</Typography>
-			<Card
-				sx={{ display: 'flex', flexDirection: 'column', width: 1, p: 5 }}
-				component={'form'}
-				onSubmit={createNote}
-			>
-				<TextField label='Title' name='title' sx={{ mb: 2 }} required />
-				<Button variant='contained' type='submit'>
-					Make a new note
-				</Button>
-			</Card>
+			<Accordion sx={{ mt: 3 }}>
+				<AccordionSummary expandIcon={<ExpandMoreIcon />}>
+					<Typography variant='h6'>Make a new note</Typography>
+				</AccordionSummary>
+				<AccordionDetails>
+					<Card
+						sx={{ display: 'flex', flexDirection: 'column', width: 1, p: 5 }}
+						component={'form'}
+						onSubmit={createNote}
+					>
+						<TextField label='Title' name='title' sx={{ mb: 2 }} required />
+						<Button variant='contained' type='submit'>
+							Make a new note
+						</Button>
+					</Card>
+				</AccordionDetails>
+			</Accordion>
+
+			<Accordion sx={{ mt: 3, mb: 5 }}>
+				<AccordionSummary expandIcon={<ExpandMoreIcon />}>
+					<Typography variant='h6'>{`Your notes (${noteCount})`}</Typography>
+				</AccordionSummary>
+				<AccordionDetails>
+					<MyNotes setNoteCount={setNoteCount} />
+				</AccordionDetails>
+			</Accordion>
 
 			<Typography variant='h4' sx={{ mb: 2, mt: 2 }}>
 				Posts
