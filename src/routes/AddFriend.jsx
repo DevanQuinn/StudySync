@@ -162,28 +162,6 @@ const handleVisibilityToggle = async () => {
     fetchData();
   }, []);
 
-  // async function inviteFriend(selectedFriend) {
-  //   try {
-  //     console.log(selectedFriend);
-  //     const recipientDocRef = doc(db, 'usersNew', selectedFriend.username);
-  
-  //     await updateDoc(recipientDocRef, {
-  //         friendRequests: arrayUnion(user.uid)  // Use arrayUnion directly
-  //     });
-  
-  //     toast.success(`Friend request sent to ${selectedFriend.username}`);
-  // } catch (error) {
-  //     console.error('Error sending friend request:', error);
-  
-  //     if (error.code === 'firestore/permission-denied') {
-  //         toast.error('You do not have permission to send friend requests. Please check your Firestore rules.');
-  //     } else {
-  //         toast.error('Error sending friend request. Please try again.');
-  //     }
-  // } finally {
-  //     setIsLoadingRequest(false);
-  // }
-  // }
 
   async function inviteFriend(selectedFriend) {
     try {
@@ -195,6 +173,19 @@ const handleVisibilityToggle = async () => {
       });
   
       toast.success(`Friend request sent to ${selectedFriend.username}`);
+
+    console.log('Inviting friend:', selectedFriend);
+    setSelectedFriend(selectedFriend);
+  };
+
+  const handleAcceptRequest = async (accept) => {
+    try {
+      const userDocRef = doc(db, 'usersNew', "Sai Monish"); // Change "Your Name" to your actual name
+      const friendsCount = accept ? 1 : 0;
+      await setDoc(userDocRef, { friendsCount });
+      //toast.success(`Friend request ${accept ? 'accepted' : 'rejected'}`);
+      setShowConfirmation(false);
+      console.log('Friend request processed successfully');
     } catch (error) {
       console.error('Error sending friend request:', error);
   
