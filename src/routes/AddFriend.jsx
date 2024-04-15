@@ -6,6 +6,7 @@ import {
   doc,
   updateDoc,
   arrayUnion
+  arrayUnion
 } from "firebase/firestore";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -50,11 +51,21 @@ const FriendDropdown = ({ friends, selectedFriend, setSelectedFriend, inviteFrie
   //   console.log(friend); // Log the selected friend
   // };
 
+  // const handleSelectChange = (event) => {
+  //   const selectedFriendId = event.target.value;
+  //   console.log("selectedfriendId: ", selectedFriendId);
+  //   const friend = friends.find((friend) => friend.id === selectedFriendId);
+  //   setSelectedFriend(friend);
+  //   console.log(friend); // Log the selected friend
+  // };
+
   const handleSelectChange = (event) => {
     const selectedFriendId = event.target.value;
     console.log("selectedfriendId: ", selectedFriendId);
+    console.log("selectedfriendId: ", selectedFriendId);
     const friend = friends.find((friend) => friend.id === selectedFriendId);
     setSelectedFriend(friend);
+    console.log(friend); // Log the selected friend
     console.log(friend); // Log the selected friend
   };
 
@@ -68,7 +79,7 @@ const FriendDropdown = ({ friends, selectedFriend, setSelectedFriend, inviteFrie
           </option>
         ))}
       </select>
-      {/* <button onClick={() => selectedFriend && inviteFriend(selectedFriend)}>Send Invite</button> */}
+      {/* {/* <button onClick={() => selectedFriend && inviteFriend(selectedFriend)}>Send Invite</button> */} */}
     </div>
   );
 };
@@ -196,7 +207,6 @@ const handleVisibilityToggle = async () => {
 
       // Use FieldValue directly
       await updateDoc(recipientDocRef, {
-        //friendRequests: FieldValue.arrayUnion(user.uid)
         friendRequests: arrayUnion(user.uid)  // Use arrayUnion directly
       });
 
@@ -225,7 +235,12 @@ const handleVisibilityToggle = async () => {
       console.log('Friend request processed successfully');
     } catch (error) {
       console.error('Error sending friend request:', error);
-      toast.error('Error sending friend request. Please try again.');
+  
+      if (error.code === 'firestore/permission-denied') {
+        toast.error('You do not have permission to send friend requests. Please check your Firestore rules.');
+      } else {
+        toast.error('Error sending friend request. Please try again.');
+      }
     } finally {
       setIsLoadingRequest(false);
     }
