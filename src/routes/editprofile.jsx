@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, } from 'react';
-import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link, TextField, Typography } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link, Switch, TextField, Typography } from '@mui/material';
 import useUser from '../hooks/useUser';
 import {
     getFirestore,
@@ -16,7 +16,8 @@ const EditProfile = () => {
     const auth = getAuth(app);
     const user = useUser(true);
     const db = getFirestore(app);
-    const docRef = user ? doc(db, `users`, user.displayName) : null;
+    const docRef = user ? doc(db, `profile-data`, user.uid) : null;
+
     const fetchProfileDataCalled = useRef(false);
     const storage = getStorage();
     const [userEmail, setUserEmail] = useState('');
@@ -29,8 +30,8 @@ const EditProfile = () => {
     const favoritesOptions = ['Leaderboard', 'Study Room', 'Timer', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards'];
     const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
 
-    // Load profile visibility setting from localStorage on component mount
-    useEffect(() => {
+     // Load profile visibility setting from localStorage on component mount
+     useEffect(() => {
         const storedVisibility = localStorage.getItem('isPublicProfile');
         if (storedVisibility !== null) {
             setIsPublicProfile(JSON.parse(storedVisibility));
@@ -41,10 +42,10 @@ const EditProfile = () => {
     useEffect(() => {
         localStorage.setItem('isPublicProfile', JSON.stringify(isPublicProfile));
     }, [isPublicProfile]);
+
     const uploadPublicProfileData = async profile => {
-		await addDoc(col, profile);
-		//fetchProfileData();
-	};
+        await addDoc(col, profile);
+    };
 
     const fetchProfileData = async () => {
         if (docRef && !fetchProfileDataCalled.current) {
@@ -76,9 +77,8 @@ const EditProfile = () => {
 
         const loadImageBlob = async () => {
             if (profileData.profilePicture && profileData.profilePicture != 'unset') {
-                
                 const storage = getStorage();
-                const pathReference = ref(storage, `profile-pictures/${data.pfpID}`);
+                const pathReference = ref(storage, profileData.profilePicture);
                 try {
                     // getting the binary data from the StorageReference path
                     const blob = await getBlob(pathReference);
@@ -98,7 +98,7 @@ const EditProfile = () => {
 
     const uploadProfileData = async profile => {
         if (user) {
-            const docRef = doc(db, `users/`, `${user.displayName}`);
+            const docRef = doc(db, `profile-data/`, `${user.uid}`);
             await setDoc(docRef, profile);
         }
     };
@@ -140,16 +140,17 @@ const EditProfile = () => {
         console.log({
             favorites: selectedFavorites,
             studyGoals: data.get('studyGoals'),
-            pfpID: data.get('profilePicture'),
+            profilePicture: data.get('profilePicture'),
             isPublicProfile: isPublicProfile, // Include the value of isPublicProfile in the form data
         });
     };
 
     const uploadImage = async imageToUpload => {
         const imageId = uuid();
-        const storageRef = ref(storage, `profile-pictures/${imageId}`);
+        const storageRef = ref(storage, `profile-images/${imageId}`);
         await uploadBytes(storageRef, imageToUpload);
-        return imageId;
+
+        return storageRef.fullPath;
     };
 
     const handleImageChange = (event) => {
@@ -175,16 +176,14 @@ const EditProfile = () => {
         if (selectedImage != null) {
             imagePath = await uploadImage(selectedImage);
         } else {
-            imagePath = profileData.pfpID;
+            imagePath = profileData.profilePicture;
         }
 
         var newData = {
             favorites: selectedFavorites,
             studyGoals: studyGoals,
-            pfpID: imagePath,
-            userID: user.uid,
-            username: user.displayName.toLowerCase()
-            }
+            profilePicture: imagePath
+        }
 
         await uploadProfileData(newData);
         setProfileData(newData);
@@ -315,21 +314,16 @@ const EditProfile = () => {
                             </Grid>
                         ))}
                     </Grid>
+                    {/* <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
+                        Profile Visibility
+                    </Typography> */}
                     <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
                         Profile Visibility
                     </Typography>
-                    {/* <FormControlLabel
+                    <FormControlLabel
                         control={<Switch checked={isPublicProfile} onChange={() => setIsPublicProfile(!isPublicProfile)} />}
                         label={isPublicProfile ? 'Public' : 'Private'}
-                    /> */}
-                    {/* <FormControlLabel
-                        control={<Switch checked={isPublicProfile} onChange={() => {
-                            const newVisibility = !isPublicProfile;
-                            console.log('New Profile Visibility:', newVisibility);
-                            setIsPublicProfile(newVisibility);
-                        }} />}
-                        label={isPublicProfile ? 'Public' : 'Private'}
-                    /> */}
+                    />
                     <Button
                         type="submit"
                         fullWidth
