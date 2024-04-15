@@ -157,19 +157,30 @@ const handleVisibilityToggle = async () => {
       if (!selectedFriend || !selectedFriend.username) {
         throw new Error('Selected friend or username is undefined or null.');
       }
-  
+
+      console.log(selectedFriend);
       const recipientDocRef = doc(db, 'usersNew', selectedFriend.username);
-  
+
       // Use FieldValue directly
       await updateDoc(recipientDocRef, {
-        friendRequests: FieldValue.arrayUnion(user.uid)
+        //friendRequests: FieldValue.arrayUnion(user.uid)
+        friendRequests: arrayUnion(user.uid)  // Use arrayUnion directly
       });
-  
-      toast.success(`Friend request sent to ${selectedFriend.username}`);
 
-    console.log('Inviting friend:', selectedFriend);
-    setSelectedFriend(selectedFriend);
-  };
+      toast.success(`Friend request sent to ${selectedFriend.username}`);
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      toast.error('Error sending friend request. Please try again.');
+
+      if (error.code === 'firestore/permission-denied') {
+        toast.error('You do not have permission to send friend requests. Please check your Firestore rules.');
+      } else {
+        toast.error('Error sending friend request. Please try again.');
+      }
+    } finally {
+      setIsLoadingRequest(false);
+    }
+  }
 
   const handleAcceptRequest = async (accept) => {
     try {
