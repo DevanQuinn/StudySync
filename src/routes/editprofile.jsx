@@ -22,47 +22,76 @@ const EditProfile = () => {
     const storage = getStorage();
     const [userEmail, setUserEmail] = useState('');
     const [imageBlob, setImageBlob] = useState(null);
-    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', profilePicture: 'unset' });
+    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', profilePicture: 'unset', profileVisibility: true });
     const [studyGoals, setStudyGoals] = useState('');
     const [selectedFavorites, setSelectedFavorites] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageUrl, setImageUrl] = useState(null);
     const favoritesOptions = ['Leaderboard', 'Study Room', 'Timer', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards'];
-    const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
+    //const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
+    const [profileVisibility, setProfileVisibility] = useState(true); // State for profile visibility
 
-     // Load profile visibility setting from localStorage on component mount
-     useEffect(() => {
-        const storedVisibility = localStorage.getItem('isPublicProfile');
-        if (storedVisibility !== null) {
-            setIsPublicProfile(JSON.parse(storedVisibility));
+
+// useEffect(() => {
+//     const storedVisibility = localStorage.getItem('profileVisibility');
+//     console.log("storedVisibility setting to localStorage", storedVisibility);
+//     if (storedVisibility !== null) {
+//         try {
+//             setIsPublicProfile(JSON.parse(storedVisibility));
+//             console.log("in try", JSON.parse(storedVisibility));
+//         } catch (error) {
+//             // Handle error parsing JSON
+//             console.error('Error parsing JSON:', error);
+//         }
+//     } else {
+//         console.log("storedVisibility is null or undefined");
+//     }
+// }, []);
+
+useEffect(() => {
+    const storedVisibility = localStorage.getItem('profileVisibility');
+    console.log("storedVisibility setting to localStorage", storedVisibility);
+    if (storedVisibility !== null) {
+        try {
+            setProfileVisibility(JSON.parse(storedVisibility));
+            console.log("in try", JSON.parse(storedVisibility));
+        } catch (error) {
+            // Handle error parsing JSON
+            console.error('Error parsing JSON:', error);
         }
-    }, []);
+    } else {
+        console.log("storedVisibility is null or undefined");
+    }
+}, []);
 
-    // Save profile visibility setting to localStorage whenever it changes
-    useEffect(() => {
-        localStorage.setItem('isPublicProfile', JSON.stringify(isPublicProfile));
-    }, [isPublicProfile]);
 
-    const uploadPublicProfileData = async profile => {
-        await addDoc(col, profile);
-    };
+// Save profile visibility setting to localStorage whenever it changes
+useEffect(() => {
+    localStorage.setItem('profileVisibility', JSON.stringify(profileVisibility));
+}, [profileVisibility]);
 
-    const fetchProfileData = async () => {
-        if (docRef && !fetchProfileDataCalled.current) {
-            fetchProfileDataCalled.current = true;
-            console.log('docRef:', docRef);
-            const docSnapshot = await getDoc(docRef);
-            if (docSnapshot.exists()) {
-                const docData = docSnapshot.data();
-                setProfileData(docData);
-                console.log('fetched data:', docData);
+const fetchProfileData = async () => {
+    if (docRef && !fetchProfileDataCalled.current) {
+        fetchProfileDataCalled.current = true;
+        console.log('docRef:', docRef);
+        const docSnapshot = await getDoc(docRef);
+        if (docSnapshot.exists()) {
+            const docData = docSnapshot.data();
+            setProfileData(docData);
+            console.log('fetched data:', docData);
+            if (docData.hasOwnProperty('profileVisibility')) {
+                setProfileVisibility(docData.profileVisibility);
+            } else {
+                setProfileVisibility(true); // Assuming true if profileVisibility is missing
             }
         }
-    };
+    }
+};
 
-    useEffect(() => {
-        fetchProfileData();
-    }, [docRef]);
+useEffect(() => {
+    fetchProfileData();
+}, [docRef]);
+
 
     useEffect(() => {
         if (user) {
@@ -141,7 +170,7 @@ const EditProfile = () => {
             favorites: selectedFavorites,
             studyGoals: data.get('studyGoals'),
             profilePicture: data.get('profilePicture'),
-            isPublicProfile: isPublicProfile, // Include the value of isPublicProfile in the form data
+            profileVisibility: profileVisibility, // Include the value of isPublicProfile in the form data
         });
     };
 
@@ -182,7 +211,9 @@ const EditProfile = () => {
         var newData = {
             favorites: selectedFavorites,
             studyGoals: studyGoals,
-            profilePicture: imagePath
+            profilePicture: imagePath,
+            //Add profile visibility
+            profileVisibility: profileVisibility // Add profileVisibility to newData
         }
 
         await uploadProfileData(newData);
@@ -321,8 +352,8 @@ const EditProfile = () => {
                         Profile Visibility
                     </Typography>
                     <FormControlLabel
-                        control={<Switch checked={isPublicProfile} onChange={() => setIsPublicProfile(!isPublicProfile)} />}
-                        label={isPublicProfile ? 'Public' : 'Private'}
+                        control={<Switch checked={profileVisibility} onChange={() => setProfileVisibility(!profileVisibility)} />}
+                        label={profileVisibility ? 'Public' : 'Private'}
                     />
                     <Button
                         type="submit"
