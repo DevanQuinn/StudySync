@@ -6,7 +6,6 @@ import {
   doc,
   updateDoc,
   arrayUnion
-  arrayUnion
 } from "firebase/firestore";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -79,7 +78,7 @@ const FriendDropdown = ({ friends, selectedFriend, setSelectedFriend, inviteFrie
           </option>
         ))}
       </select>
-      {/* {/* <button onClick={() => selectedFriend && inviteFriend(selectedFriend)}>Send Invite</button> */} */}
+      {/* {/* <button onClick={() => selectedFriend && inviteFriend(selectedFriend)}>Send Invite</button> */} 
     </div>
   );
 };
