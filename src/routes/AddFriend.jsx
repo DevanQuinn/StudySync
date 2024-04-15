@@ -110,7 +110,7 @@ const App1 = () => {
   // Modify the fetchFriends function to filter out private profiles
   const fetchFriends = async () => {
     try {
-      const friendsCollection = collection(db, 'usersNew');
+      const friendsCollection = collection(db, 'users');
       const unsubscribe = onSnapshot(friendsCollection, (snapshot) => {
         setFriends(snapshot.docs.map((doc) => ({
           username: doc.id,
@@ -128,7 +128,7 @@ const App1 = () => {
 // Add a function to handle the visibility toggle
 const handleVisibilityToggle = async () => {
   setIsPrivate(!isPrivate);
-  const userDocRef = doc(db, 'usersNew', user.uid);
+  const userDocRef = doc(db, 'users', user.uid);
   await updateDoc(userDocRef, {
     isPrivate: !isPrivate
   });
