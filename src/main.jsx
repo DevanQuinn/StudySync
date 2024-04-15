@@ -22,24 +22,24 @@ import StudyRoomUI from './routes/StudyRoomUI.jsx';
 import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 import Posts from './routes/posts.jsx';
 import UserPosts from './routes/userposts.jsx';
+import Note from './routes/note.jsx';
 
 const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#20c997',
-    },
-    secondary: {
-      main: '#B0DCCD',
-    },
-  },
+	palette: {
+		primary: {
+			main: '#20c997',
+		},
+		secondary: {
+			main: '#B0DCCD',
+		},
+	},
 });
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-	// <React.StrictMode>
+	 <React.StrictMode>
 		<ThemeProvider theme={theme}>
 			<BrowserRouter>
 				<Routes>
-
 					<Route
 						path='/'
 						element={
@@ -175,12 +175,38 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 							</>
 						}
 					/>
+					<Route
+						path='/note/:id'
+						element={
+							<>
+								<Navbar /> <Note />{' '}
+							</>
+						}
+					/>
 					<Route path='/room/:roomId' element={<RoomDetailsPage />} />{' '}
 					{/* No Navbar for /room */}
-					<Route path='/AddFriend' element={<><Navbar /><AddFriend /></>} /> {/* New route for AddFriend */}
+					<Route
+						path='/AddFriend'
+						element={
+							<>
+								<Navbar />
+								<AddFriend />
+							</>
+						}
+					/>{' '}
+					{/* New route for AddFriend */}
+					<Route
+						path='/AddFriend'
+						element={
+							<>
+								<Navbar />
+								<AddFriend />
+							</>
+						}
+					/>{' '}
+					{/* New route for AddFriend */}
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>
-	// </React.StrictMode>
-
+	 </React.StrictMode>
 );
