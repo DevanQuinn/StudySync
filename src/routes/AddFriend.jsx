@@ -5,6 +5,7 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  arrayUnion
 } from "firebase/firestore";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -41,10 +42,20 @@ const auth = getAuth(app);
 
 
 const FriendDropdown = ({ friends, selectedFriend, setSelectedFriend, inviteFriend }) => {
+  // const handleSelectChange = (event) => {
+  //   const selectedFriendId = event.target.value;
+  //   console.log("selectedfriendId: ", selectedFriendId);
+  //   const friend = friends.find((friend) => friend.id === selectedFriendId);
+  //   setSelectedFriend(friend);
+  //   console.log(friend); // Log the selected friend
+  // };
+
   const handleSelectChange = (event) => {
     const selectedFriendId = event.target.value;
+    console.log("selectedfriendId: ", selectedFriendId);
     const friend = friends.find((friend) => friend.id === selectedFriendId);
     setSelectedFriend(friend);
+    console.log(friend); // Log the selected friend
   };
 
   return (
@@ -57,7 +68,7 @@ const FriendDropdown = ({ friends, selectedFriend, setSelectedFriend, inviteFrie
           </option>
         ))}
       </select>
-      <button onClick={() => selectedFriend && inviteFriend(selectedFriend)}>Send Invite</button>
+      {/* <button onClick={() => selectedFriend && inviteFriend(selectedFriend)}>Send Invite</button> */}
     </div>
   );
 };
@@ -151,6 +162,28 @@ const handleVisibilityToggle = async () => {
     fetchData();
   }, []);
 
+  // async function inviteFriend(selectedFriend) {
+  //   try {
+  //     console.log(selectedFriend);
+  //     const recipientDocRef = doc(db, 'usersNew', selectedFriend.username);
+  
+  //     await updateDoc(recipientDocRef, {
+  //         friendRequests: arrayUnion(user.uid)  // Use arrayUnion directly
+  //     });
+  
+  //     toast.success(`Friend request sent to ${selectedFriend.username}`);
+  // } catch (error) {
+  //     console.error('Error sending friend request:', error);
+  
+  //     if (error.code === 'firestore/permission-denied') {
+  //         toast.error('You do not have permission to send friend requests. Please check your Firestore rules.');
+  //     } else {
+  //         toast.error('Error sending friend request. Please try again.');
+  //     }
+  // } finally {
+  //     setIsLoadingRequest(false);
+  // }
+  // }
 
   async function inviteFriend(selectedFriend) {
     try {
