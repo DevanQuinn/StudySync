@@ -33,6 +33,14 @@ const theme = createTheme({
 			main: '#B0DCCD',
 		},
 	},
+	palette: {
+		primary: {
+			main: '#20c997',
+		},
+		secondary: {
+			main: '#B0DCCD',
+		},
+	},
 });
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -185,6 +193,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					/>
 					<Route path='/room/:roomId' element={<RoomDetailsPage />} />{' '}
 					{/* No Navbar for /room */}
+					<Route
+						path='/AddFriend'
+						element={
+							<>
+								<Navbar />
+								<AddFriend />
+							</>
+						}
+					/>{' '}
+					{/* New route for AddFriend */}
 					<Route
 						path='/AddFriend'
 						element={
