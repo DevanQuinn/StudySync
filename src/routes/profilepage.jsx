@@ -15,9 +15,8 @@ import Copyright from '../components/Copyright.jsx';
 import { grey } from '@mui/material/colors';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-export default function SignIn() {
+export default function ProfilePage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = React.useState('');
   const handleSubmit = async event => {
       event.preventDefault();
       const data = new FormData(event.currentTarget);

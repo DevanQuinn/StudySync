@@ -151,6 +151,7 @@ const handleVisibilityToggle = async () => {
     fetchData();
   }, []);
 
+
   async function inviteFriend(selectedFriend) {
     try {
       if (!selectedFriend || !selectedFriend.username) {
@@ -165,6 +166,19 @@ const handleVisibilityToggle = async () => {
       });
   
       toast.success(`Friend request sent to ${selectedFriend.username}`);
+
+    console.log('Inviting friend:', selectedFriend);
+    setSelectedFriend(selectedFriend);
+  };
+
+  const handleAcceptRequest = async (accept) => {
+    try {
+      const userDocRef = doc(db, 'usersNew', "Sai Monish"); // Change "Your Name" to your actual name
+      const friendsCount = accept ? 1 : 0;
+      await setDoc(userDocRef, { friendsCount });
+      //toast.success(`Friend request ${accept ? 'accepted' : 'rejected'}`);
+      setShowConfirmation(false);
+      console.log('Friend request processed successfully');
     } catch (error) {
       console.error('Error sending friend request:', error);
       toast.error('Error sending friend request. Please try again.');
