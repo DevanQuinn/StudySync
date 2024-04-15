@@ -22,7 +22,7 @@ import StudyRoomUI from './routes/StudyRoomUI.jsx';
 import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 import Posts from './routes/posts.jsx';
 import UserPosts from './routes/userposts.jsx';
-import Note from './components/Note.jsx';
+import Note from './routes/note.jsx';
 
 const theme = createTheme({
 	palette: {
@@ -176,7 +176,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 						}
 					/>
 					<Route
-						path='/note'
+						path='/note/:id'
 						element={
 							<>
 								<Navbar /> <Note />{' '}

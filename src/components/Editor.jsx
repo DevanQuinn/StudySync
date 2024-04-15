@@ -19,16 +19,16 @@ import {
 	Toolbar,
 	Container,
 	TextField,
+	Card,
 } from '@mui/material';
 import { Color } from '@tiptap/extension-color';
 import ListItem from '@tiptap/extension-list-item';
 import TextStyle from '@tiptap/extension-text-style';
 import { EditorProvider, NodePos, useCurrentEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { MuiColorInput } from 'mui-color-input';
 import React, { useEffect, useState } from 'react';
 
-const MenuBar = () => {
+const MenuBar = ({ updateNote }) => {
 	const { editor } = useCurrentEditor();
 	const [fontSize, setFontSize] = useState(0);
 	const [color, setColor] = useState('#000000');
@@ -262,6 +262,16 @@ const MenuBar = () => {
 					onInput={handleColorChange}
 				/>
 				{/* <MuiColorInput format='hex' value={color} onChange={setColor} /> */}
+				<Button
+					onClick={async () => {
+						editor.options.editable = false;
+						await updateNote(editor.getJSON());
+						editor.options.editable = true;
+					}}
+					disabled={!editor.options.editable}
+				>
+					Save
+				</Button>
 			</Toolbar>
 		</AppBar>
 	);
@@ -282,46 +292,30 @@ const extensions = [
 	}),
 ];
 
-const content = `
-<h2>
-  Hi there,
-</h2>
-<p>
-  this is a <em>basic</em> example of <strong>tiptap</strong>. Sure, there are all kind of basic text styles you’d probably expect from a text editor. But wait until you see the lists:
-</p>
-<ul>
-  <li>
-    That’s a bullet list with one …
-  </li>
-  <li>
-    … or two list items.
-  </li>
-</ul>
-<p>
-  Isn’t that great? And all of that is editable. But wait, there’s more. Let’s try a code block:
-</p>
-<pre><code class="language-css">body {
-display: none;
-}</code></pre>
-<p>
-  I know, I know, this is impressive. It’s only the tip of the iceberg though. Give it a try and click a little bit around. Don’t forget to check the other examples too.
-</p>
-<blockquote>
-  Wow, that’s amazing. Good work, boy! 👏
-  <br />
-  — Mom
-</blockquote>
-`;
-
-export default () => {
+export default ({ content, updateNote }) => {
 	return (
-		<Box sx={{ width: 1, heigh: 1, outline: '1px solid black' }}>
+		<Box
+			sx={{
+				width: 1,
+				heigh: 1,
+				// outline: '1px solid black',
+				// mt: 10,
+				// mb: 10,
+				// width: 1,
+			}}
+			overflow={'scroll'}
+		>
 			<CssBaseline />
-			<Box overflow='scroll' sx={{ height: 1, width: 1, p: 1 }}>
+			<Box
+				overflow='scroll'
+				sx={{ height: 1, width: 1, p: 1, textAlign: 'left' }}
+			>
+				{/* <Button variant='contained'>Save</Button> */}
 				<EditorProvider
-					slotBefore={<MenuBar />}
+					slotBefore={<MenuBar updateNote={updateNote} />}
 					extensions={extensions}
 					content={content}
+					autofocus
 				></EditorProvider>
 			</Box>
 		</Box>
