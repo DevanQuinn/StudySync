@@ -64,7 +64,7 @@ const PostLikeButton = ({ postId }) => {
 				updateLike();
 			}}
 		>
-			<Favorite color={liked ? 'primary' : 'action'} />
+			<Favorite data-testid="like-icon" color={liked ? 'primary' : 'action'} />
 		</IconButton>
 	);
 };
