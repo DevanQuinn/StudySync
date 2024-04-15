@@ -13,11 +13,11 @@ import ForgotPass from './routes/forgotpass.jsx';
 import AddFriend from './routes/AddFriend.jsx'; // Import your AddFriend component here
 import SpotifyPlaylists from './routes/SpotifyPlaylists.jsx';
 import Callback from './routes/Callback.jsx';
-import Chatbot from './routes/chatbot.jsx';
 import Pomodoro from './routes/pomodoro.jsx';
 import Firebase from './firebase.js';
 import EditProfile from './routes/editprofile.jsx';
 import Flashcards from './routes/flashcards.jsx';
+import ProfilePage from './routes/profilepage.jsx';
 import StudyRoomUI from './routes/StudyRoomUI.jsx';
 import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 import Posts from './routes/posts.jsx';
@@ -36,7 +36,7 @@ const theme = createTheme({
 });
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-	<React.StrictMode>
+	 <React.StrictMode>
 		<ThemeProvider theme={theme}>
 			<BrowserRouter>
 				<Routes>
@@ -149,15 +149,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 						}
 					/>
 					<Route
-						path='chatbot'
-						element={
-							<>
-								<Navbar />
-								<Chatbot />
-							</>
-						}
-					/>
-					<Route
 						path='posts'
 						element={
 							<>
@@ -172,6 +163,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 							<>
 								<Navbar />
 								<UserPosts />
+							</>
+						}
+					/>
+					<Route
+						path='/profilepage'
+						element={
+							<>
+								<Navbar />
+								<ProfilePage />
 							</>
 						}
 					/>
@@ -208,5 +208,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 				</Routes>
 			</BrowserRouter>
 		</ThemeProvider>
-	</React.StrictMode>
+	 </React.StrictMode>
 );

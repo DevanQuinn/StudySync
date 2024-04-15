@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, } from 'react';
 import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link, TextField, Typography } from '@mui/material';
 import useUser from '../hooks/useUser';
 import {
@@ -16,8 +16,7 @@ const EditProfile = () => {
     const auth = getAuth(app);
     const user = useUser(true);
     const db = getFirestore(app);
-    const docRef = user ? doc(db, `profile-data`, user.uid) : null;
-
+    const docRef = user ? doc(db, `users`, user.displayName) : null;
     const fetchProfileDataCalled = useRef(false);
     const storage = getStorage();
     const [userEmail, setUserEmail] = useState('');
@@ -77,8 +76,9 @@ const EditProfile = () => {
 
         const loadImageBlob = async () => {
             if (profileData.profilePicture && profileData.profilePicture != 'unset') {
+                
                 const storage = getStorage();
-                const pathReference = ref(storage, profileData.profilePicture);
+                const pathReference = ref(storage, `profile-pictures/${data.pfpID}`);
                 try {
                     // getting the binary data from the StorageReference path
                     const blob = await getBlob(pathReference);
@@ -98,7 +98,7 @@ const EditProfile = () => {
 
     const uploadProfileData = async profile => {
         if (user) {
-            const docRef = doc(db, `profile-data/`, `${user.uid}`);
+            const docRef = doc(db, `users/`, `${user.displayName}`);
             await setDoc(docRef, profile);
         }
     };
@@ -140,17 +140,16 @@ const EditProfile = () => {
         console.log({
             favorites: selectedFavorites,
             studyGoals: data.get('studyGoals'),
-            profilePicture: data.get('profilePicture'),
+            pfpID: data.get('profilePicture'),
             isPublicProfile: isPublicProfile, // Include the value of isPublicProfile in the form data
         });
     };
 
     const uploadImage = async imageToUpload => {
         const imageId = uuid();
-        const storageRef = ref(storage, `profile-images/${imageId}`);
+        const storageRef = ref(storage, `profile-pictures/${imageId}`);
         await uploadBytes(storageRef, imageToUpload);
-
-        return storageRef.fullPath;
+        return imageId;
     };
 
     const handleImageChange = (event) => {
@@ -176,14 +175,16 @@ const EditProfile = () => {
         if (selectedImage != null) {
             imagePath = await uploadImage(selectedImage);
         } else {
-            imagePath = profileData.profilePicture;
+            imagePath = profileData.pfpID;
         }
 
         var newData = {
             favorites: selectedFavorites,
             studyGoals: studyGoals,
-            profilePicture: imagePath
-        }
+            pfpID: imagePath,
+            userID: user.uid,
+            username: user.displayName.toLowerCase()
+            }
 
         await uploadProfileData(newData);
         setProfileData(newData);

@@ -2,9 +2,13 @@ import { AppBar, Avatar, Button, Container, Toolbar, Typography } from '@mui/mat
 import { Link } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import Logo from './Logo';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import IconButton from '@mui/material/IconButton';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { deleteDoc, doc, getDoc, getFirestore, updateDoc } from 'firebase/firestore';
+import { Fab, Box, Slide } from '@mui/material';
 import app from '../firebase';
+import ChatBot from './ChatBot'
 import {
 	getDownloadURL,
 	getStorage,
@@ -27,12 +31,14 @@ const Navbar = () => {
         		{ title: 'Pomodoro', path: '/pomodoro'},
         {title: 'SpotifyPlaylists', path: '/SpotifyPlaylists'},
         { title: 'Flash Cards', path: '/flashcards' },
-		{ title: 'Chat Bot', path: '/chatbot' },
-        { title: 'AddFriend', path: '/AddFriend' }
+        { title: 'AddFriend', path: '/AddFriend' },
+		{ title: 'Profile Page', path: '/profilePage'}
 	];
 	const [image, setImage] = useState();
 	const db = getFirestore(app);
 	const storage = getStorage(app);
+	const [showBot, setShowBot] = useState(false);
+    const toggleBot = () => setShowBot(!showBot);
 	const fetchImage = async () => {
 		if ( !user ) {
 			const pathReference = ref(storage, 'profile-pictures/');
@@ -52,6 +58,7 @@ const Navbar = () => {
 		fetchImage();
 	}, [user]);
 	return (
+	<div>
 		<AppBar position='fixed' color='secondary'>
 			<Toolbar>
 				<Typography sx={{ mr: 3 }} color='textPrimary' component={'span'}>
@@ -69,6 +76,9 @@ const Navbar = () => {
 					component='div'
 					sx={{ flexGrow: 1 }}
 				></Typography>
+				<IconButton sx={{flexGrow: .1}} onClick={toggleBot}>
+					<SmartToyIcon />
+				</IconButton>
 				<Avatar
 					src={user ? (image) : (null)}
 					sx={{mr : 2}}
@@ -88,6 +98,10 @@ const Navbar = () => {
 				</Button>	
 			</Toolbar>
 		</AppBar>
+		<Slide direction="down" in={showBot} mountOnEnter unmountOnExit>
+			<Box sx={{ position: 'fixed', top: 75, right: 100, zIndex: 1100 }}><ChatBot/></Box>
+		</Slide>
+		</div>
 	);
 };
 
