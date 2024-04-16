@@ -16,12 +16,15 @@ import { useParams } from 'react-router-dom';
 import {
 	addDoc,
 	collection,
+	deleteDoc,
 	doc,
 	getDoc,
 	getDocs,
 	getFirestore,
+	orderBy,
 	query,
 	serverTimestamp,
+	updateDoc,
 	where,
 } from 'firebase/firestore';
 import app from '../firebase';
@@ -54,6 +57,33 @@ const Note = () => {
 		setLoading(false);
 	};
 
+	const addToRecents = async () => {
+		const col = collection(db, `users/${user.displayName}/recentNotes`);
+		const q = query(col, orderBy('visited', 'desc'));
+		const docs = await getDocs(q);
+		for (let i = 0; i < docs.docs.length; i++) {
+			const noteData = docs.docs[i].data();
+			if (noteData.noteId === id) {
+				await updateDoc(
+					doc(db, `users/${user.displayName}/recentNotes/${docs.docs[i].id}`),
+					{ visited: serverTimestamp() }
+				);
+				return;
+			}
+			if (i >= 4) {
+				await deleteDoc(
+					doc(db, `users/${user.displayName}/recentNotes/${docs.docs[i].id}`)
+				);
+			}
+		}
+		await addDoc(col, {
+			noteId: id,
+			owner: data.owner,
+			title: data.title,
+			visited: serverTimestamp(),
+		});
+	};
+
 	const addCollaborator = async e => {
 		e.preventDefault();
 		const col = collection(db, `notes/${id}/access`);
@@ -70,6 +100,11 @@ const Note = () => {
 		if (!user) return;
 		fetchNote();
 	}, [user]);
+
+	useEffect(() => {
+		if (!data) return;
+		addToRecents();
+	}, [data]);
 
 	if (loading) return <CircularProgress />;
 

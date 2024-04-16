@@ -288,8 +288,9 @@ export default ({ content, authorized, id, user }) => {
 			provider,
 			user: {
 				name: user,
-				color:
-					'#' + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0'),
+				color: `#${Math.floor(Math.random() * 0x1000000)
+					.toString(16)
+					.padStart(6, '0')}`,
 			},
 		}),
 	];
