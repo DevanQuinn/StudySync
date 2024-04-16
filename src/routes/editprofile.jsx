@@ -8,7 +8,7 @@ import {
     setDoc,
 } from 'firebase/firestore';
 import { getAuth, reauthenticateWithCredential, updatePassword, EmailAuthProvider } from 'firebase/auth';
-import { getStorage, getBlob, ref, uploadBytes } from 'firebase/storage';
+import { getStorage, getBlob, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import app from '../firebase';
 import { v4 as uuid } from 'uuid';
 
@@ -21,7 +21,7 @@ const EditProfile = () => {
     const storage = getStorage();
     const [userEmail, setUserEmail] = useState('');
     const [imageBlob, setImageBlob] = useState(null);
-    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', profilePicture: 'unset' });
+    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', pfpID: 'unset' });
     const [studyGoals, setStudyGoals] = useState('');
     const [selectedFavorites, setSelectedFavorites] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -42,11 +42,12 @@ const EditProfile = () => {
         localStorage.setItem('isPublicProfile', JSON.stringify(isPublicProfile));
     }, [isPublicProfile]);
     const uploadPublicProfileData = async profile => {
-		await addDoc(col, profile);
-		//fetchProfileData();
-	};
+        await addDoc(col, profile);
+        //fetchProfileData();
+    };
 
     const fetchProfileData = async () => {
+
         if (docRef && !fetchProfileDataCalled.current) {
             fetchProfileDataCalled.current = true;
             console.log('docRef:', docRef);
@@ -71,14 +72,14 @@ const EditProfile = () => {
 
 
     useEffect(() => {
-        setStudyGoals(profileData.studyGoals);
-        setSelectedFavorites(profileData.favorites);
+        setStudyGoals(profileData.studyGoals || '');
+        setSelectedFavorites(profileData.favorites || []);
 
         const loadImageBlob = async () => {
-            if (profileData.profilePicture && profileData.profilePicture != 'unset') {
-                
+            if (profileData.pfpID && profileData.pfpID != 'unset') {
+
                 const storage = getStorage();
-                const pathReference = ref(storage, `profile-pictures/${data.pfpID}`);
+                const pathReference = ref(storage, `profile-pictures/${profileData.pfpID}`);
                 try {
                     // getting the binary data from the StorageReference path
                     const blob = await getBlob(pathReference);
@@ -88,6 +89,7 @@ const EditProfile = () => {
                 }
             }
         };
+
 
         loadImageBlob();
     }, [profileData]);
@@ -184,7 +186,8 @@ const EditProfile = () => {
             pfpID: imagePath,
             userID: user.uid,
             username: user.displayName.toLowerCase()
-            }
+        }
+        console.log("uploading newData: ", newData)
 
         await uploadProfileData(newData);
         setProfileData(newData);

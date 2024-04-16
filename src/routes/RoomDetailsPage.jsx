@@ -5,7 +5,7 @@ import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField, withT
 import RoomPomodoro from '../components/RoomPomodoro';
 import { useNavigate } from 'react-router-dom';
 import Draggable from 'react-draggable';
-import { doc, getDoc, getFirestore, deleteDoc, updateDoc, setDoc, serverTimestamp, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, deleteDoc, updateDoc, setDoc, addDoc, serverTimestamp, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth'; // Make sure to import getAuth
 import { useLocation } from 'react-router-dom';
@@ -67,7 +67,7 @@ export const videoCategories = {
 
 
 
-const Chat = ({theme, roomId}) => {
+const Chat = ({theme, roomId, chatCount, setChatCount}) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [activeDrags, setActiveDrags] = useState(0);
@@ -118,6 +118,7 @@ const Chat = ({theme, roomId}) => {
         
       //  setMessages([...messages, {text: message, sender: currentUser.displayName}]); 
         setMessage('');
+        setChatCount(chatCount + 1);
       } catch (error) {
         console.error("Error sending message:", error);
       }
@@ -237,6 +238,8 @@ const RoomDetailsPage = () => {
   const location = useLocation();
   const { inviterUid, videoCategory } = location.state || {};
   const [roomUsers, setRoomUsers] = useState([]);
+  const [roomJoinTime, setRoomJoinTime] = useState(0);
+  const [chatCount, setChatCount] = useState(0);
   
   // const handleCategoryClick = (event) => {
   //   setAnchorEl(event.currentTarget);
@@ -260,6 +263,7 @@ const RoomDetailsPage = () => {
   
     const now = new Date();
     const joinedAt = joinTime.toDate(); // Convert Firestore Timestamp to JavaScript Date
+    setRoomJoinTime(joinedAt - 0); // Store joined at time as milliseconds
     const spentMilliseconds = now - joinedAt;
     return Math.round(spentMilliseconds / 1000 / 60); // Convert to minutes
   };
@@ -480,6 +484,20 @@ const RoomDetailsPage = () => {
       try {
         // Define the room document reference
         const roomRef = doc(db, `studyrooms/${roomId}`); // Adjusted for a more generic path if necessary
+        const now = new Date();
+        const durationMs = now - roomJoinTime;
+
+        const studyRoomCol = user
+          ? collection(db, `userStats/${user?.uid}/studyRoomTimes`)
+          : null;
+
+        const statsData = { durationMs, chatCount };
+        try {
+          await addDoc(studyRoomCol, statsData);
+        } catch (error) {
+          console.error('Error uploading user statistics:', error);
+        }
+
         // Delete the room document
         await deleteDoc(roomRef);
         console.log(`Room ${roomId} deleted successfully`);
@@ -549,7 +567,7 @@ const isCreator = auth.currentUser?.displayName === roomData?.creator_id;
           ))}
         </div>
 
-        <Chat theme={isLightMode ? 'light' : 'dark'} roomId={roomId} />
+        <Chat theme={isLightMode ? 'light' : 'dark'} roomId={roomId} chatCount={chatCount} setChatCount={setChatCount} />
       </div>
 
       <div className="body">
