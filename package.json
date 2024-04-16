@@ -13,11 +13,15 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
+    "@hocuspocus/provider": "^2.11.3",
     "@firebase/firestore": "^4.6.0",
     "@mui/icons-material": "^5.15.10",
     "@mui/material": "^5.15.11",
     "@rollup/rollup-darwin-arm64": "^4.13.0",
+    "@tiptap/extension-collaboration": "^2.3.0",
+    "@tiptap/extension-collaboration-cursor": "^2.3.0",
     "@tiptap/extension-color": "^2.2.4",
+    "@tiptap/extension-placeholder": "^2.3.0",
     "@tiptap/extension-text-style": "^2.2.4",
     "@tiptap/pm": "^2.2.4",
     "@tiptap/react": "^2.2.4",
@@ -40,7 +44,10 @@
     "slick-carousel": "^1.8.1",
     "sort-by": "^1.2.0",
     "timrjs": "^3.2.1",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "y-prosemirror": "^1.2.3",
+    "y-websocket": "^2.0.2",
+    "yjs": "^13.6.14"
   },
   "devDependencies": {
     "@babel/core": "^7.24.4",
