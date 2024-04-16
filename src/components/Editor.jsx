@@ -30,7 +30,7 @@ import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect, useState } from 'react';
 import * as Y from 'yjs';
 
-const MenuBar = ({ authorized }) => {
+const MenuBar = () => {
 	const { editor } = useCurrentEditor();
 	const [fontSize, setFontSize] = useState(0);
 	const [color, setColor] = useState('#000000');
@@ -38,10 +38,6 @@ const MenuBar = ({ authorized }) => {
 	if (!editor) {
 		return null;
 	}
-
-	useEffect(() => {
-		editor.options.editable = authorized;
-	}, [authorized]);
 
 	useEffect(() => {
 		if (!editor) return;
@@ -316,6 +312,7 @@ export default ({ content, authorized, id, user }) => {
 					extensions={extensions}
 					content={content}
 					autofocus
+					editable={authorized}
 				></EditorProvider>
 			</Box>
 		</Box>
