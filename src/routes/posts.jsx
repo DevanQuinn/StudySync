@@ -121,7 +121,7 @@ const Posts = () => {
 		const res = await addDoc(col, note);
 		col = collection(db, `notes/${res.id}/access`);
 		await addDoc(col, {
-			user: user.displayName,
+			user: user.displayName.toLowerCase(),
 			type: 'owner',
 			added: serverTimestamp(),
 		});

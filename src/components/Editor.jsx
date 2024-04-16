@@ -17,9 +17,7 @@ import {
 	Box,
 	AppBar,
 	Toolbar,
-	Container,
 	TextField,
-	Card,
 } from '@mui/material';
 import { Color } from '@tiptap/extension-color';
 import ListItem from '@tiptap/extension-list-item';
@@ -28,7 +26,7 @@ import { EditorProvider, NodePos, useCurrentEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect, useState } from 'react';
 
-const MenuBar = ({ updateNote }) => {
+const MenuBar = ({ updateNote, authorized }) => {
 	const { editor } = useCurrentEditor();
 	const [fontSize, setFontSize] = useState(0);
 	const [color, setColor] = useState('#000000');
@@ -36,6 +34,11 @@ const MenuBar = ({ updateNote }) => {
 	if (!editor) {
 		return null;
 	}
+
+	useEffect(() => {
+		console.log(authorized);
+		editor.options.editable = authorized;
+	}, [authorized]);
 
 	useEffect(() => {
 		if (!editor) return;
@@ -258,10 +261,8 @@ const MenuBar = ({ updateNote }) => {
 					type='color'
 					sx={{ width: 50 }}
 					value={color}
-					// onChange={e => setColor(e.target.value)}
 					onInput={handleColorChange}
 				/>
-				{/* <MuiColorInput format='hex' value={color} onChange={setColor} /> */}
 				<Button
 					onClick={async () => {
 						editor.options.editable = false;
@@ -292,16 +293,12 @@ const extensions = [
 	}),
 ];
 
-export default ({ content, updateNote }) => {
+export default ({ content, updateNote, authorized }) => {
 	return (
 		<Box
 			sx={{
 				width: 1,
 				heigh: 1,
-				// outline: '1px solid black',
-				// mt: 10,
-				// mb: 10,
-				// width: 1,
 			}}
 			overflow={'scroll'}
 		>
@@ -310,9 +307,12 @@ export default ({ content, updateNote }) => {
 				overflow='scroll'
 				sx={{ height: 1, width: 1, p: 1, textAlign: 'left' }}
 			>
-				{/* <Button variant='contained'>Save</Button> */}
 				<EditorProvider
-					slotBefore={<MenuBar updateNote={updateNote} />}
+					slotBefore={
+						authorized ? (
+							<MenuBar updateNote={updateNote} authorized={authorized} />
+						) : null
+					}
 					extensions={extensions}
 					content={content}
 					autofocus
