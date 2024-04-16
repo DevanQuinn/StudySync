@@ -21,7 +21,7 @@ const MyNotes = ({ setNoteCount }) => {
 	const fetchNotes = async () => {
 		const q = query(
 			collectionGroup(db, 'access'),
-			where('user', '==', user.displayName),
+			where('user', '==', user.displayName.toLowerCase()),
 			orderBy('added', 'desc')
 		);
 		const data = await getDocs(q);

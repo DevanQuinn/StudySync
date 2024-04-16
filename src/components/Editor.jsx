@@ -9,7 +9,6 @@ import {
 	Undo,
 } from '@mui/icons-material';
 import {
-	Button,
 	CssBaseline,
 	IconButton,
 	Select,
@@ -22,11 +21,16 @@ import {
 import { Color } from '@tiptap/extension-color';
 import ListItem from '@tiptap/extension-list-item';
 import TextStyle from '@tiptap/extension-text-style';
-import { EditorProvider, NodePos, useCurrentEditor } from '@tiptap/react';
+import Collaboration from '@tiptap/extension-collaboration';
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
+import Placeholder from '@tiptap/extension-placeholder';
+import { TiptapCollabProvider } from '@hocuspocus/provider';
+import { EditorProvider, useCurrentEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect, useState } from 'react';
+import * as Y from 'yjs';
 
-const MenuBar = ({ updateNote, authorized }) => {
+const MenuBar = ({ authorized }) => {
 	const { editor } = useCurrentEditor();
 	const [fontSize, setFontSize] = useState(0);
 	const [color, setColor] = useState('#000000');
@@ -36,7 +40,6 @@ const MenuBar = ({ updateNote, authorized }) => {
 	}
 
 	useEffect(() => {
-		console.log(authorized);
 		editor.options.editable = authorized;
 	}, [authorized]);
 
@@ -220,40 +223,21 @@ const MenuBar = ({ updateNote, authorized }) => {
 					/>
 				</IconButton>
 				<IconButton
-					onClick={() =>
-						editor
-							.chain()
-							.focus()
-							.undo()
-							.run()
-					}
-					disabled={
-						!editor
-							.can()
-							.chain()
-							.focus()
-							.undo()
-							.run()
-					}
+					onClick={() => editor.commands.undo()}
+					// disabled={!editor.commands.redo()}
 				>
 					<Undo color={editor.isActive('undo') ? 'primary' : 'action'} />
 				</IconButton>
 				<IconButton
-					onClick={() =>
-						editor
-							.chain()
-							.focus()
-							.redo()
-							.run()
-					}
-					disabled={
-						!editor
-							.can()
-							.chain()
-							.focus()
-							.redo()
-							.run()
-					}
+					onClick={() => editor.commands.redo()}
+					// disabled={
+					// 	!editor
+					// 		.can()
+					// 		.chain()
+					// 		.focus()
+					// 		.redo()
+					// 		.run()
+					// }
 				>
 					<Redo color={editor.isActive('redo') ? 'primary' : 'action'} />
 				</IconButton>
@@ -263,37 +247,57 @@ const MenuBar = ({ updateNote, authorized }) => {
 					value={color}
 					onInput={handleColorChange}
 				/>
-				<Button
-					onClick={async () => {
-						editor.options.editable = false;
-						await updateNote(editor.getJSON());
-						editor.options.editable = true;
-					}}
-					disabled={!editor.options.editable}
-				>
-					Save
-				</Button>
 			</Toolbar>
 		</AppBar>
 	);
 };
 
-const extensions = [
-	Color.configure({ types: [TextStyle.name, ListItem.name] }),
-	TextStyle.configure({ types: [ListItem.name] }),
-	StarterKit.configure({
-		bulletList: {
-			keepMarks: true,
-			keepAttributes: false, // TODO : Making this as `false` becase marks are not preserved when I try to preserve attrs, awaiting a bit of help
-		},
-		orderedList: {
-			keepMarks: true,
-			keepAttributes: false, // TODO : Making this as `false` becase marks are not preserved when I try to preserve attrs, awaiting a bit of help
-		},
-	}),
-];
+export default ({ content, authorized, id, user }) => {
+	const ydoc = new Y.Doc();
+	const provider = new TiptapCollabProvider({
+		name: id, // any identifier - all connections sharing the same identifier will be synced
+		appId: 'j9y12891', // replace with YOUR_APP_ID
+		token:
+			'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MTMyNDE5NjgsIm5iZiI6MTcxMzI0MTk2OCwiZXhwIjoxNzEzMzI4MzY4LCJpc3MiOiJodHRwczovL2Nsb3VkLnRpcHRhcC5kZXYiLCJhdWQiOiJqOXkxMjg5MSJ9.E_IhaMrERZ6VbYsug-JmsPMrokkoacO2iRKFrLuMIRM', // replace with your JWT
+		document: ydoc,
+	});
 
-export default ({ content, updateNote, authorized }) => {
+	useEffect(() => {
+		return () => {
+			provider.destroy();
+		};
+	}, []);
+
+	const extensions = [
+		Color.configure({ types: [TextStyle.name, ListItem.name] }),
+		TextStyle.configure({ types: [ListItem.name] }),
+		StarterKit.configure({
+			bulletList: {
+				keepMarks: true,
+				keepAttributes: false, // TODO : Making this as `false` becase marks are not preserved when I try to preserve attrs, awaiting a bit of help
+			},
+			orderedList: {
+				keepMarks: true,
+				keepAttributes: false, // TODO : Making this as `false` becase marks are not preserved when I try to preserve attrs, awaiting a bit of help
+			},
+			history: false,
+		}),
+		Placeholder.configure({
+			placeholder: 'Type something...',
+		}),
+		Collaboration.configure({
+			document: ydoc,
+		}),
+		CollaborationCursor.configure({
+			provider,
+			user: {
+				name: user,
+				color:
+					'#' + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0'),
+			},
+		}),
+	];
+
 	return (
 		<Box
 			sx={{
@@ -308,11 +312,7 @@ export default ({ content, updateNote, authorized }) => {
 				sx={{ height: 1, width: 1, p: 1, textAlign: 'left' }}
 			>
 				<EditorProvider
-					slotBefore={
-						authorized ? (
-							<MenuBar updateNote={updateNote} authorized={authorized} />
-						) : null
-					}
+					slotBefore={authorized ? <MenuBar authorized={authorized} /> : null}
 					extensions={extensions}
 					content={content}
 					autofocus

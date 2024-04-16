@@ -1,3 +1,5 @@
+import '../App.css';
+
 import React, { useEffect, useState } from 'react';
 import {
 	Container,
@@ -20,7 +22,6 @@ import {
 	getFirestore,
 	query,
 	serverTimestamp,
-	updateDoc,
 	where,
 } from 'firebase/firestore';
 import app from '../firebase';
@@ -51,12 +52,6 @@ const Note = () => {
 
 		setData(data.data());
 		setLoading(false);
-	};
-
-	const updateNote = async json => {
-		const noteDoc = await doc(db, `notes/${id}`);
-		await updateDoc(noteDoc, { content: json });
-		alert('Saved!');
 	};
 
 	const addCollaborator = async e => {
@@ -95,8 +90,9 @@ const Note = () => {
 			<Card sx={{ width: 1, pb: 3, mb: 5, p: 1 }}>
 				<Editor
 					content={data.content}
-					updateNote={updateNote}
 					authorized={authorized}
+					id={id}
+					user={user.displayName}
 				/>
 			</Card>
 			{authorized ? (

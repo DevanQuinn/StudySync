@@ -114,7 +114,6 @@ const Posts = () => {
 		let col = collection(db, `notes`);
 		const note = {
 			title,
-			content: '',
 			owner: user.displayName,
 			created: serverTimestamp(),
 		};
