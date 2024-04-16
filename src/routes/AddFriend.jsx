@@ -104,14 +104,14 @@ const App1 = () => {
   };
 
 
-// Add a function to handle the visibility toggle
-const handleVisibilityToggle = async () => {
-  setIsPrivate(!isPrivate);
-  const userDocRef = doc(db, 'usersNew', user.uid);
-  await updateDoc(userDocRef, {
-    isPrivate: !isPrivate
-  });
-};
+  // Add a function to handle the visibility toggle
+  const handleVisibilityToggle = async () => {
+    setIsPrivate(!isPrivate);
+    const userDocRef = doc(db, 'usersNew', user.uid);
+    await updateDoc(userDocRef, {
+      isPrivate: !isPrivate
+    });
+  };
 
   const fetchUser = async () => {
     setIsLoadingUser(true);
@@ -157,66 +157,69 @@ const handleVisibilityToggle = async () => {
       if (!selectedFriend || !selectedFriend.username) {
         throw new Error('Selected friend or username is undefined or null.');
       }
-  
+
       const recipientDocRef = doc(db, 'usersNew', selectedFriend.username);
-  
+
       // Use FieldValue directly
       await updateDoc(recipientDocRef, {
         friendRequests: FieldValue.arrayUnion(user.uid)
       });
-  
+
       toast.success(`Friend request sent to ${selectedFriend.username}`);
 
-    console.log('Inviting friend:', selectedFriend);
-    setSelectedFriend(selectedFriend);
-  };
-
-  const handleAcceptRequest = async (accept) => {
-    try {
-      const userDocRef = doc(db, 'usersNew', "Sai Monish"); // Change "Your Name" to your actual name
-      const friendsCount = accept ? 1 : 0;
-      await setDoc(userDocRef, { friendsCount });
-      //toast.success(`Friend request ${accept ? 'accepted' : 'rejected'}`);
-      setShowConfirmation(false);
-      console.log('Friend request processed successfully');
+      console.log('Inviting friend:', selectedFriend);
+      setSelectedFriend(selectedFriend);
     } catch (error) {
-      console.error('Error sending friend request:', error);
-      toast.error('Error sending friend request. Please try again.');
-    } finally {
-      setIsLoadingRequest(false);
-    }
-  }
-  
-  
+      console.log('Could not send friend request, error:', error);
+    };
 
-  return (
-    <div>
-      <button onClick={handleVisibilityToggle}>
-  {isPrivate ? 'Set Profile to Public' : 'Set Profile to Private'}
-  </button>
-      <h2>Sending Friend Request</h2>
-      <FriendDropdown
-        friends={friends}
-        selectedFriend={selectedFriend}
-        setSelectedFriend={setSelectedFriend}
-        inviteFriend={inviteFriend}
-      />
-      <ToastContainer />
+    const handleAcceptRequest = async (accept) => {
+      try {
+        const userDocRef = doc(db, 'usersNew', "Sai Monish"); // Change "Your Name" to your actual name
+        const friendsCount = accept ? 1 : 0;
+        await setDoc(userDocRef, { friendsCount });
+        //toast.success(`Friend request ${accept ? 'accepted' : 'rejected'}`);
+        setShowConfirmation(false);
+        console.log('Friend request processed successfully');
+      } catch (error) {
+        console.error('Error sending friend request:', error);
+        toast.error('Error sending friend request. Please try again.');
+      } finally {
+        setIsLoadingRequest(false);
+      }
+    }
+
+
+
+    return (
       <div>
-        {isLoadingUser ? (
-          <p>Loading user data...</p>
-        ) : (
-          user ? (
-            <button onClick={inviteFriend} disabled={isLoadingRequest}>
-              {isLoadingRequest ? 'Sending Request...' : 'Send Friend Request'}
-            </button>
+        <button onClick={handleVisibilityToggle}>
+          {isPrivate ? 'Set Profile to Public' : 'Set Profile to Private'}
+        </button>
+        <h2>Sending Friend Request</h2>
+        <FriendDropdown
+          friends={friends}
+          selectedFriend={selectedFriend}
+          setSelectedFriend={setSelectedFriend}
+          inviteFriend={inviteFriend}
+        />
+        <ToastContainer />
+        <div>
+          {isLoadingUser ? (
+            <p>Loading user data...</p>
           ) : (
-            <p>Please sign in.</p>
-          )
-        )}
+            user ? (
+              <button onClick={inviteFriend} disabled={isLoadingRequest}>
+                {isLoadingRequest ? 'Sending Request...' : 'Send Friend Request'}
+              </button>
+            ) : (
+              <p>Please sign in.</p>
+            )
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 };
 
 export default App1;
