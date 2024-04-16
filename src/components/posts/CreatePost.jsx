@@ -68,6 +68,7 @@ const CreatePost = ({ fetchPosts }) => {
 					placeholder='Title'
 					value={title}
 					onChange={e => setTitle(e.target.value)}
+					data-testid='title-input'
 				/>
 				<TextField
 					margin='normal'
@@ -79,6 +80,7 @@ const CreatePost = ({ fetchPosts }) => {
 					rows={4}
 					value={description}
 					onChange={e => setDescription(e.target.value)}
+					data-testid='description-input'
 				/>
 				{image ? (
 					<Box>

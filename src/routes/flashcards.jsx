@@ -395,7 +395,7 @@ const Flashcards = () => {
 						color='primary'
 						onClick={startStudySession}
 						//disable if study session in progress (not null)
-						disabled={studyStartTime}
+						disabled={!!studyStartTime}
 					>
 						Start Study Session
 					</Button>

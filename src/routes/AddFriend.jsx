@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, onSnapshot, doc, setDoc } from "firebase/firestore";
-//import { ToastContainer, toast } from 'react-toastify';
-//import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import NotificationFeedback from '../components/NotificationFeedback.jsx';
 import app from '../firebase';
 
@@ -129,7 +129,7 @@ const App1 = () => {
         </div>
       )}
 
-      //<ToastContainer />
+      <ToastContainer />
     </div>
   );
 };
