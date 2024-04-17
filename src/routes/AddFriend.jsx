@@ -327,7 +327,11 @@ useEffect(() => {
             onChange={(event, newValue) => setSelectedUser(newValue)}
             renderInput={(params) => <TextField {...params} label="Search for users" variant="outlined" />}
           />
-         
+          <Button onClick={handleAddFriend} color="primary" disabled={!selectedUser || isLoading}>
+            Send Invite
+          </Button>
+          {isLoading && <CircularProgress />}
+          {error && <Alert severity="error">{error}</Alert>}
         </Box>
       </Box>
 
