@@ -4,6 +4,8 @@ import TasklistList from '../components/TasklistList.jsx'
 import RoomPomodoro from '../components/RoomPomodoro.jsx';
 import AddIcon from '@mui/icons-material/Add';
 import { Fab, Box, Slide } from '@mui/material';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import {
 	query,
 	where,
@@ -26,10 +28,28 @@ TODO LIST:
 
 function Dashboard() {
 	const [showPomodoro, setShowPomodoro] = useState(false);
+	const [showTask, setShowTask] = useState(false);
 	const togglePomodoro = () => setShowPomodoro(!showPomodoro);
+	const toggleTask = () => setShowTask(!showTask);
 	const defaultPreferences = {color:"#FFFFFF"};
 	//should load preferences from user doc and reflect them
 	const [preferences, setPreferences] = useState(defaultPreferences);
+	const [anchorEl, setAnchorEl] = useState(null);
+  	const open = Boolean(anchorEl);
+  	const handleClick = (event) => {   
+		setAnchorEl(event.currentTarget);
+  	};
+  	const handleClosePomo = () => {
+		togglePomodoro();
+    	setAnchorEl(null);
+  	};
+	const handleCloseTask = () => {
+		toggleTask();
+    	setAnchorEl(null);
+  	};
+	const handleClose = () => {
+    	setAnchorEl(null);
+  	};
 	const db = getFirestore(app)
 	const user = useUser(false);
 
@@ -48,18 +68,34 @@ function Dashboard() {
 		}
 	}, [preferences]);
 
-
-
 	return (
 		<div>
-			<Fab color="primary" aria-label="add" onClick={togglePomodoro} sx={{top: 450, left: 675 }}>
+			<Fab color="primary" aria-label="add"    id="basic-button"
+				aria-controls={open ? 'basic-menu' : undefined}
+				aria-haspopup="true"
+				aria-expanded={open ? 'true' : undefined}
+				onClick={handleClick} 
+				sx={{ position: 'fixed', top: 100, right:  100}}>
 				<AddIcon />
 			</Fab>
+			<Menu
+				id="basic-menu"
+				anchorEl={anchorEl}
+				open={open}
+				onClose={handleClose}
+				MenuListProps={{
+				'aria-labelledby': 'basic-button',
+				}}>
+				<MenuItem onClick={handleCloseTask}>Tasklist</MenuItem>
+				<MenuItem onClick={handleClosePomo}>Pomodoro Timer</MenuItem>
+      		</Menu>
 			<Slide direction="up" in={showPomodoro} mountOnEnter unmountOnExit>
        		 	<Box sx={{ position: 'fixed', bottom: 60, right: 0, zIndex: 1100 }}><RoomPomodoro /></Box>
       		</Slide>
 			<DashboardConfigurator initialPreference={preferences} preferenceCallback={updatePreferences}/>
-			<TasklistList className="component-wrapper"/>	
+			<Slide direction="up" in={showTask} mountOnEnter unmountOnExit>
+       		 	<Box><TasklistList className="component-wrapper"/></Box>
+      		</Slide>
 		</div>
 		
 	)

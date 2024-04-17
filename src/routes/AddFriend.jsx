@@ -253,7 +253,9 @@ useEffect(() => {
       alert('Failed to remove friend. Please try again later.');
       handleCloseConfirmDialog();
     }
-  };
+  }
+  
+  
 
   return (
     <Box sx={{ display: 'flex', width: '100%', height: '100%' }}>
