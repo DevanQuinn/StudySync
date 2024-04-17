@@ -39,32 +39,41 @@ const Leaderboard = () => {
    };
  
    const data = {
-	 labels: ['Study Time', 'Flashcards Study Time', 'Pomodoro Study Time', 'Study Room Time'],
-	 datasets: [
-	   {
-		 label: '# of Hours',
-		 data: [
-		   parseTime(currentUser.studyTime),
-		   parseTime(currentUser.flashcardTime),
-		   parseTime(currentUser.pomodoroTime),
-		   parseTime(currentUser.studyRoomTime),
-		 ],
-		 backgroundColor: [
-		   'rgba(255, 99, 132, 0.2)',
-		   'rgba(54, 162, 235, 0.2)',
-		   'rgba(255, 206, 86, 0.2)',
-		   'rgba(75, 192, 192, 0.2)',
-		 ],
-		 borderColor: [
-		   'rgba(255, 99, 132, 1)',
-		   'rgba(54, 162, 235, 1)',
-		   'rgba(255, 206, 86, 1)',
-		   'rgba(75, 192, 192, 1)',
-		 ],
-		 borderWidth: 1,
-	   },
-	 ],
-   };
+    labels: ['Other Study Time', 'Flashcards Study Time', 'Pomodoro Study Time', 'Study Room Time'],
+    datasets: [{
+      label: '# of Hours',
+      data: [
+        parseTime(currentUser.studyTime),
+        parseTime(currentUser.flashcardTime),
+        parseTime(currentUser.pomodoroTime),
+        parseTime(currentUser.studyRoomTime),
+      ],
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+      ],
+      borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+      ],
+      borderWidth: 1,
+    }],
+  };
+
+  const options = {
+    maintainAspectRatio: true, // This can also be false to ignore container size
+    aspectRatio: 1.5, // Default is 2 (wider), lower for more square
+    plugins: {
+      legend: {
+        position: 'top',
+      }
+    },
+    responsive: true,
+  };
  
 
   return (
@@ -117,11 +126,14 @@ const Leaderboard = () => {
           </Button>
         </Box>
       </Box>
-
-	  <Typography component="h1" variant="h4" sx={{ mt: 4 }}>
-        Study Time Breakdown
+      <Typography variant="h4" sx={{ mt: 4, textAlign: 'center' }}>
+        Time Spent Studying
       </Typography>
-      <Pie data={data} />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 3 }}>
+        <Box sx={{ width: 400, height: 400 }}>
+          <Pie data={data} />
+        </Box>
+      </Box>
     </Container>
   );
 };
