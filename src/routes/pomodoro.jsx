@@ -22,7 +22,13 @@ export default function Pomodoro() {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const sTime = data.get('start-time');
-    const bTime = data.get('short-break-time');
+    let bTime = data.get('short-break-time');
+
+    // If break time is empty, set it to '1' (1 second)
+    if (!bTime) {
+      bTime = '00:01';
+    }
+
     timer.setStartTime(sTime);
     setTime(sTime);
     setBreakTime(bTime);
@@ -30,6 +36,7 @@ export default function Pomodoro() {
     setStudy("Study!");
     setCount(2);
   }
+
 
   useEffect(() => {
     timer
