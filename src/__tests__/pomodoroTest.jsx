@@ -1,8 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, getByTestId } from '@testing-library/react';
 import Pomodoro from '../routes/pomodoro';
 import '@testing-library/jest-dom';
 import React from 'react';
 
+
+/*
 // Mock timrjs since it handles the actual timing logic
 jest.mock('timrjs', () => {
     return {
@@ -24,15 +26,36 @@ jest.mock('timrjs', () => {
         }),
     };
 });
+*/
+
+jest.mock('timrjs', () => ({
+  create: jest.fn().mockImplementation(() => {
+      return {
+          start: jest.fn(),
+          pause: jest.fn(),
+          setStartTime: jest.fn(),
+          getFt: jest.fn(() => "10:00"),
+          ticker: jest.fn(callback => {
+              callback({ formattedTime: "10:00" });
+              return {
+                  onStop: jest.fn().mockReturnThis(),
+                  finish: jest.fn().mockReturnThis()
+              };
+          }),
+      };
+  }),
+}));
+
 
 
 describe('Pomodoro Component', () => {
   let timer;
 
   beforeEach(() => {
-    jest.resetModules();
-    timer = require('timrjs').create();
-    render(<Pomodoro timerProp={timer} />);
+    //jest.resetModules();
+    //timer = require('timrjs').create();
+    //render(<Pomodoro timerProp={timer} />);
+    render(<Pomodoro />);
   });
 
   test('renders with default time', () => {
@@ -40,13 +63,24 @@ describe('Pomodoro Component', () => {
     expect(screen.getByText("10:00")).toBeInTheDocument();
   });
 
+  test('starts timer when start button is clicked', () => {
+    const startButton = getByTestId('start-button');
+
+    // Mock function to simulate timer behavior
+    const timer = create();
+    timer.start.mockClear(); // Clear any mocks if necessary
+
+    fireEvent.click(startButton);
+    expect(timer.start).toHaveBeenCalled();
+  });
+
 /*
   test('starts timer when start button is clicked', () => {
     fireEvent.click(screen.getByText('Start'));
     expect(timer.start).toHaveBeenCalled();
   });
-
-
+*/
+/*
   test('pauses timer when pause button is clicked', () => {
     fireEvent.click(screen.getByText('Pause'));
     expect(timer.pause).toHaveBeenCalled();

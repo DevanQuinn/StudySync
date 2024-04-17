@@ -14,7 +14,6 @@ import {
 	Card,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {
 	collection,
 	getDocs,
@@ -43,6 +42,7 @@ import MyNotes from '../components/MyNotes';
 
 const Posts = () => {
 	const [posts, setPosts] = useState([]);
+	const [noteCount, setNoteCount] = useState('...');
 	const user = useUser();
 	const [loading, setLoading] = useState(true);
 	const [totalTimeStudied, setTotalTimeStudied] = useState([]);
@@ -114,13 +114,14 @@ const Posts = () => {
 		let col = collection(db, `notes`);
 		const note = {
 			title,
+			content: '',
 			owner: user.displayName,
 			created: serverTimestamp(),
 		};
 		const res = await addDoc(col, note);
 		col = collection(db, `notes/${res.id}/access`);
 		await addDoc(col, {
-			user: user.displayName.toLowerCase(),
+			user: user.displayName,
 			type: 'owner',
 			added: serverTimestamp(),
 		});
@@ -233,7 +234,7 @@ const Posts = () => {
 				Notes
 			</Typography>
 			<Accordion sx={{ mt: 3 }}>
-				<AccordionSummary expandIcon={<AddCircleOutlineIcon />}>
+				<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 					<Typography variant='h6'>Make a new note</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
@@ -250,21 +251,12 @@ const Posts = () => {
 				</AccordionDetails>
 			</Accordion>
 
-			<Accordion sx={{ mt: 3 }}>
-				<AccordionSummary expandIcon={<ExpandMoreIcon />}>
-					<Typography variant='h6'>Your notes</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
-					<MyNotes variant='owned' />
-				</AccordionDetails>
-			</Accordion>
-
 			<Accordion sx={{ mt: 3, mb: 5 }}>
 				<AccordionSummary expandIcon={<ExpandMoreIcon />}>
-					<Typography variant='h6'>Recently viewed notes</Typography>
+					<Typography variant='h6'>{`Your notes (${noteCount})`}</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
-					<MyNotes variant='visited' />
+					<MyNotes setNoteCount={setNoteCount} />
 				</AccordionDetails>
 			</Accordion>
 
@@ -274,7 +266,7 @@ const Posts = () => {
 
 			<TagSearch />
 			<Accordion sx={{ mt: 3 }}>
-				<AccordionSummary expandIcon={<AddCircleOutlineIcon />}>
+				<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 					<Typography variant='h6'>Make a new post</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
