@@ -21,8 +21,9 @@ const EditProfile = () => {
     const storage = getStorage();
     const [userEmail, setUserEmail] = useState('');
     const [imageBlob, setImageBlob] = useState(null);
-    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', pfpID: 'unset' });
+    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', pfpID: 'unset', aboutMe: '' });
     const [studyGoals, setStudyGoals] = useState('');
+    const [aboutMe, setAboutMe] = useState('');
     const [selectedFavorites, setSelectedFavorites] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageUrl, setImageUrl] = useState(null);
@@ -74,6 +75,7 @@ const EditProfile = () => {
     useEffect(() => {
         setStudyGoals(profileData.studyGoals || '');
         setSelectedFavorites(profileData.favorites || []);
+        setAboutMe(profileData.aboutMe|| '');
 
         const loadImageBlob = async () => {
             if (profileData.pfpID && profileData.pfpID != 'unset') {
@@ -144,6 +146,7 @@ const EditProfile = () => {
             studyGoals: data.get('studyGoals'),
             pfpID: data.get('profilePicture'),
             isPublicProfile: isPublicProfile, // Include the value of isPublicProfile in the form data
+            aboutMe : data.get('aboutMe')
         });
     };
 
@@ -170,6 +173,10 @@ const EditProfile = () => {
         setStudyGoals(event.target.value);
     }
 
+    const handleAboutMeChange = (event) => {
+        setAboutMe(event.target.value);
+    }
+
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -185,7 +192,8 @@ const EditProfile = () => {
             studyGoals: studyGoals,
             pfpID: imagePath,
             userID: user.uid,
-            username: user.displayName.toLowerCase()
+            username: user.displayName.toLowerCase(),
+            aboutMe: aboutMe
         }
         console.log("uploading newData: ", newData)
 
@@ -264,6 +272,21 @@ const EditProfile = () => {
                         placeholder={studyGoals ? '' : 'Edit your study goals'}
                         value={studyGoals}
                         onChange={handleStudyGoalsChange}
+                    />
+                    <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
+                        About Me
+                    </Typography>
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        multiline
+                        rows={4}
+                        name='aboutMe'
+                        label="About Me"
+                        id="aboutMe"
+                        placeholder={aboutMe ? '' : 'Edit your about me'}
+                        value={aboutMe}
+                        onChange={handleAboutMeChange}
                     />
                     <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
                         Change Profile Picture

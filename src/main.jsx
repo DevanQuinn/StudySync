@@ -17,7 +17,7 @@ import Pomodoro from './routes/pomodoro.jsx';
 import Firebase from './firebase.js';
 import EditProfile from './routes/editprofile.jsx';
 import Flashcards from './routes/flashcards.jsx';
-import ProfilePage from './routes/profilepage.jsx';
+import ProfilePage from './routes/userpage.jsx';
 import StudyRoomUI from './routes/StudyRoomUI.jsx';
 import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 import Posts from './routes/posts.jsx';
@@ -149,15 +149,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					}
 				/>
 				<Route
-					path='chatbot'
-					element={
-						<>
-							<Navbar />
-							<Chatbot />
-						</>
-					}
-				/>
-				<Route
 					path='posts'
 					element={
 						<>
@@ -172,6 +163,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 						<>
 							<Navbar />
 							<UserPosts />
+						</>
+					}
+				/>
+				<Route
+					path=':username/profile'
+					element={
+						<>
+							<Navbar />
+							<ProfilePage />
 						</>
 					}
 				/>
