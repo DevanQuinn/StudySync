@@ -1,5 +1,4 @@
 import {
-	collection,
 	collectionGroup,
 	doc,
 	getDoc,
@@ -15,30 +14,14 @@ import app from '../firebase';
 import useUser from '../hooks/useUser';
 import { Link } from 'react-router-dom';
 
-const MyNotes = ({ variant }) => {
+const MyNotes = ({ setNoteCount }) => {
 	const [notes, setNotes] = useState([]);
 	const user = useUser();
 	const db = getFirestore(app);
 	const fetchNotes = async () => {
-		if (variant === 'visited') {
-			const q = query(
-				collection(db, `users/${user.displayName}/recentNotes`),
-				orderBy('visited', 'desc')
-			);
-			const data = await getDocs(q);
-			const newNotes = [];
-			console.log(data.docs.length);
-			data.forEach(note => {
-				const noteData = note.data();
-				noteData.id = noteData.noteId;
-				newNotes.push(noteData);
-			});
-			setNotes(newNotes);
-			return;
-		}
 		const q = query(
 			collectionGroup(db, 'access'),
-			where('user', '==', user.displayName.toLowerCase()),
+			where('user', '==', user.displayName),
 			orderBy('added', 'desc')
 		);
 		const data = await getDocs(q);
@@ -50,6 +33,7 @@ const MyNotes = ({ variant }) => {
 			noteData.id = parent.id;
 			newNotes.push(noteData);
 		}
+		setNoteCount(newNotes.length);
 		setNotes(newNotes);
 	};
 

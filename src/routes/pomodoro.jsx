@@ -70,63 +70,62 @@ export default function Pomodoro() {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <Box>
-        <Box
-          component={"form"}
-          flexDirection={"row"}
-          justifyContent={"center"}
-          gap={"20px"}
-          onSubmit={handleSubmit}
-        >
-          <Typography variant="h2">
-            {study}
-          </Typography>
-          <Typography variant="h1">
-            {time}
-          </Typography>
-          <Stack spacing={5} direction="row" justifyContent={"center"}>
-            <Button
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              onClick={() => timer.start()}
-            >
-              Start
-            </Button>
-            <Button
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              onClick={() => timer.pause()}
-            >
-              Pause
-            </Button>
-          </Stack>
-          <TextField
-            margin="normal"
-            name='start-time'
-            label="Study Time"
-            type="text"
-            id="study-time"
-            placeholder='10:00'
-            color='primary'
-          />
-          <TextField
-            margin='normal'
-            name='short-break-time'
-            label="Short Break Time"
-            type="text"
-            id="short-break-time"
-            placeholder='10:00'
-            color='primary'
-          />
+      <Box
+        component={"form"}
+        flexDirection={"row"}
+        justifyContent={"center"}
+        gap={"20px"}
+        onSubmit={handleSubmit}
+      >
+        <Typography variant="h2">
+          {study}
+        </Typography>
+        <Typography variant="h1">
+          {time}
+        </Typography>
+        <Stack spacing={5} direction="row" justifyContent={"center"}>
           <Button
-            fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            type='submit'
+            onClick={() => timer.start()}
+            data-testid="start-button"
           >
-            Set
+            Start
           </Button>
-        </Box>
+          <Button
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            onClick={() => timer.pause()}
+          >
+            Pause
+          </Button>
+        </Stack>
+        <TextField
+          margin="normal"
+          name='start-time'
+          label="Study Time"
+          type="text"
+          id="study-time"
+          placeholder='10:00'
+          color='primary'
+        />
+        <TextField
+          margin='normal'
+          name='short-break-time'
+          label="Short Break Time"
+          type="text"
+          id="short-break-time"
+          placeholder='10:00'
+          color='primary'
+        />
+        <Button
+          fullWidth
+          variant="contained"
+          sx={{ mt: 3, mb: 2 }}
+          type='submit'
+        >
+          Set
+        </Button>
       </Box>
     </Container>
   );
