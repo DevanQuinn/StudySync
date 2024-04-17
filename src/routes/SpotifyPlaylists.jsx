@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import '/Users/saimonishtunguturu/307S24Project/StudySync/src/routes/SpotifyPlaylists.css'; // Import your CSS file
 
 const SpotifyPlaylists = () => {
   const [accessToken, setAccessToken] = useState(null);
@@ -67,12 +68,20 @@ const SpotifyPlaylists = () => {
     </>
   );
 
+  // const renderLoginButton = () => (
+  //   <div>
+  //     <p>Please login to view your playlists.</p>
+  //     <button onClick={handleLogin}>Login with Spotify</button>
+  //   </div>
+  // );
+
   const renderLoginButton = () => (
-    <div>
+    <div className="bottom-right-container">
       <p>Please login to view your playlists.</p>
-      <button onClick={handleLogin}>Login with Spotify</button>
+      <button className="bottom-right-button" onClick={handleLogin}>Login with Spotify</button>
     </div>
   );
+  
 
   const handleLogin = () => {
     window.location.href = `https://accounts.spotify.com/authorize` +

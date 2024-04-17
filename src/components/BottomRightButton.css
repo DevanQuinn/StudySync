@@ -1,0 +1,7 @@
+/* BottomRightButton.css */
+.bottom-right-button {
+    position: fixed;
+    bottom: -291px; /* Adjust the distance from the bottom as needed */
+    right: -564px; /* Adjust the distance from the right as needed */
+  }
+  
