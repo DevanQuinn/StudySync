@@ -23,6 +23,7 @@ import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 import Posts from './routes/posts.jsx';
 import UserPosts from './routes/userposts.jsx';
 import Note from './routes/note.jsx';
+import Chatbot from './components/ChatBot.jsx';
 
 const theme = createTheme({
 	palette: {
