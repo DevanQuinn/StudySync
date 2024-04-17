@@ -2,27 +2,22 @@ import * as React from 'react';
 import { create } from 'timrjs';
 import { useState, useEffect } from 'react';
 import { Stack } from '@mui/material';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import Copyright from '../components/Copyright.jsx';
-import { grey } from '@mui/material/colors';
+
 export default function Pomodoro() {
-  const [timer] = useState(create('10m'))
-  const [time, setTime] = useState(timer.getFt())
-  const [breakTime, setBreakTime] = useState(timer.getFt())
-  const [startTime, setStartTime] = useState(timer.getFt())
-  const [study, setStudy] = useState("Study!")
-  const [count, setCount] = useState(1)
-  let num = 0
+  const [timer] = useState(create('3'));
+  const [time, setTime] = useState(timer.getFt());
+  const [breakTime, setBreakTime] = useState(timer.getFt());
+  const [startTime, setStartTime] = useState(timer.getFt());
+  const [study, setStudy] = useState("Study!");
+  const [count, setCount] = useState(1);
+  let num = 0;
+
   const handleSubmit = event => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -32,35 +27,39 @@ export default function Pomodoro() {
     setTime(sTime);
     setBreakTime(bTime);
     setStartTime(sTime);
-    setStudy("Study!")
-    setCount(2)
+    setStudy("Study!");
+    setCount(2);
   }
+
   useEffect(() => {
     timer
       .ticker(({ formattedTime }) => {
-        setTime(formattedTime)
+        setTime(formattedTime);
       })
       .onStop(() => {
-        setTime(timer.getFt())
-      })
-      .finish(() => {
-        console.log(count)
-        console.log(num)
-        if (count % 2 === 0) {
-          setTime(breakTime)
-          setStudy("Break!")
-          num++
-          timer.setStartTime(breakTime)
-          setCount(1)
-        }
-        else {
-          setTime(startTime)
-          setStudy("Study!")
-          timer.setStartTime(startTime)
-          setCount(2)
-        }
-      })
-  }, [breakTime, startTime, time])
+        setTime(timer.getFt());
+      });
+  }, [timer]);
+
+  useEffect(() => {
+    timer.finish(() => {
+      console.log("Count: ", count);
+      console.log("Num: ", num);
+      if (count % 2 === 0) {
+        setTime(breakTime);
+        setStudy("Break!");
+        num++;
+        timer.setStartTime(breakTime);
+        setCount(1);
+      } else {
+        setTime(startTime);
+        setStudy("Study!");
+        timer.setStartTime(startTime);
+        setCount(2);
+      }
+    });
+  }, [timer, breakTime, startTime, count]);
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
