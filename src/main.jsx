@@ -177,6 +177,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					}
 				/>
 				<Route
+					path='/profilepage'
+					element={
+						<>
+							<Navbar />
+							<ProfilePage />
+						</>
+					}
+				/>
+				<Route
 					path='/note/:id'
 					element={
 						<>
