@@ -37,7 +37,7 @@ const treeDisplayBanner = () => { //trees should be an array of ints, each repre
 						if (doc.data().treeSelection != undefined) {
 							updateTrees(doc.data().treeSelection)
 						}
-                    }); //set the frontends properties equal to the database properties
+          }); //set the frontends properties equal to the database properties
 				})
 			})
 		}
