@@ -27,7 +27,7 @@ const EditProfile = () => {
     const [selectedFavorites, setSelectedFavorites] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageUrl, setImageUrl] = useState(null);
-    const favoritesOptions = ['Leaderboard', 'Study Room', 'Timer', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards'];
+    const favoritesOptions = ['Leaderboard', 'StudyRoom', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards', 'Posts'];
     const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
 
     // Load profile visibility setting from localStorage on component mount
