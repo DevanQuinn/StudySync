@@ -68,7 +68,7 @@ const Flashcards = () => {
 		: null;
 
 	const userStatsCol = user
-		? collection(db, `userStats/${user?.uid}/timeStudied`)
+		? collection(db, `userStats/${user?.uid}/flashcardsStudied`)
 		: null;
 
 	useEffect(() => {
