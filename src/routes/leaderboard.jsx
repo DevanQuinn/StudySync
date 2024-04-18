@@ -13,11 +13,6 @@ import {
   Paper,
   Button,
 } from '@mui/material';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-
-// Register the necessary chart components
-ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Leaderboard = () => {
   //hardcoded data before linking to firebase
@@ -28,53 +23,6 @@ const Leaderboard = () => {
       { username: 'User4', studyTime: '2h 15m', flashcardTime: '0h 25m', pomodoroTime: '0h 4m', studyRoomTime: '1h 15m' },
       { username: 'User5', studyTime: '1h 45m', flashcardTime: '0h 20m', pomodoroTime: '0h 4m', studyRoomTime: '1h 10m' }
   ];
-
-   // Example for a single user's breakdown; adjust based on your app's state management
-   const currentUser = leaderboardData[0]; // Assuming current user is 'User1'
-
-   // Parsing times into hours (assuming the format is always 'Xh Ym')
-   const parseTime = timeStr => {
-	 const [hours, minutes] = timeStr.split('h').map(part => parseInt(part));
-	 return hours + minutes / 60; // Convert minutes into a fraction of an hour
-   };
- 
-   const data = {
-    labels: ['Other Study Time', 'Flashcards Study Time', 'Pomodoro Study Time', 'Study Room Time'],
-    datasets: [{
-      label: '# of Hours',
-      data: [
-        parseTime(currentUser.studyTime),
-        parseTime(currentUser.flashcardTime),
-        parseTime(currentUser.pomodoroTime),
-        parseTime(currentUser.studyRoomTime),
-      ],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)',
-        'rgba(75, 192, 192, 0.2)',
-      ],
-      borderColor: [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-      ],
-      borderWidth: 1,
-    }],
-  };
-
-  const options = {
-    maintainAspectRatio: true, // This can also be false to ignore container size
-    aspectRatio: 1.5, // Default is 2 (wider), lower for more square
-    plugins: {
-      legend: {
-        position: 'top',
-      }
-    },
-    responsive: true,
-  };
- 
 
   return (
     <Container component="main" maxWidth="md">
@@ -124,14 +72,6 @@ const Leaderboard = () => {
           <Button variant="contained">
             Study Rooms
           </Button>
-        </Box>
-      </Box>
-      <Typography variant="h4" sx={{ mt: 4, textAlign: 'center' }}>
-        Time Spent Studying
-      </Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 3 }}>
-        <Box sx={{ width: 400, height: 400 }}>
-          <Pie data={data} />
         </Box>
       </Box>
     </Container>

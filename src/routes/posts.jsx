@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import CreatePost from '../components/posts/CreatePost';
+import UserStudyChart from './UserStudyChart'; 
 import {
 	Accordion,
 	AccordionSummary,
