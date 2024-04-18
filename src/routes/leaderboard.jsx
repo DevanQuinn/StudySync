@@ -14,11 +14,19 @@ import {
   Button,
 } from '@mui/material';
 import {
+  collection,
   getDocs,
   getFirestore,
   collectionGroup,
+  orderBy,
+  query,
+  where,
+  addDoc,
+  serverTimestamp,
 } from 'firebase/firestore';
 import app from '../firebase';
+import { Pie } from 'react-chartjs-2';
+import useUser from '../hooks/useUser';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -28,24 +36,11 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Leaderboard = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-  const [boardData, setBoardData] = useState([]);
-  const [activeCategory, setActiveCategory] = useState('General');
+  const [boardData, setBoardData] = useState([])
 
   const db = getFirestore(app);
 
-  // define category-specific column headings
-  const categoryColumns = {
-    General: ['Total Time Studied', 'Flashcards Study Time', 'Pomodoro Study Time', 'Study Room Time'],
-    Flashcards: ['Avg. time per card', 'Num cards studied'],
-    Pomodoro: ['Num study sessions', 'Longest duration of session'],
-    StudyRooms: ['Time studied', 'Engagement in study room'],
-  };
-
   const timeStringToMilliseconds = (timeStr) => {
-    if (!timeStr) {
-      return 0; // or handle the case when timeStr is undefined/null
-    }
-
     const regex = /(?:(\d+)h)? ?(?:(\d+)m)? ?(?:(\d+)s)?/;
     const match = timeStr.match(regex);
 
@@ -64,11 +59,11 @@ const Leaderboard = () => {
 
   // Function to handle sorting
   const handleSort = (key) => {
-    console.log('Sorting key:', key);
     let direction = 'desc'; // Start with descending order
     if (sortConfig.key === key && sortConfig.direction === 'desc') {
       direction = 'asc'; // Toggle to ascending order if already descending
     }
+    console.log('Sorting key:', key);
     console.log('Sorting direction:', direction);
     const sortedData = [...boardData].sort((a, b) => {
       const valueA = timeStringToMilliseconds(a[key]);
@@ -79,7 +74,6 @@ const Leaderboard = () => {
         return valueB - valueA;
       }
     });
-    console.log('Sorted data:', sortedData);
     setSortConfig({ key, direction });
     setBoardData(sortedData);
   };
@@ -267,36 +261,40 @@ const Leaderboard = () => {
           Leaderboards
         </Typography>
       </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 4 }}>
-        <Button variant="contained" onClick={() => setActiveCategory('General')}>
-          General
-        </Button>
-        <Button variant="contained" onClick={() => setActiveCategory('Flashcards')}>
-          Flashcards
-        </Button>
-        <Button variant="contained" onClick={() => setActiveCategory('Pomodoro')}>
-          Pomodoro
-        </Button>
-        <Button variant="contained" onClick={() => setActiveCategory('StudyRooms')}>
-          Study Rooms
-        </Button>
-      </Box>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Rank</TableCell>
               <TableCell>Username</TableCell>
-              {categoryColumns[activeCategory].map((heading, index) => (
-                <SortableHeader
-                  key={index}
-                  label={heading}
-                  sortKey={heading}
-                  currentSortKey={sortConfig.key}
-                  currentSortDirection={sortConfig.direction}
-                  onClick={handleSort}
-                />
-              ))}
+              <SortableHeader
+                label="Total Time Studied"
+                sortKey="studyTime"
+                currentSortKey={sortConfig.key}
+                currentSortDirection={sortConfig.direction}
+                onClick={handleSort}
+              />
+              <SortableHeader
+                label="Flashcards Study Time"
+                sortKey="flashcardTime"
+                currentSortKey={sortConfig.key}
+                currentSortDirection={sortConfig.direction}
+                onClick={handleSort}
+              />
+              <SortableHeader
+                label="Pomodoro Study Time"
+                sortKey="pomodoroTime"
+                currentSortKey={sortConfig.key}
+                currentSortDirection={sortConfig.direction}
+                onClick={handleSort}
+              />
+              <SortableHeader
+                label="Study Room Time"
+                sortKey="studyRoomTime"
+                currentSortKey={sortConfig.key}
+                currentSortDirection={sortConfig.direction}
+                onClick={handleSort}
+              />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -304,28 +302,31 @@ const Leaderboard = () => {
               <TableRow key={index}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{user.username}</TableCell>
-                {activeCategory === 'General' && (
-                  <>
-                    <TableCell align="center">{user.studyTime}</TableCell>
-                    <TableCell align="center">{user.flashcardTime}</TableCell>
-                    <TableCell align="center">{user.pomodoroTime}</TableCell>
-                    <TableCell align="center">{user.studyRoomTime}</TableCell>
-                  </>
-                )}
-                {activeCategory !== 'General' && (
-                  <>
-                    {categoryColumns[activeCategory].map((heading, index) => (
-                      <TableCell key={index} align="center">
-                        {user[`${heading.toLowerCase().replace(/\s+/g, '')}Time`]}
-                      </TableCell>
-                    ))}
-                  </>
-                )}
+                <TableCell align="center">{user.studyTime}</TableCell>
+                <TableCell align="center">{user.flashcardTime}</TableCell>
+                <TableCell align="center">{user.pomodoroTime}</TableCell>
+                <TableCell align="center">{user.studyRoomTime}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+      <Box sx={{ mt: 3, textAlign: 'center' }}>
+        <Typography variant="h5" sx={{ mb: 3, mt: 2 }}>
+          Leaderboards by Category
+        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 4 }}>
+          <Button variant="contained">
+            Flashcards
+          </Button>
+          <Button variant="contained">
+            Pomodoro
+          </Button>
+          <Button variant="contained">
+            Study Rooms
+          </Button>
+        </Box>
+      </Box>
     </Container>
   );
 };
