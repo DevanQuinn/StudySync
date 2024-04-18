@@ -14,19 +14,11 @@ import {
   Button,
 } from '@mui/material';
 import {
-  collection,
   getDocs,
   getFirestore,
   collectionGroup,
-  orderBy,
-  query,
-  where,
-  addDoc,
-  serverTimestamp,
 } from 'firebase/firestore';
 import app from '../firebase';
-import { Pie } from 'react-chartjs-2';
-import useUser from '../hooks/useUser';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
