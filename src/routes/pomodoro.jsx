@@ -8,6 +8,10 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import { getFirestore, addDoc, collection } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import app from '../firebase';
+
 
 export default function Pomodoro() {
   const [timer] = useState(create('3'));
@@ -15,8 +19,12 @@ export default function Pomodoro() {
   const [breakTime, setBreakTime] = useState(timer.getFt());
   const [startTime, setStartTime] = useState(timer.getFt());
   const [study, setStudy] = useState("Study!");
-  const [count, setCount] = useState(1);
+  const [count, setCount] = useState(0);
+  const [totalStudyTime, setTotalStudyTime] = useState(timer.currentTime);
+
   let num = 0;
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
   const handleSubmit = event => {
     event.preventDefault();
@@ -24,12 +32,16 @@ export default function Pomodoro() {
     const sTime = data.get('start-time');
     let bTime = data.get('short-break-time');
 
-    // If break time is empty, set it to '1' (1 second)
+    // If break time is empty, set it to 1 second
     if (!bTime) {
       bTime = '00:01';
     }
 
+    //setTotalStudyTime(sTime);
     timer.setStartTime(sTime);
+    let t = timer.getCurrentTime()
+    setTotalStudyTime(t)
+    console.log("set total study time to: ", t)
     setTime(sTime);
     setBreakTime(bTime);
     setStartTime(sTime);
@@ -49,6 +61,26 @@ export default function Pomodoro() {
   }, [timer]);
 
   useEffect(() => {
+    const uploadData = async () => {
+      console.log("calling finish, do upload with time: ", totalStudyTime * 1000)
+
+      const user = auth.currentUser;
+      const pomodoroCol = user
+        ? collection(db, `userStats/${user?.uid}/pomodoroTimes`)
+        : null;
+
+      console.log("uploading to ", user?.uid)
+
+      const statsData = {
+        durationMs: totalStudyTime * 1000
+      };
+
+      try {
+        await addDoc(pomodoroCol, statsData);
+      } catch (error) {
+        console.error('Error uploading user statistics:', error);
+      }
+    }
     timer.finish(() => {
       console.log("Count: ", count);
       console.log("Num: ", num);
@@ -65,6 +97,10 @@ export default function Pomodoro() {
         setCount(2);
       }
     });
+
+    if (count % 2 === 1) {
+      uploadData()
+    }
   }, [timer, breakTime, startTime, count]);
 
   return (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -15,30 +15,43 @@ import {
 } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 // Register the necessary chart components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Leaderboard = () => {
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
   //hardcoded data before linking to firebase
   const leaderboardData = [
-      { username: 'User1', studyTime: '4h 30m', flashcardTime: '0h 45m', pomodoroTime: '0h 10m', studyRoomTime: '1h 30m' },
-      { username: 'User2', studyTime: '3h 15m', flashcardTime: '0h 35m', pomodoroTime: '0h 8m', studyRoomTime: '1h 25m' },
-      { username: 'User3', studyTime: '2h 45m', flashcardTime: '0h 30m', pomodoroTime: '0h 6m', studyRoomTime: '1h 20m' },
-      { username: 'User4', studyTime: '2h 15m', flashcardTime: '0h 25m', pomodoroTime: '0h 4m', studyRoomTime: '1h 15m' },
-      { username: 'User5', studyTime: '1h 45m', flashcardTime: '0h 20m', pomodoroTime: '0h 4m', studyRoomTime: '1h 10m' }
+    { username: 'User1', studyTime: '4h 30m', flashcardTime: '0h 45m', pomodoroTime: '0h 10m', studyRoomTime: '1h 30m' },
+    { username: 'User2', studyTime: '3h 15m', flashcardTime: '0h 35m', pomodoroTime: '0h 8m', studyRoomTime: '1h 25m' },
+    { username: 'User3', studyTime: '2h 45m', flashcardTime: '0h 30m', pomodoroTime: '0h 6m', studyRoomTime: '1h 20m' },
+    { username: 'User4', studyTime: '2h 15m', flashcardTime: '0h 25m', pomodoroTime: '0h 4m', studyRoomTime: '1h 15m' },
+    { username: 'User5', studyTime: '1h 45m', flashcardTime: '0h 20m', pomodoroTime: '0h 4m', studyRoomTime: '1h 10m' }
   ];
 
-   // Example for a single user's breakdown; adjust based on your app's state management
-   const currentUser = leaderboardData[0]; // Assuming current user is 'User1'
+  // Function to handle sorting
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
 
-   // Parsing times into hours (assuming the format is always 'Xh Ym')
-   const parseTime = timeStr => {
-	 const [hours, minutes] = timeStr.split('h').map(part => parseInt(part));
-	 return hours + minutes / 60; // Convert minutes into a fraction of an hour
-   };
- 
-   const data = {
+  // Example for a single user's breakdown; adjust based on your app's state management
+  const currentUser = leaderboardData[0]; // Assuming current user is 'User1'
+
+  // Parsing times into hours (assuming the format is always 'Xh Ym')
+  const parseTime = timeStr => {
+    const [hours, minutes] = timeStr.split('h').map(part => parseInt(part));
+    return hours + minutes / 60; // Convert minutes into a fraction of an hour
+  };
+
+  const data = {
     labels: ['Other Study Time', 'Flashcards Study Time', 'Pomodoro Study Time', 'Study Room Time'],
     datasets: [{
       label: '# of Hours',
@@ -74,7 +87,31 @@ const Leaderboard = () => {
     },
     responsive: true,
   };
- 
+
+  // Sorting function
+  const sortedData = [...leaderboardData].sort((a, b) => {
+    if (sortConfig.direction === 'asc') {
+      return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
+    } else {
+      return a[sortConfig.key] < b[sortConfig.key] ? 1 : -1;
+    }
+  });
+
+  const SortableHeader = ({ label, sortKey, currentSortKey, currentSortDirection, onClick }) => {
+    const isCurrentSortKey = currentSortKey === sortKey;
+    const isAscending = currentSortDirection === 'asc';
+
+    return (
+      <TableCell onClick={() => onClick(sortKey)} sx={{ cursor: 'pointer' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span>{label}</span>
+          {isCurrentSortKey && (
+            isAscending ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />
+          )}
+        </div>
+      </TableCell>
+    );
+  };
 
   return (
     <Container component="main" maxWidth="md">
@@ -90,14 +127,38 @@ const Leaderboard = () => {
             <TableRow>
               <TableCell>Rank</TableCell>
               <TableCell>Username</TableCell>
-              <TableCell align="center">Total Time Studied</TableCell>
-              <TableCell align="center">Flashcards Study Time</TableCell>
-              <TableCell align="center">Pomodoro Study Time</TableCell>
-              <TableCell align="center">Study Room Time</TableCell>
+              <SortableHeader
+                label="Total Time Studied"
+                sortKey="studyTime"
+                currentSortKey={sortConfig.key}
+                currentSortDirection={sortConfig.direction}
+                onClick={handleSort}
+              />
+              <SortableHeader
+                label="Flashcards Study Time"
+                sortKey="flashcardTime"
+                currentSortKey={sortConfig.key}
+                currentSortDirection={sortConfig.direction}
+                onClick={handleSort}
+              />
+              <SortableHeader
+                label="Pomodoro Study Time"
+                sortKey="pomodoroTime"
+                currentSortKey={sortConfig.key}
+                currentSortDirection={sortConfig.direction}
+                onClick={handleSort}
+              />
+              <SortableHeader
+                label="Study Room Time"
+                sortKey="studyRoomTime"
+                currentSortKey={sortConfig.key}
+                currentSortDirection={sortConfig.direction}
+                onClick={handleSort}
+              />
             </TableRow>
           </TableHead>
           <TableBody>
-            {leaderboardData.map((user, index) => (
+            {sortedData.map((user, index) => (
               <TableRow key={index}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{user.username}</TableCell>
@@ -111,7 +172,7 @@ const Leaderboard = () => {
         </Table>
       </TableContainer>
       <Box sx={{ mt: 3, textAlign: 'center' }}>
-        <Typography variant="h5" sx = {{mb: 3, mt: 2}}>
+        <Typography variant="h5" sx={{ mb: 3, mt: 2 }}>
           Leaderboards by Category
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 4 }}>
@@ -137,5 +198,6 @@ const Leaderboard = () => {
     </Container>
   );
 };
+
 
 export default Leaderboard;
