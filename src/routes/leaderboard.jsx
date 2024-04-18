@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -13,55 +13,217 @@ import {
   Paper,
   Button,
 } from '@mui/material';
+import {
+  collection,
+  getDocs,
+  getFirestore,
+  collectionGroup,
+  orderBy,
+  query,
+  where,
+  addDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import app from '../firebase';
 import { Pie } from 'react-chartjs-2';
+import useUser from '../hooks/useUser';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 // Register the necessary chart components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Leaderboard = () => {
-  //hardcoded data before linking to firebase
-  const leaderboardData = [
-      { username: 'User1', studyTime: '4h 30m', flashcardTime: '0h 45m', pomodoroTime: '0h 10m', studyRoomTime: '1h 30m' },
-      { username: 'User2', studyTime: '3h 15m', flashcardTime: '0h 35m', pomodoroTime: '0h 8m', studyRoomTime: '1h 25m' },
-      { username: 'User3', studyTime: '2h 45m', flashcardTime: '0h 30m', pomodoroTime: '0h 6m', studyRoomTime: '1h 20m' },
-      { username: 'User4', studyTime: '2h 15m', flashcardTime: '0h 25m', pomodoroTime: '0h 4m', studyRoomTime: '1h 15m' },
-      { username: 'User5', studyTime: '1h 45m', flashcardTime: '0h 20m', pomodoroTime: '0h 4m', studyRoomTime: '1h 10m' }
-  ];
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [boardData, setBoardData] = useState([])
 
-   // Example for a single user's breakdown; adjust based on your app's state management
-   const currentUser = leaderboardData[0]; // Assuming current user is 'User1'
+  const db = getFirestore(app);
 
-   // Parsing times into hours (assuming the format is always 'Xh Ym')
-   const parseTime = timeStr => {
-	 const [hours, minutes] = timeStr.split('h').map(part => parseInt(part));
-	 return hours + minutes / 60; // Convert minutes into a fraction of an hour
-   };
- 
-   const data = {
-    labels: ['Other Study Time', 'Flashcards Study Time', 'Pomodoro Study Time', 'Study Room Time'],
-    datasets: [{
-      label: '# of Hours',
-      data: [
-        parseTime(currentUser.studyTime),
-        parseTime(currentUser.flashcardTime),
-        parseTime(currentUser.pomodoroTime),
-        parseTime(currentUser.studyRoomTime),
-      ],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)',
-        'rgba(75, 192, 192, 0.2)',
-      ],
-      borderColor: [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-      ],
-      borderWidth: 1,
-    }],
+  const timeStringToMilliseconds = (timeStr) => {
+    const regex = /(?:(\d+)h)? ?(?:(\d+)m)? ?(?:(\d+)s)?/;
+    const match = timeStr.match(regex);
+
+    if (!match) {
+      throw new Error('Invalid time string format. Expected format: XXh XXm XXs');
+    }
+
+    const hours = match[1] ? parseInt(match[1]) : 0;
+    const minutes = match[2] ? parseInt(match[2]) : 0;
+    const seconds = match[3] ? parseInt(match[3]) : 0;
+
+    const milliseconds = hours * 3600000 + minutes * 60000 + seconds * 1000;
+
+    return milliseconds;
+  };
+
+  // Function to handle sorting
+  const handleSort = (key) => {
+    let direction = 'desc'; // Start with descending order
+    if (sortConfig.key === key && sortConfig.direction === 'desc') {
+      direction = 'asc'; // Toggle to ascending order if already descending
+    }
+    console.log('Sorting key:', key);
+    console.log('Sorting direction:', direction);
+    const sortedData = [...boardData].sort((a, b) => {
+      const valueA = timeStringToMilliseconds(a[key]);
+      const valueB = timeStringToMilliseconds(b[key]);
+      if (direction === 'asc') {
+        return valueA - valueB;
+      } else {
+        return valueB - valueA;
+      }
+    });
+    setSortConfig({ key, direction });
+    setBoardData(sortedData);
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    const usersFlashcardTimesMap = await getDataMap('flashcardsStudied');
+    //console.log("got the usersFlashcardTimesMap: ", usersFlashcardTimesMap)
+
+    const usersPomodoroTimesMap = await getDataMap('pomodoroTimes');
+    //console.log("got the usersPomodoroTimesMap: ", usersPomodoroTimesMap)
+
+    const usersStudyRoomTimesMap = await getDataMap('studyRoomTimes');
+    //console.log("got the usersStudyRoomTimesMap: ", usersStudyRoomTimesMap)
+
+    const statsMap = calculateStatistics(usersFlashcardTimesMap, usersPomodoroTimesMap, usersStudyRoomTimesMap);
+    console.log("created statsMap from calculateStatistics: ", statsMap)
+    setBoardData(convertStatsMapToJsonArray(statsMap));
+  };
+
+  const convertStatsMapToJsonArray = (statsMap) => {
+    const jsonArray = [];
+
+    // Iterate over each entry in the statsMap
+    Object.entries(statsMap).forEach(([username, userData], index) => {
+
+      // Create an object with the required fields
+      if (!userData) {
+        userData = {}
+        userData.totalDuration = 0
+        userData.totalCount = 0
+      }
+      if (!userData.flashcard) {
+        userData.flashcard = {}
+        userData.flashcard.countEach = 0
+        userData.flashcard.totalDurationEach = 0
+      }
+      if (!userData.pomodoro) {
+        userData.pomodoro = {}
+        userData.pomodoro.countEach = 0
+        userData.pomodoro.totalDurationEach = 0
+      }
+      if (!userData.studyRoom) {
+        userData.studyRoom = {}
+        userData.studyRoom.countEach = 0
+        userData.studyRoom.totalDurationEach = 0
+      }
+
+      const userStats = {
+        username,
+        studyTime: formatDuration(userData.totalDuration),
+        flashcardTime: formatDuration(userData.flashcard.totalDurationEach),
+        pomodoroTime: formatDuration(userData.pomodoro.totalDurationEach),
+        studyRoomTime: formatDuration(userData.studyRoom.totalDurationEach),
+      };
+
+      // Push the created object into the jsonArray
+      jsonArray.push(userStats);
+    });
+
+    return jsonArray;
+  };
+
+  const getDataMap = async (path) => {
+    let dataMap = {};
+
+    try {
+      const times = await getDocs(collectionGroup(db, path));
+
+      times.forEach(doc => {
+        const userData = doc.data();
+
+        const username = userData.username;
+        if (!dataMap[username]) {
+          dataMap[username] = [];
+        }
+
+        dataMap[username].push(userData);
+      });
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+
+    return dataMap;
+  };
+
+  const calculateStatistics = (usersFlashcardTimesMap, usersPomodoroTimesMap, usersStudyRoomTimesMap) => {
+    let statisticsMap = {};
+
+    // Helper function to sum up durations and count occurrences for each username
+    const calcUserStatsEach = (map, mapType) => {
+      Object.keys(map).forEach(username => {
+        const userData = map[username];
+        const totalDurationEach = userData.reduce((acc, curr) => acc + curr.durationMs, 0);
+        const countEach = userData.length;
+        if (!statisticsMap[username]) {
+          statisticsMap[username] = {};
+        }
+        // Set totalDuration and totalCount for each map type
+        statisticsMap[username][mapType] = {
+          totalDurationEach,
+          countEach
+        };
+      });
+    };
+
+    // Calculate stats for each type of map
+    calcUserStatsEach(usersFlashcardTimesMap, 'flashcard');
+    calcUserStatsEach(usersPomodoroTimesMap, 'pomodoro');
+    calcUserStatsEach(usersStudyRoomTimesMap, 'studyRoom');
+
+    // Calculate totalDuration and totalCount across all maps for each user
+    Object.keys(statisticsMap).forEach(username => {
+      const userData = statisticsMap[username];
+      userData.totalDuration = Object.values(userData).reduce((acc, curr) => {
+        if (typeof curr === 'object' && curr.totalDurationEach) {
+          return acc + curr.totalDurationEach;
+        }
+        return acc;
+      }, 0);
+      userData.totalCount = Object.values(userData).reduce((acc, curr) => {
+        if (typeof curr === 'object' && curr.countEach) {
+          return acc + curr.countEach;
+        }
+        return acc;
+      }, 0);
+    });
+
+    return statisticsMap
+  };
+
+  const formatDuration = (milliseconds) => {
+    // Convert milliseconds to seconds
+    const seconds = Math.floor(milliseconds / 1000);
+
+    // Calculate hours, minutes, and remaining seconds
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    // Format the time string
+    const formattedHours = hours > 0 ? `${hours}h ` : '';
+    const formattedMinutes = minutes > 0 ? `${minutes}m ` : '';
+    const formattedSeconds = remainingSeconds > 0 || (hours === 0 && minutes === 0) ? `${remainingSeconds}s` : '';
+
+    // Combine the formatted parts
+    return formattedHours + formattedMinutes + formattedSeconds;
   };
 
   const options = {
@@ -74,7 +236,22 @@ const Leaderboard = () => {
     },
     responsive: true,
   };
- 
+
+  const SortableHeader = ({ label, sortKey, currentSortKey, currentSortDirection, onClick }) => {
+    const isCurrentSortKey = currentSortKey === sortKey;
+    const isAscending = currentSortDirection === 'asc';
+
+    return (
+      <TableCell onClick={() => onClick(sortKey)} sx={{ cursor: 'pointer' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span>{label}</span>
+          {isCurrentSortKey && (
+            isAscending ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />
+          )}
+        </div>
+      </TableCell>
+    );
+  };
 
   return (
     <Container component="main" maxWidth="md">
@@ -90,14 +267,38 @@ const Leaderboard = () => {
             <TableRow>
               <TableCell>Rank</TableCell>
               <TableCell>Username</TableCell>
-              <TableCell align="center">Total Time Studied</TableCell>
-              <TableCell align="center">Flashcards Study Time</TableCell>
-              <TableCell align="center">Pomodoro Study Time</TableCell>
-              <TableCell align="center">Study Room Time</TableCell>
+              <SortableHeader
+                label="Total Time Studied"
+                sortKey="studyTime"
+                currentSortKey={sortConfig.key}
+                currentSortDirection={sortConfig.direction}
+                onClick={handleSort}
+              />
+              <SortableHeader
+                label="Flashcards Study Time"
+                sortKey="flashcardTime"
+                currentSortKey={sortConfig.key}
+                currentSortDirection={sortConfig.direction}
+                onClick={handleSort}
+              />
+              <SortableHeader
+                label="Pomodoro Study Time"
+                sortKey="pomodoroTime"
+                currentSortKey={sortConfig.key}
+                currentSortDirection={sortConfig.direction}
+                onClick={handleSort}
+              />
+              <SortableHeader
+                label="Study Room Time"
+                sortKey="studyRoomTime"
+                currentSortKey={sortConfig.key}
+                currentSortDirection={sortConfig.direction}
+                onClick={handleSort}
+              />
             </TableRow>
           </TableHead>
           <TableBody>
-            {leaderboardData.map((user, index) => (
+            {boardData.map((user, index) => (
               <TableRow key={index}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{user.username}</TableCell>
@@ -111,7 +312,7 @@ const Leaderboard = () => {
         </Table>
       </TableContainer>
       <Box sx={{ mt: 3, textAlign: 'center' }}>
-        <Typography variant="h5" sx = {{mb: 3, mt: 2}}>
+        <Typography variant="h5" sx={{ mb: 3, mt: 2 }}>
           Leaderboards by Category
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 4 }}>
@@ -126,16 +327,10 @@ const Leaderboard = () => {
           </Button>
         </Box>
       </Box>
-      <Typography variant="h4" sx={{ mt: 4, textAlign: 'center' }}>
-        Time Spent Studying
-      </Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 3 }}>
-        <Box sx={{ width: 400, height: 400 }}>
-          <Pie data={data} />
-        </Box>
-      </Box>
     </Container>
   );
 };
 
+
 export default Leaderboard;
+

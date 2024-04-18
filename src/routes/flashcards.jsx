@@ -68,7 +68,7 @@ const Flashcards = () => {
 		: null;
 
 	const userStatsCol = user
-		? collection(db, `userStats/${user?.uid}/timeStudied`)
+		? collection(db, `userStats/${user?.uid}/flashcardsStudied`)
 		: null;
 
 	useEffect(() => {
@@ -101,7 +101,14 @@ const Flashcards = () => {
 		if (!userStatsCol) return;
 
 		if (numCardsStudied > 0) {
-			const statsData = { startTime, endTime, durationMs, duration, numCardsStudied };
+			const statsData = {
+				startTime,
+				endTime,
+				durationMs,
+				duration,
+				numCardsStudied,
+				username: user.displayName
+			};
 
 			try {
 				await addDoc(userStatsCol, statsData);

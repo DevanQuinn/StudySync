@@ -32,7 +32,6 @@ const Navbar = () => {
         {title: 'SpotifyPlaylists', path: '/SpotifyPlaylists'},
         { title: 'Flash Cards', path: '/flashcards' },
         { title: 'AddFriend', path: '/AddFriend' },
-		{ title: 'Profile Page', path: '/profilePage'}
 	];
 	const [image, setImage] = useState();
 	const db = getFirestore(app);
@@ -71,6 +70,13 @@ const Navbar = () => {
 						<Link to={page.path}>{page.title}</Link>
 					</Typography>
 				))}
+				<Typography sx={{ mr: 7 }} color='textPrimary'>
+					{user ? (
+						<Link to={`/${user.displayName}/profile`}>Profile</Link>
+					) : (
+						<Link to={'/signin'}>Sign In</Link>
+					)}
+				</Typography>
 				<Typography
 					variant='h6'
 					component='div'
