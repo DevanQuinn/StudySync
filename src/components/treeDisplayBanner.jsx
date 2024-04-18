@@ -45,7 +45,9 @@ const treeDisplayBanner = () => { //trees should be an array of ints, each repre
 
     return (
         <div>
-            {trees.map((tree, index) => {
+					{trees.length == 0 && <>You haven't selected any trees yet! Visit the Edit Profile page to grow a garden.</>}
+					{trees.length != 0 && 
+							trees.map((tree, index) => {
                 return(
                     <img key={index} src={treeImages[tree].tree} style={{width:'10wv', height:'10vw'}}/>
                 )

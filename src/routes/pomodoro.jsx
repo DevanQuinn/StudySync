@@ -15,6 +15,22 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Copyright from '../components/Copyright.jsx';
 import { grey } from '@mui/material/colors';
+import TimerBar from '../components/TimerBar.jsx';
+import useUser from '../hooks/useUser.jsx';
+import {
+	query,
+	where,
+	getFirestore,
+	collection,
+	getDocs,
+	getDoc,
+	setDoc,
+	doc,
+	addDoc,
+	deleteDoc,
+} from 'firebase/firestore';
+import app from '../firebase.js';
+
 export default function Pomodoro() {
   const [timer] = useState(create('10m'))
   const [time, setTime] = useState(timer.getFt())
@@ -22,6 +38,12 @@ export default function Pomodoro() {
   const [startTime, setStartTime] = useState(timer.getFt())
   const [study, setStudy] = useState("Study!")
   const [count, setCount] = useState(1)
+  const [percentDone, setPercentDone] = useState(0);
+  const [treeSelection, updateTreeSelection] = useState(0);
+  const [disableStartButton, updateDisableStartButton] = useState(false);
+  const user = useUser(false);
+  const db = getFirestore(app);
+
   let num = 0
   const handleSubmit = event => {
     event.preventDefault();
@@ -39,6 +61,7 @@ export default function Pomodoro() {
     timer
        .ticker(({ formattedTime }) => {
           setTime(formattedTime)
+          setPercentDone(percentDone);
        })
        .onStop(() => {
           setTime(timer.getFt())
@@ -61,8 +84,47 @@ export default function Pomodoro() {
         }
       })
  }, [breakTime, startTime, time])
+
+  const addTreeToGarden = (treeType, quantity, studySeconds) => {
+    if (user) {
+      var username;
+      if (user) { //if logged in
+        const q = query(collection(db, "users"), where("userID", "==", user.uid)); //set up username query
+        getDocs(q).then(userssnapshot => { //get username
+          userssnapshot.forEach(user => { //should only run once if userIDs are unique
+            username = user.data().username; //save username
+            console.log(username);
+            console.log(user.uid);
+          })
+        }).then(() => { //with username
+          getDoc(doc(db, "users", username)).then(usersnapshot => {
+            console.log(usersnapshot);
+            if (usersnapshot.data().trees == undefined || usersnapshot.data().trees[treeType] == undefined) {
+              setDoc(doc(db, "users", username), 
+                {trees : {[treeType] : Number(quantity)},
+                },
+                {merge:true}
+              )
+            } else {
+              setDoc(doc(db, "users", username), 
+                {trees : 
+                  {[treeType] : (Number(usersnapshot.data().trees[treeType]) + Number(quantity))}},
+                {merge:true}
+              )
+            }
+            if (usersnapshot.data().totalStudySeconds == undefined ) {
+              setDoc(doc(db, "users", username), {totalStudySeconds : {studySeconds}}, {merge:true});
+            } else {
+              setDoc(doc(db, "users", username), {totalStudySeconds : usersnapshot.data().totalStudySeconds + studySeconds}, {merge:true})
+            }
+          })
+        })
+      }
+    }
+  }
+
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs" style={{paddingTop:"11vh", paddingTop:"11vh"}}>
         <CssBaseline />
     <Box>
       <Box
@@ -121,6 +183,15 @@ export default function Pomodoro() {
       >
         Set
         </Button>
+        <TimerBar 
+            percentDone={percentDone} 
+            studyState={study} 
+            treeSelection={treeSelection} 
+            updateTreeSelection={updateTreeSelection} 
+            addTreeToGarden={addTreeToGarden} 
+            studyTime={timer.getStartTime()}
+            disableStartButtonFunc={(val) => updateDisableStartButton(val)}  
+          />
       </Box>
     </Box>
     </Container>

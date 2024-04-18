@@ -51,11 +51,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					}
 				/>
 				<Route
-					path='dashboard'
+					path='tasklists'
 					element={
 						<>
 							<Navbar />
-							<Dashboard />
+							<Tasklists />
 						</>
 					}
 				/>
