@@ -2,9 +2,12 @@
 This class will handle the testing of the Study Rooms UI to ensure
 that all elements function as expected and are responsive.
 */
-
+import React from 'react';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import { BrowserRouter } from 'react-router-dom';
+import { render, fireEvent } from '@testing-library/react';
+import RoomDetailsPage from '../routes/RoomDetailsPage';
 import { videoCategories } from '../constants/videoCategories';
 // Mock the Firestore directly within the jest.mock() call
 
