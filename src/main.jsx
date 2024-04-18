@@ -150,15 +150,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					}
 				/>
 				<Route
-					path='chatbot'
-					element={
-						<>
-							<Navbar />
-							<Chatbot />
-						</>
-					}
-				/>
-				<Route
 					path='posts'
 					element={
 						<>
@@ -177,7 +168,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					}
 				/>
 				<Route
-					path='/profilepage'
+					path=':username/profile'
 					element={
 						<>
 							<Navbar />
