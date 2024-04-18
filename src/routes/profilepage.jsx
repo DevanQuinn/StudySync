@@ -10,7 +10,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Copyright from '../components/Copyright.jsx';
-import app from '../firebase';
+import app from '../firebase.js';
 import CardContent from '@mui/material/CardContent';
 import {
 	getDownloadURL,

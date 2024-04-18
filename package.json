@@ -17,7 +17,6 @@
     "@firebase/firestore": "^4.6.0",
     "@mui/icons-material": "^5.15.10",
     "@mui/material": "^5.15.11",
-    "@rollup/rollup-darwin-arm64": "^4.13.0",
     "@tiptap/extension-collaboration": "^2.3.0",
     "@tiptap/extension-collaboration-cursor": "^2.3.0",
     "@tiptap/extension-color": "^2.2.4",
