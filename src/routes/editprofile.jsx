@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, } from 'react';
-import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link, TextField, Typography } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link, Switch, TextField, Typography } from '@mui/material';
 import useUser from '../hooks/useUser';
 import {
     getFirestore,
@@ -8,7 +8,7 @@ import {
     setDoc,
 } from 'firebase/firestore';
 import { getAuth, reauthenticateWithCredential, updatePassword, EmailAuthProvider } from 'firebase/auth';
-import { getStorage, getBlob, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage, getBlob, ref, uploadBytes } from 'firebase/storage';
 import app from '../firebase';
 import { v4 as uuid } from 'uuid';
 
@@ -16,54 +16,82 @@ const EditProfile = () => {
     const auth = getAuth(app);
     const user = useUser(true);
     const db = getFirestore(app);
-    const docRef = user ? doc(db, `users`, user.displayName) : null;
+    const docRef = user ? doc(db, `profile-data`, user.uid) : null;
+
     const fetchProfileDataCalled = useRef(false);
     const storage = getStorage();
     const [userEmail, setUserEmail] = useState('');
     const [imageBlob, setImageBlob] = useState(null);
-    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', pfpID: 'unset', aboutMe: '' });
+    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', profilePicture: 'unset', profileVisibility: true });
     const [studyGoals, setStudyGoals] = useState('');
-    const [aboutMe, setAboutMe] = useState('');
     const [selectedFavorites, setSelectedFavorites] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageUrl, setImageUrl] = useState(null);
     const favoritesOptions = ['Leaderboard', 'Study Room', 'Timer', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards'];
-    const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
+    //const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
+    const [profileVisibility, setProfileVisibility] = useState(true); // State for profile visibility
 
-    // Load profile visibility setting from localStorage on component mount
-    useEffect(() => {
-        const storedVisibility = localStorage.getItem('isPublicProfile');
-        if (storedVisibility !== null) {
-            setIsPublicProfile(JSON.parse(storedVisibility));
+
+// useEffect(() => {
+//     const storedVisibility = localStorage.getItem('profileVisibility');
+//     console.log("storedVisibility setting to localStorage", storedVisibility);
+//     if (storedVisibility !== null) {
+//         try {
+//             setIsPublicProfile(JSON.parse(storedVisibility));
+//             console.log("in try", JSON.parse(storedVisibility));
+//         } catch (error) {
+//             // Handle error parsing JSON
+//             console.error('Error parsing JSON:', error);
+//         }
+//     } else {
+//         console.log("storedVisibility is null or undefined");
+//     }
+// }, []);
+
+useEffect(() => {
+    const storedVisibility = localStorage.getItem('profileVisibility');
+    console.log("storedVisibility setting to localStorage", storedVisibility);
+    if (storedVisibility !== null) {
+        try {
+            setProfileVisibility(JSON.parse(storedVisibility));
+            console.log("in try", JSON.parse(storedVisibility));
+        } catch (error) {
+            // Handle error parsing JSON
+            console.error('Error parsing JSON:', error);
         }
-    }, []);
+    } else {
+        console.log("storedVisibility is null or undefined");
+    }
+}, []);
 
-    // Save profile visibility setting to localStorage whenever it changes
-    useEffect(() => {
-        localStorage.setItem('isPublicProfile', JSON.stringify(isPublicProfile));
-    }, [isPublicProfile]);
-    const uploadPublicProfileData = async profile => {
-        await addDoc(col, profile);
-        //fetchProfileData();
-    };
 
-    const fetchProfileData = async () => {
+// Save profile visibility setting to localStorage whenever it changes
+useEffect(() => {
+    localStorage.setItem('profileVisibility', JSON.stringify(profileVisibility));
+}, [profileVisibility]);
 
-        if (docRef && !fetchProfileDataCalled.current) {
-            fetchProfileDataCalled.current = true;
-            console.log('docRef:', docRef);
-            const docSnapshot = await getDoc(docRef);
-            if (docSnapshot.exists()) {
-                const docData = docSnapshot.data();
-                setProfileData(docData);
-                console.log('fetched data:', docData);
+const fetchProfileData = async () => {
+    if (docRef && !fetchProfileDataCalled.current) {
+        fetchProfileDataCalled.current = true;
+        console.log('docRef:', docRef);
+        const docSnapshot = await getDoc(docRef);
+        if (docSnapshot.exists()) {
+            const docData = docSnapshot.data();
+            setProfileData(docData);
+            console.log('fetched data:', docData);
+            if (docData.hasOwnProperty('profileVisibility')) {
+                setProfileVisibility(docData.profileVisibility);
+            } else {
+                setProfileVisibility(true); // Assuming true if profileVisibility is missing
             }
         }
-    };
+    }
+};
 
-    useEffect(() => {
-        fetchProfileData();
-    }, [docRef]);
+useEffect(() => {
+    fetchProfileData();
+}, [docRef]);
+
 
     useEffect(() => {
         if (user) {
@@ -73,15 +101,13 @@ const EditProfile = () => {
 
 
     useEffect(() => {
-        setStudyGoals(profileData.studyGoals || '');
-        setSelectedFavorites(profileData.favorites || []);
-        setAboutMe(profileData.aboutMe|| '');
+        setStudyGoals(profileData.studyGoals);
+        setSelectedFavorites(profileData.favorites);
 
         const loadImageBlob = async () => {
-            if (profileData.pfpID && profileData.pfpID != 'unset') {
-
+            if (profileData.profilePicture && profileData.profilePicture != 'unset') {
                 const storage = getStorage();
-                const pathReference = ref(storage, `profile-pictures/${profileData.pfpID}`);
+                const pathReference = ref(storage, profileData.profilePicture);
                 try {
                     // getting the binary data from the StorageReference path
                     const blob = await getBlob(pathReference);
@@ -92,7 +118,6 @@ const EditProfile = () => {
             }
         };
 
-
         loadImageBlob();
     }, [profileData]);
 
@@ -102,7 +127,7 @@ const EditProfile = () => {
 
     const uploadProfileData = async profile => {
         if (user) {
-            const docRef = doc(db, `users/`, `${user.displayName}`);
+            const docRef = doc(db, `profile-data/`, `${user.uid}`);
             await setDoc(docRef, profile);
         }
     };
@@ -144,17 +169,17 @@ const EditProfile = () => {
         console.log({
             favorites: selectedFavorites,
             studyGoals: data.get('studyGoals'),
-            pfpID: data.get('profilePicture'),
-            isPublicProfile: isPublicProfile, // Include the value of isPublicProfile in the form data
-            aboutMe : data.get('aboutMe')
+            profilePicture: data.get('profilePicture'),
+            profileVisibility: profileVisibility, // Include the value of isPublicProfile in the form data
         });
     };
 
     const uploadImage = async imageToUpload => {
         const imageId = uuid();
-        const storageRef = ref(storage, `profile-pictures/${imageId}`);
+        const storageRef = ref(storage, `profile-images/${imageId}`);
         await uploadBytes(storageRef, imageToUpload);
-        return imageId;
+
+        return storageRef.fullPath;
     };
 
     const handleImageChange = (event) => {
@@ -173,10 +198,6 @@ const EditProfile = () => {
         setStudyGoals(event.target.value);
     }
 
-    const handleAboutMeChange = (event) => {
-        setAboutMe(event.target.value);
-    }
-
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -184,18 +205,16 @@ const EditProfile = () => {
         if (selectedImage != null) {
             imagePath = await uploadImage(selectedImage);
         } else {
-            imagePath = profileData.pfpID;
+            imagePath = profileData.profilePicture;
         }
 
         var newData = {
             favorites: selectedFavorites,
             studyGoals: studyGoals,
-            pfpID: imagePath,
-            userID: user.uid,
-            username: user.displayName.toLowerCase(),
-            aboutMe: aboutMe
+            profilePicture: imagePath,
+            //Add profile visibility
+            profileVisibility: profileVisibility // Add profileVisibility to newData
         }
-        console.log("uploading newData: ", newData)
 
         await uploadProfileData(newData);
         setProfileData(newData);
@@ -274,21 +293,6 @@ const EditProfile = () => {
                         onChange={handleStudyGoalsChange}
                     />
                     <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
-                        About Me
-                    </Typography>
-                    <TextField
-                        margin="normal"
-                        fullWidth
-                        multiline
-                        rows={4}
-                        name='aboutMe'
-                        label="About Me"
-                        id="aboutMe"
-                        placeholder={aboutMe ? '' : 'Edit your about me'}
-                        value={aboutMe}
-                        onChange={handleAboutMeChange}
-                    />
-                    <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
                         Change Profile Picture
                     </Typography>
                     <input
@@ -341,21 +345,16 @@ const EditProfile = () => {
                             </Grid>
                         ))}
                     </Grid>
+                    {/* <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
+                        Profile Visibility
+                    </Typography> */}
                     <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
                         Profile Visibility
                     </Typography>
-                    {/* <FormControlLabel
-                        control={<Switch checked={isPublicProfile} onChange={() => setIsPublicProfile(!isPublicProfile)} />}
-                        label={isPublicProfile ? 'Public' : 'Private'}
-                    /> */}
-                    {/* <FormControlLabel
-                        control={<Switch checked={isPublicProfile} onChange={() => {
-                            const newVisibility = !isPublicProfile;
-                            console.log('New Profile Visibility:', newVisibility);
-                            setIsPublicProfile(newVisibility);
-                        }} />}
-                        label={isPublicProfile ? 'Public' : 'Private'}
-                    /> */}
+                    <FormControlLabel
+                        control={<Switch checked={profileVisibility} onChange={() => setProfileVisibility(!profileVisibility)} />}
+                        label={profileVisibility ? 'Public' : 'Private'}
+                    />
                     <Button
                         type="submit"
                         fullWidth
