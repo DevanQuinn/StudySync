@@ -145,7 +145,7 @@ const Posts = () => {
 		<Container component='main' maxWidth='lg' sx={{ mt: 14, mb: 10 }}>
 			<CssBaseline />
 			<Typography variant='h4' sx={{ mb: 2 }}>
-				User's Study Statistics
+				User's Flashcard Statistics
 			</Typography>
 
 			<TableContainer
