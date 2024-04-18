@@ -5,7 +5,7 @@ import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField, withT
 import RoomPomodoro from '../components/RoomPomodoro';
 import { useNavigate } from 'react-router-dom';
 import Draggable from 'react-draggable';
-import { addDoc, doc, getDoc, getFirestore, deleteDoc, updateDoc, addDoc, setDoc, serverTimestamp, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
+import {  doc, getDoc, getFirestore, deleteDoc, updateDoc, addDoc, setDoc, serverTimestamp, collection, query, where, getDocs, orderBy, onSnapshot } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth'; // Make sure to import getAuth
 import { useLocation } from 'react-router-dom';
