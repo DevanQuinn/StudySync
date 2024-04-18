@@ -51,7 +51,7 @@ const Posts = () => {
 	const db = getFirestore(app);
 
 	const userStatsCol = user
-		? collection(db, `userStats/${user?.uid}/timeStudied`)
+		? collection(db, `userStats/${user?.uid}/flashcardsStudied`)
 		: null;
 
 	const fetchPosts = async () => {
@@ -86,10 +86,7 @@ const Posts = () => {
 			totalTime += data.durationMs;
 		});
 
-		if (totalCards == 0) {
-			totalCards = 1;
-		}
-		var averageTimePerCard = totalTime / totalCards;
+		var averageTimePerCard = totalTime / (totalCards + 1);
 		const totalDuration = moment.duration(totalTime);
 		const totalDurationFormat = moment
 			.utc(totalDuration.as('milliseconds'))
