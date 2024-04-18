@@ -15,19 +15,10 @@ export default function Chatbot() {
         userBubbleColor: "#d3d3d3",
         userFontColor: '#000000',
       };
-    const [showBot, setShowBot] = useState(false);
-    const toggleBot = () => setShowBot(!showBot);
     return (
-    <div>
-        <Button color="primary" type='fixed' variant={"contained"} onClick={toggleBot} sx={{top: -5, left: 0 }}>
-        {showBot ? 'Close Bot' : 'Open Bot'}
-        </Button>
-        <Slide direction="up" in={showBot} mountOnEnter unmountOnExit>
-            <Box>
             <ThemeProvider theme = {theme}>
                 <ChatBot
-                style={{height: '600px', width: '500px' }}
-                footerStyle={{height: "200px"}}
+                style={{width: '350px' }}
                 steps={[
                     {
                         id: '1',
@@ -90,8 +81,5 @@ export default function Chatbot() {
                 ]}
                 />
             </ThemeProvider>
-            </Box>
-        </Slide>     
-    </div>
     );
 }

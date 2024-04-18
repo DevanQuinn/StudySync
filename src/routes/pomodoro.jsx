@@ -83,6 +83,7 @@ export default function Pomodoro() {
         variant="contained"
         sx={{ mt: 3, mb: 2 }}
         onClick={() => timer.start()}
+        data-testid="start-button" 
       >
         Start
         </Button>
