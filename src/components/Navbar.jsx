@@ -26,7 +26,7 @@ const Navbar = () => {
 
 	const pages = [ 
 				{ title: 'Leaderboard', path: '/leaderboard'},
-				{ title: 'Dashboard', path: '/dashboard'},
+				{ title: 'Tasklists', path: '/tasklists'},
 				{ title: 'Study Room', path: '/studyroom' },
         		{ title: 'Pomodoro', path: '/pomodoro'},
         {title: 'SpotifyPlaylists', path: '/SpotifyPlaylists'},
