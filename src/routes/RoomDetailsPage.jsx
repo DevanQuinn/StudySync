@@ -10,7 +10,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth'; // Make sure to import getAuth
 import { useLocation } from 'react-router-dom';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
-import { ID } from 'yjs';
+//import { ID } from 'yjs';
 
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
@@ -470,7 +470,7 @@ const RoomDetailsPage = () => {
       const currentUser = auth.currentUser;
       if (!currentUser) {
         console.error("User not authenticated");
-        navigate('/dashboard');
+        navigate('/');
         return;
       }
       // Use inviterUid if present, otherwise fall back to the current user's UID
@@ -582,7 +582,7 @@ const RoomDetailsPage = () => {
         console.log(`All invitations for room ${roomId} deleted successfully`);
 
         // Navigate to another page after deletion and cleanup
-        navigate('/dashboard'); // Adjust the navigation path as needed
+        navigate('/'); // Adjust the navigation path as needed
       } catch (error) {
         console.error("Error during room exit and cleanup:", error);
       }
