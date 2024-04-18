@@ -36,26 +36,25 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Leaderboard = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-  const [totalTimeStudied, setTotalTimeStudied] = useState([]);
-  const [totalFlashcardsStudied, setTotalFlashcardsStudied] = useState([]);
-  const [avgTimeStudied, setAvgTimeStudied] = useState([]);
   const [boardData, setBoardData] = useState([])
 
-  const user = useUser();
   const db = getFirestore(app);
 
-  //hardcoded data before linking to firebase
-  const leaderboardData = [
-    { username: 'User1', studyTime: '4h 30m', flashcardTime: '0h 45m', pomodoroTime: '0h 10m', studyRoomTime: '1h 30m' },
-    { username: 'User2', studyTime: '3h 15m', flashcardTime: '0h 35m', pomodoroTime: '0h 8m', studyRoomTime: '1h 25m' },
-    { username: 'User3', studyTime: '2h 45m', flashcardTime: '0h 30m', pomodoroTime: '0h 6m', studyRoomTime: '1h 20m' },
-    { username: 'User4', studyTime: '2h 15m', flashcardTime: '0h 25m', pomodoroTime: '0h 4m', studyRoomTime: '1h 15m' },
-    { username: 'User5', studyTime: '1h 45m', flashcardTime: '0h 20m', pomodoroTime: '0h 4m', studyRoomTime: '1h 10m' }
-  ];
-
   const timeStringToMilliseconds = (timeStr) => {
-    const [hours, minutes] = timeStr.split('h').map(part => parseInt(part));
-    return hours * 3600000 + minutes * 60000; // Convert hours to milliseconds and add to minutes in milliseconds
+    const regex = /(?:(\d+)h)? ?(?:(\d+)m)? ?(?:(\d+)s)?/;
+    const match = timeStr.match(regex);
+
+    if (!match) {
+      throw new Error('Invalid time string format. Expected format: XXh XXm XXs');
+    }
+
+    const hours = match[1] ? parseInt(match[1]) : 0;
+    const minutes = match[2] ? parseInt(match[2]) : 0;
+    const seconds = match[3] ? parseInt(match[3]) : 0;
+
+    const milliseconds = hours * 3600000 + minutes * 60000 + seconds * 1000;
+
+    return milliseconds;
   };
 
   // Function to handle sorting
@@ -64,7 +63,8 @@ const Leaderboard = () => {
     if (sortConfig.key === key && sortConfig.direction === 'desc') {
       direction = 'asc'; // Toggle to ascending order if already descending
     }
-    // Convert the time string key to milliseconds
+    console.log('Sorting key:', key);
+    console.log('Sorting direction:', direction);
     const sortedData = [...boardData].sort((a, b) => {
       const valueA = timeStringToMilliseconds(a[key]);
       const valueB = timeStringToMilliseconds(b[key]);
@@ -98,17 +98,10 @@ const Leaderboard = () => {
   };
 
   const convertStatsMapToJsonArray = (statsMap) => {
-    //console.log("inside convertStatsMaptoJson")
-    // Initialize an empty array to store the converted data
     const jsonArray = [];
-
-    //console.log("  statsMap to convert is: ", statsMap)
 
     // Iterate over each entry in the statsMap
     Object.entries(statsMap).forEach(([username, userData], index) => {
-      //console.log("username:", username);
-      //console.log("userData:", userData);
-
 
       // Create an object with the required fields
       if (!userData) {
@@ -140,8 +133,6 @@ const Leaderboard = () => {
         studyRoomTime: formatDuration(userData.studyRoom.totalDurationEach),
       };
 
-      console.log("made userStats: ", userStats)
-
       // Push the created object into the jsonArray
       jsonArray.push(userStats);
     });
@@ -154,11 +145,9 @@ const Leaderboard = () => {
 
     try {
       const times = await getDocs(collectionGroup(db, path));
-      console.log("got collection size: ", times.size); // Log the number of documents in the snapshot
 
       times.forEach(doc => {
         const userData = doc.data();
-        //console.log("data:", userData);
 
         const username = userData.username;
         if (!dataMap[username]) {
@@ -216,15 +205,7 @@ const Leaderboard = () => {
       }, 0);
     });
 
-    console.log("statisticsMap:", statisticsMap);
     return statisticsMap
-  };
-
-
-  // Parsing times into hours (assuming the format is always 'Xh Ym')
-  const parseTime = timeStr => {
-    const [hours, minutes] = timeStr.split('h').map(part => parseInt(part));
-    return hours + minutes / 60; // Convert minutes into a fraction of an hour
   };
 
   const formatDuration = (milliseconds) => {
@@ -245,33 +226,6 @@ const Leaderboard = () => {
     return formattedHours + formattedMinutes + formattedSeconds;
   };
 
-
-  // const data = {
-  //   labels: ['Other Study Time', 'Flashcards Study Time', 'Pomodoro Study Time', 'Study Room Time'],
-  //   datasets: [{
-  //     label: '# of Hours',
-  //     data: [
-  //       parseTime(currentUser.studyTime),
-  //       parseTime(currentUser.flashcardTime),
-  //       parseTime(currentUser.pomodoroTime),
-  //       parseTime(currentUser.studyRoomTime),
-  //     ],
-  //     backgroundColor: [
-  //       'rgba(255, 99, 132, 0.2)',
-  //       'rgba(54, 162, 235, 0.2)',
-  //       'rgba(255, 206, 86, 0.2)',
-  //       'rgba(75, 192, 192, 0.2)',
-  //     ],
-  //     borderColor: [
-  //       'rgba(255, 99, 132, 1)',
-  //       'rgba(54, 162, 235, 1)',
-  //       'rgba(255, 206, 86, 1)',
-  //       'rgba(75, 192, 192, 1)',
-  //     ],
-  //     borderWidth: 1,
-  //   }],
-  // };
-
   const options = {
     maintainAspectRatio: true, // This can also be false to ignore container size
     aspectRatio: 1.5, // Default is 2 (wider), lower for more square
@@ -282,15 +236,6 @@ const Leaderboard = () => {
     },
     responsive: true,
   };
-
-  // Sorting function
-  const sortedData = [...boardData].sort((a, b) => {
-    if (sortConfig.direction === 'asc') {
-      return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
-    } else {
-      return a[sortConfig.key] < b[sortConfig.key] ? 1 : -1;
-    }
-  });
 
   const SortableHeader = ({ label, sortKey, currentSortKey, currentSortDirection, onClick }) => {
     const isCurrentSortKey = currentSortKey === sortKey;
@@ -353,7 +298,7 @@ const Leaderboard = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedData.map((user, index) => (
+            {boardData.map((user, index) => (
               <TableRow key={index}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{user.username}</TableCell>
@@ -382,17 +327,10 @@ const Leaderboard = () => {
           </Button>
         </Box>
       </Box>
-      <Typography variant="h4" sx={{ mt: 4, textAlign: 'center' }}>
-        Time Spent Studying
-      </Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 3 }}>
-        <Box sx={{ width: 400, height: 400 }}>
-          {/* <Pie data={data} /> */}
-        </Box>
-      </Box>
     </Container>
   );
 };
 
 
 export default Leaderboard;
+
