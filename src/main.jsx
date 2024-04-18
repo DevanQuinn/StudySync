@@ -1,8 +1,6 @@
-// index.js
-
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom'; // Import BrowserRouter and Routes
 import { ThemeProvider, createTheme } from '@mui/material';
 import './index.css';
 import App from './App';
@@ -25,6 +23,7 @@ import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 import Posts from './routes/posts.jsx';
 import UserPosts from './routes/userposts.jsx';
 import Note from './routes/note.jsx';
+import ButtonWrapper from './routes/ButtonWrapper'; // Import ButtonWrapper component
 
 const theme = createTheme({
   palette: {
@@ -41,173 +40,26 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <BrowserRouter>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <>
-                <Navbar />
-                <App />
-              </>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <>
-                <Navbar />
-                <Dashboard />
-              </>
-            }
-          />
-          <Route
-            path="/leaderboard"
-            element={
-              <>
-                <Navbar />
-                <Leaderboard />
-              </>
-            }
-          />
-          <Route
-            path="/signin"
-            element={
-              <>
-                <Navbar />
-                <SignIn />
-              </>
-            }
-          />
-          <Route
-            path="/forgotpass"
-            element={
-              <>
-                <Navbar />
-                <ForgotPass />
-              </>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <>
-                <Navbar />
-                <SignUp />
-              </>
-            }
-          />
-          <Route
-            path="/editprofile"
-            element={
-              <>
-                <Navbar />
-                <EditProfile />
-              </>
-            }
-          />
-          <Route
-            path="/flashcards"
-            element={
-              <>
-                <Navbar />
-                <Flashcards />
-              </>
-            }
-          />
-          <Route
-            path="/pomodoro"
-            element={
-              <>
-                <Navbar />
-                <Pomodoro />
-              </>
-            }
-          />
-          <Route
-            path="/SpotifyPlaylists"
-            element={
-              <>
-                <Navbar />
-                <SpotifyPlaylists />
-              </>
-            }
-          />
-          <Route
-            path="/Callback"
-            element={
-              <>
-                <Navbar />
-                <Callback />
-              </>
-            }
-          />
-          <Route
-            path="/studyroom/*"
-            element={
-              <>
-                <Navbar />
-                <StudyRoomUI />
-              </>
-            }
-          />
-          <Route
-            path="/posts"
-            element={
-              <>
-                <Navbar />
-                <Posts />
-              </>
-            }
-          />
-          <Route
-            path="/:username/posts"
-            element={
-              <>
-                <Navbar />
-                <UserPosts />
-              </>
-            }
-          />
-          <Route
-            path="/profilepage"
-            element={
-              <>
-                <Navbar />
-                <ProfilePage />
-              </>
-            }
-          />
-          <Route
-            path="/note/:id"
-            element={
-              <>
-                <Navbar />
-                <Note />
-              </>
-            }
-          />
+        <Navbar />
+        <Routes> {/* Wrap Routes inside BrowserRouter */}
+          <Route path="/" element={<App />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/forgotpass" element={<ForgotPass />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/editprofile" element={<EditProfile />} />
+          <Route path="/flashcards" element={<Flashcards />} />
+          <Route path="/pomodoro" element={<Pomodoro />} />
+          <Route path="/SpotifyPlaylists" element={<SpotifyPlaylists />} />
+          <Route path="/Callback" element={<Callback />} />
+          <Route path="/studyroom/*" element={<StudyRoomUI />} />
+          <Route path="/posts" element={<Posts />} />
+          <Route path="/:username/posts" element={<UserPosts />} />
+          <Route path="/profilepage" element={<ProfilePage />} />
+          <Route path="/note/:id" element={<Note />} />
           <Route path="/room/:roomId" element={<RoomDetailsPage />} />
-          {/* No Navbar for /room */}
-          <Route
-            path="/AddFriend"
-            element={
-              <>
-                <Navbar />
-                <AddFriend />
-              </>
-            }
-          />
-          {/* New route for AddFriend */}
-          <Route
-            path="/AddFriend"
-            element={
-              <>
-                <Navbar />
-                <AddFriend />
-              </>
-            }
-          />
-          {/* New route for AddFriend */}
+          <Route path="/AddFriend" element={<AddFriend />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

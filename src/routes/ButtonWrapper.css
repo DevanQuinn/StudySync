@@ -1,0 +1,13 @@
+/* ButtonWrapper.css */
+
+.button-wrapper {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+  
+  .spotify-button {
+    /* Add your button styling here */
+  }
+  

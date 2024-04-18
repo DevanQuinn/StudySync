@@ -1,5 +1,5 @@
+// SpotifyPlaylists.js
 import React, { useState, useEffect } from 'react';
-import '/Users/saimonishtunguturu/307S24Project/StudySync/src/routes/SpotifyPlaylists.css'; // Import your CSS file
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
@@ -88,13 +88,19 @@ const SpotifyPlaylists = () => {
 
   const toggleChatbot = () => {
     setShowChatbot(prevState => !prevState);
+    if (!showChatbot && accessToken) {
+      const playlistsUrl = `https://open.spotify.com/collection/playlists`;
+  
+      // Open a new tab with the playlists URL
+      window.open(playlistsUrl, '_blank');
+    }
   };
 
   return (
     <div>
       <div className={classes.chatbotContainer}>
         <Button variant="contained" color="primary" onClick={toggleChatbot}>
-          {showChatbot ? 'Hide Chatbot' : 'Show Chatbot'}
+          {showChatbot ? 'Hide Chatbot' : 'Listen to Music :)'}
         </Button>
         {showChatbot && (
           <div className={`${classes.chatbotMessages} ${classes.chatbotMessagesVisible}`}>
@@ -117,4 +123,3 @@ const SpotifyPlaylists = () => {
 };
 
 export default SpotifyPlaylists;
-
