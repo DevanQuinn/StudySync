@@ -69,7 +69,8 @@ export default function SignUp() {
                   pfpID: imageID,
                   lower: username.toLowerCase(),
                   favorites: [],
-                  studyGoals: ""
+                  studyGoals: "",
+                  aboutMe: ""
                 }
                 await setDoc(doc(db, 'users', username), docData);
                 alert("Success!")
