@@ -493,9 +493,11 @@ const RoomDetailsPage = () => {
           ? collection(db, `userStats/${user?.uid}/studyRoomTimes`)
           : null;
 
-        console.log("uploading to ", user?.uid)
-
-        const statsData = { durationMs, chatCount };
+        const statsData = {
+          durationMs,
+          chatCount,
+          username: user.displayName
+        };
         try {
           await addDoc(studyRoomCol, statsData);
         } catch (error) {

@@ -72,7 +72,8 @@ export default function Pomodoro() {
       console.log("uploading to ", user?.uid)
 
       const statsData = {
-        durationMs: totalStudyTime * 1000
+        durationMs: totalStudyTime * 1000,
+        username: user.displayName
       };
 
       try {

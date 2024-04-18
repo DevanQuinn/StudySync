@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -13,7 +13,20 @@ import {
   Paper,
   Button,
 } from '@mui/material';
+import {
+  collection,
+  getDocs,
+  getFirestore,
+  collectionGroup,
+  orderBy,
+  query,
+  where,
+  addDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import app from '../firebase';
 import { Pie } from 'react-chartjs-2';
+import useUser from '../hooks/useUser';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -23,6 +36,12 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Leaderboard = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [totalTimeStudied, setTotalTimeStudied] = useState([]);
+  const [totalFlashcardsStudied, setTotalFlashcardsStudied] = useState([]);
+  const [avgTimeStudied, setAvgTimeStudied] = useState([]);
+
+  const user = useUser();
+  const db = getFirestore(app);
 
   //hardcoded data before linking to firebase
   const leaderboardData = [
@@ -44,6 +63,26 @@ const Leaderboard = () => {
 
   // Example for a single user's breakdown; adjust based on your app's state management
   const currentUser = leaderboardData[0]; // Assuming current user is 'User1'
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      //const snapshot = await getDocs(allStatsCol);
+      const allTimesStudied = await getDocs(collectionGroup(db, 'timeStudied'));
+
+      console.log("allTimesStudied:", allTimesStudied.size); // Log the number of documents in the snapshot
+
+      allTimesStudied.forEach(userStat => {
+        const data = userStat.data();
+        console.log("data:", data);
+      });
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
 
   // Parsing times into hours (assuming the format is always 'Xh Ym')
   const parseTime = timeStr => {
