@@ -12,8 +12,12 @@
     border: 5px solid blue;
     border-radius: 10px;
     height: 75vh;
-    width: 25vw;
     overflow-y: scroll;
     color: black;
     background-color: gray;
+  }
+
+  .tasklist-page-wrapper {
+    margin-top: 10vh;
+    margin-bottom: 10vh;
   }

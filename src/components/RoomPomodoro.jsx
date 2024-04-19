@@ -3,14 +3,44 @@ import { create } from 'timrjs';
 import { useState, useEffect } from 'react';
 import { Stack, Button, TextField, Typography, Box, Container, CssBaseline } from '@mui/material';
 import Draggable from 'react-draggable';
+import TimerBar from './TimerBar.jsx';
+import useUser from '../hooks/useUser.jsx';
+import {
+	query,
+	where,
+	getFirestore,
+	collection,
+	getDocs,
+	getDoc,
+	setDoc,
+	doc,
+	addDoc,
+	deleteDoc,
+} from 'firebase/firestore';
+import app from '../firebase.js';
 
+/*
+  There is a bug with this component.
+  Finishing a timer is supposed to send one signal to the database that the tree has grown.
+  However, one signal is sent for every timer that has previously been "set", and previously set timers retain which tree they are growing.
+  It is almost as if the "set" button creates a new timer without deleting the previous one, and each time the new timer finishes, the finish signal
+  on all previous timers is also sent.
+
+  This bug is mitigated by passing the functionality of adding trees to the database down to the TimerBar component, but I could forsee it causing
+  a memory leak for huge study sessions.
+*/
 export default function RoomPomodoro() {
-  const [timer] = useState(create('10m'));
+  const [timer] = useState(create('10m')); //I think when the component re-renders, the timer is being re-created.
   const [time, setTime] = useState(timer.getFt());
   const [breakTime, setBreakTime] = useState('5m'); // Default break time
   const [startTime, setStartTime] = useState('25m'); // Default study time
   const [study, setStudy] = useState("Study!");
   const [count, setCount] = useState(1);
+  const [percentDone, setPercentDone] = useState(0);
+  const [treeSelection, updateTreeSelection] = useState(0);
+  const [disableStartButton, updateDisableStartButton] = useState(false);
+  const user = useUser(false);
+  const db = getFirestore(app);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -26,24 +56,63 @@ export default function RoomPomodoro() {
   };
 
   useEffect(() => {
-    timer.ticker(({ formattedTime }) => {
+    timer.ticker(({ formattedTime, percentDone }) => {
       setTime(formattedTime);
+      setPercentDone(percentDone);
     }).finish(() => {
       if (count % 2 === 0) {
         setTime(breakTime);
         setStudy("Break!");
         timer.setStartTime(breakTime);
         setCount(1);
+
       } else {
-        setTime(startTime);
-        setStudy("Study!");
-        timer.setStartTime(startTime);
-        setCount(2);
+      setTime(startTime);
+      setStudy("Study!");
+      timer.setStartTime(startTime);
+      setCount(2);
       }
     });
-
     return () => timer.stop(); // Cleanup timer on component unmount
   }, [timer, count, breakTime, startTime]);
+  
+  const addTreeToGarden = (treeType, quantity, studySeconds) => {
+    if (user) {
+      var username;
+      if (user) { //if logged in
+        const q = query(collection(db, "users"), where("userID", "==", user.uid)); //set up username query
+        getDocs(q).then(userssnapshot => { //get username
+          userssnapshot.forEach(user => { //should only run once if userIDs are unique
+            username = user.data().username; //save username
+            console.log(username);
+            console.log(user.uid);
+          })
+        }).then(() => { //with username
+          getDoc(doc(db, "users", username)).then(usersnapshot => {
+            console.log(usersnapshot);
+            if (usersnapshot.data().trees == undefined || usersnapshot.data().trees[treeType] == undefined) {
+              setDoc(doc(db, "users", username), 
+                {trees : {[treeType] : Number(quantity)},
+                },
+                {merge:true}
+              )
+            } else {
+              setDoc(doc(db, "users", username), 
+                {trees : 
+                  {[treeType] : (Number(usersnapshot.data().trees[treeType]) + Number(quantity))}},
+                {merge:true}
+              )
+            }
+            if (usersnapshot.data().totalStudySeconds == undefined ) {
+              setDoc(doc(db, "users", username), {totalStudySeconds : {studySeconds}}, {merge:true});
+            } else {
+              setDoc(doc(db, "users", username), {totalStudySeconds : usersnapshot.data().totalStudySeconds + studySeconds}, {merge:true})
+            }
+          })
+        })
+      }
+    }
+  }
 
   return (
   <Draggable>
@@ -60,7 +129,7 @@ export default function RoomPomodoro() {
         </Typography>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 1, width: '100%' }}>
           <Stack direction="row" spacing={2} justifyContent="center">
-            <Button variant="contained" sx={{ fontSize: '0.75rem', padding: '6px 12px' }} onClick={() => timer.start()}>
+            <Button disabled={disableStartButton} variant="contained" sx={{ fontSize: '0.75rem', padding: '6px 12px' }} onClick={() => timer.start()}>
               Start
             </Button>
             <Button variant="contained" sx={{ fontSize: '0.75rem', padding: '6px 12px' }} onClick={() => timer.pause()}>
@@ -90,6 +159,15 @@ export default function RoomPomodoro() {
           <Button fullWidth variant="contained" sx={{ mt: 1, mb: 2, fontSize: '0.75rem', padding: '6px 12px' }} type="submit">
             Set
           </Button>
+          <TimerBar 
+            percentDone={percentDone} 
+            studyState={study} 
+            treeSelection={treeSelection} 
+            updateTreeSelection={updateTreeSelection} 
+            addTreeToGarden={addTreeToGarden} 
+            studyTime={timer.getStartTime()}
+            disableStartButtonFunc={(val) => updateDisableStartButton(val)}  
+          />
         </form>
       </Box>
     </Container>
