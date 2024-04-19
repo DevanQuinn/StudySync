@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './Tasklist.css';
 import { Button } from '@mui/material';
+import Collapsible from 'react-collapsible';
 
 function Task({ task, completeTask, removeTask }) {
     return (
@@ -21,7 +22,6 @@ function Task({ task, completeTask, removeTask }) {
 
 function Tasklist({title, deletefunc, id, tasksProp, addtaskfunc, deletetaskfunc, completetaskfunc}) { //not updating on tasksProp updating. or maybe tasksProp isnt updating?
     useEffect(() => {
-        console.log("props updated. tasklist rerendering");
     }, [JSON.stringify(tasksProp)]);
 
     const addTask = taskTitle => {
@@ -32,7 +32,7 @@ function Tasklist({title, deletefunc, id, tasksProp, addtaskfunc, deletetaskfunc
         <div>
             <div className="todo-container">
             <div className="header">{title}</div>
-                <div>
+                <Collapsible trigger="Expand/Collapse">
                     <div className="tasks">
                         <div>
                             {tasksProp.map((task) => {
@@ -52,7 +52,7 @@ function Tasklist({title, deletefunc, id, tasksProp, addtaskfunc, deletetaskfunc
                         <CreateTask addTask={addTask} />
                     </div>
                     <Button onClick={() => deletefunc(id)}>Delete Tasklist</Button>
-                </div>
+                </Collapsible>
             </div>
         </div>
     );

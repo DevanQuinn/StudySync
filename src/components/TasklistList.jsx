@@ -1,5 +1,5 @@
 import Tasklist from '../components/Tasklist.jsx';
-import Button from '../components/Button.jsx';
+import Button from '@mui/material/Button';
 import React, { useState, useEffect } from 'react';
 import { Task } from '@mui/icons-material';
 import { nanoid } from 'nanoid';
@@ -34,13 +34,17 @@ function TasklistList() {
 	const user = useUser(false);
 
 	useEffect(() => {
-		console.log('props updated. rerendering dashboard.');
-		console.log(tasks);
 	}, [JSON.stringify(tasks)]);
 
 	useEffect(() => {
-		console.log('attempting to load state');
-		loadState();
+		if (user) {
+			const q = query(collection(db, "users"), where("userID", "==", user.uid));
+			getDocs(q).then((snapshot) => {
+				snapshot.forEach((doc) => {
+					loadState(doc.data().username);
+				})
+			})
+		}
 	}, [user]);
 
 	const addTasklist = title => {
@@ -50,7 +54,6 @@ function TasklistList() {
 			setTasklists(newTasklistsList);
 			let newTasks = tasks;
 			newTasks[id] = [];
-			console.log(newTasks);
 			setTasks(newTasks);
 		} else {
 			alert('The maximum number of tasklists is 10!');
@@ -58,17 +61,12 @@ function TasklistList() {
 	};
 
 	const deleteByIndex = id => {
-		console.log(tasklistsList);
-		console.log('deleting index ' + id);
 		const newTasklistsList = tasklistsList.filter(tasklist => {
 			if (tasklist.id != id) {
-				console.log('tasklist passed. ID: ' + tasklist.id);
 				return true;
 			}
-			console.log('tasklist failed. ID: ' + tasklist.id);
 			return false;
 		});
-		console.log(newTasklistsList);
 		setTasklists(newTasklistsList);
 	};
 
@@ -86,7 +84,7 @@ function TasklistList() {
 		let newTasksArray = tasks[tasklistID];
 		newTasksArray = newTasksArray.filter(task => {
 			if (task.taskID == taskID) {
-				task.completed = true;
+				task.completed = !(task.completed);
 			}
 			return true;
 		});
@@ -103,111 +101,70 @@ function TasklistList() {
 	};
 
 	const SaveState = () => {
+		var username;
 		if (user) {
-			setDoc(doc(db, 'users', user.uid), {}, { merge: true }).then(() => {
-				//first ensure the user's information is in the database
-				//Clear what data the database currently has
-				console.log('attempting to clear database of user tasks');
-				const tasklistsRef = collection(db, 'users', user.uid, 'tasklists');
-				const tasklistsQuery = query(tasklistsRef);
-				getDocs(tasklistsQuery)
-					.then(tasklistsSnapshot => {
+			const q = query(collection(db, "users"), where("userID", "==", user.uid));
+			getDocs(q).then(userssnapshot => {
+				userssnapshot.forEach(user => {
+					username = user.data().username;
+				})
+			}).then(() => {
+				setDoc(doc(db, 'users', username), {}, { merge: true }).then(() => {
+					const tasklistsRef = collection(db, 'users', username, 'tasklists');
+					const tasklistsQuery = query(tasklistsRef);
+					getDocs(tasklistsQuery).then(tasklistsSnapshot => {
 						tasklistsSnapshot.forEach(tasklistDoc => {
-							const tasksRef = collection(
-								db,
-								'users',
-								user.uid,
-								'tasklists',
-								tasklistDoc.id,
-								'tasks'
+							const tasksRef = collection(db,'users', username,'tasklists',tasklistDoc.id,'tasks'
 							);
 							const tasksQuery = query(tasksRef);
 							getDocs(tasksQuery).then(tasksSnapshot => {
 								tasksSnapshot.forEach(taskDoc => {
-									deleteDoc(
-										doc(
-											db,
-											'users',
-											user.uid,
-											'tasklists',
-											tasklistDoc.id,
-											'tasks',
-											taskDoc.id
-										)
-									);
+									deleteDoc(doc(db, 'users', user.uid, 'tasklists', tasklistDoc.id, 'tasks', taskDoc.id));
 								});
 							});
-							deleteDoc(
-								doc(db, 'users', user.uid, 'tasklists', tasklistDoc.id)
-							);
+							deleteDoc(doc(db, 'users', username, 'tasklists', tasklistDoc.id));
 						});
-					})
-					.then(() => {
+					}).then(() => {
 						//add new up-to-date data to the database
 						tasklistsList.forEach(tasklist => {
-							console.log('attempting to save to database');
 							setDoc(
-								doc(db, 'users', user.uid, 'tasklists', tasklist.id),
+								doc(db, 'users', username, 'tasklists', tasklist.id),
 								{ title: tasklist.title },
 								{ merge: true }
 							).then(() => {
 								tasks[tasklist.id].forEach(task => {
-									setDoc(
-										doc(
-											db,
-											'users',
-											user.uid,
-											'tasklists',
-											tasklist.id,
-											'tasks',
-											task.taskID
-										),
+									setDoc(doc(db, 'users', username, 'tasklists', tasklist.id, 'tasks', task.taskID),
 										{ title: task.title, completed: task.completed },
 										{ merge: true }
-									);
+								  );
 								});
 							});
 						});
 					});
+				})
 			});
 		}
 	};
 
-	const loadState = () => {
-		console.log('attempting to load tasks');
+	const loadState = (username) => {
 		setTasks({});
 		setTasklists([]);
 		let newTasklists = [];
 		if (user) {
 			const tasklistsQuery = query(
-				collection(db, 'users', user.uid, 'tasklists')
+				collection(db, 'users', username, 'tasklists')
 			);
 			getDocs(tasklistsQuery).then(tasklistsSnapshot => {
-				console.log(tasklistsSnapshot);
 				tasklistsSnapshot.forEach(tasklistsDoc => {
-					console.log(tasklistsDoc.data());
-					newTasklists = [
-						...newTasklists,
-						{ title: tasklistsDoc.data().title, id: tasklistsDoc.id },
+					newTasklists = [...newTasklists, { title: tasklistsDoc.data().title, id: tasklistsDoc.id },
 					];
 					setTasklists(JSON.parse(JSON.stringify(newTasklists)));
 					let dummyTasks = tasks;
 					dummyTasks[tasklistsDoc.id] = [];
 					setTasks(dummyTasks);
-					const tasksQuery = query(
-						collection(
-							db,
-							'users',
-							user.uid,
-							'tasklists',
-							tasklistsDoc.id,
-							'tasks'
-						)
-					);
+					const tasksQuery = query(collection(db, 'users', username, 'tasklists', tasklistsDoc.id, 'tasks'));
 					getDocs(tasksQuery).then(tasksSnap => {
-						//console.log(tasksSnap);
 						tasksSnap.forEach(taskDoc => {
-							//console.log(taskDoc.data())
 							let newTasks = tasks;
 							let newTasksArray = newTasks[tasklistsDoc.id];
 							newTasksArray.push({
@@ -270,23 +227,6 @@ function CreateTasklist({ addTasklist }) {
 				placeholder='Add a new tasklist'
 				onChange={e => setValue(e.target.value)}
 			/>
-		</form>
-	);
-}
-
-function LoadUserTasks({ handleLoad }) {
-	const [formValues, setFormValues] = useState({ tasklists: '', tasks: '' });
-
-	const handleSubmit = e => {
-		console.log('handling submit');
-		e.preventDefault();
-		if (!formValues) return;
-		handleLoad();
-	};
-
-	return (
-		<form onSubmit={handleSubmit}>
-			<button type='submit'>load</button>
 		</form>
 	);
 }

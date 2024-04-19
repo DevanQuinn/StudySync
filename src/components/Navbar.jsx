@@ -21,12 +21,11 @@ import useUser from '../hooks/useUser';
 const Navbar = () => {
     const user = useUser();
 
-    const pages = [
-        { title: 'Leaderboard', path: '/leaderboard' },
-        { title: 'Dashboard', path: '/dashboard' },
-        { title: 'Study Room', path: '/studyroom' },
-        { title: 'Pomodoro', path: '/pomodoro' },
-        // { title: 'SpotifyPlaylists', path: '/SpotifyPlaylists' },
+	const pages = [ 
+				{ title: 'Leaderboard', path: '/leaderboard'},
+				{ title: 'Tasklists', path: '/tasklists'},
+				{ title: 'Study Room', path: '/studyroom' },
+        		{ title: 'Pomodoro', path: '/pomodoro'},
         { title: 'Flash Cards', path: '/flashcards' },
         { title: 'AddFriend', path: '/AddFriend' },
     ];

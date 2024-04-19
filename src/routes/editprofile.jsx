@@ -11,6 +11,7 @@ import { getAuth, reauthenticateWithCredential, updatePassword, EmailAuthProvide
 import { getStorage, getBlob, ref, uploadBytes } from 'firebase/storage';
 import app from '../firebase';
 import { v4 as uuid } from 'uuid';
+import TreeDisplaySelector from '../components/treeDisplaySelector';
 
 const EditProfile = () => {
     const auth = getAuth(app);
@@ -223,7 +224,7 @@ useEffect(() => {
     };
 
     return (
-        <Container component="main" maxWidth="xs" sx={{ mt: 10 }}>
+        <Container component="main" maxWidth="lg" sx={{ mt: 10 }}>
             <CssBaseline />
             <div
                 sx={{
@@ -364,6 +365,11 @@ useEffect(() => {
                         Save Changes
                     </Button>
                 </form>
+                <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
+                    Tree Garden
+                    {/* There should be a function to display a current tree inventory. Consider refactoring a whole garden page?*/}
+                    <TreeDisplaySelector/>
+                </Typography>
                 <Grid container>
                     <Grid item xs>
                         <Link href="/" variant="body2" paddingBottom="10pt">
