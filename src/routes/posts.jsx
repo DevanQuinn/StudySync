@@ -153,7 +153,7 @@ const Posts = () => {
 
 	useEffect(() => {
 		fetchData();
-	}, []);
+	}, [user]);
 
 
 	const userStatsCol = user
