@@ -1,3 +1,5 @@
+import '../App.css';
+
 import React, { useEffect, useState } from 'react';
 import {
 	Container,
@@ -7,7 +9,6 @@ import {
 	CircularProgress,
 	CssBaseline,
 	Box,
-	Modal,
 	TextField,
 } from '@mui/material';
 import Editor from '../components/Editor';
@@ -15,10 +16,12 @@ import { useParams } from 'react-router-dom';
 import {
 	addDoc,
 	collection,
+	deleteDoc,
 	doc,
 	getDoc,
 	getDocs,
 	getFirestore,
+	orderBy,
 	query,
 	serverTimestamp,
 	updateDoc,
@@ -27,24 +30,11 @@ import {
 import app from '../firebase';
 import useUser from '../hooks/useUser';
 
-const style = {
-	position: 'absolute',
-	top: '50%',
-	left: '50%',
-	transform: 'translate(-50%, -50%)',
-	width: 400,
-	height: 500,
-	p: 3,
-	display: 'flex',
-	flexDirection: 'column',
-	justifyContent: 'center',
-};
-
 const Note = () => {
 	const { id } = useParams();
 	const [data, setData] = useState();
 	const [loading, setLoading] = useState(true);
-	const [authorized, setAuthorized] = useState(true);
+	const [authorized, setAuthorized] = useState(false);
 	const [inviteInput, setInviteInput] = useState('');
 	const user = useUser();
 	const db = getFirestore(app);
@@ -53,7 +43,7 @@ const Note = () => {
 		const noteDoc = doc(db, `notes/${id}`);
 		const q = query(
 			collection(db, `notes/${id}/access`),
-			where('user', '==', user.displayName)
+			where('user', '==', user.displayName.toLowerCase())
 		);
 		const data = await getDoc(noteDoc);
 		if (!data.exists()) {
@@ -61,27 +51,44 @@ const Note = () => {
 			return;
 		}
 		const access = await getDocs(q);
-		if (access.empty) {
-			setLoading(false);
-			setAuthorized(false);
-			return;
-		}
+		if (!access.empty) setAuthorized(true);
 
 		setData(data.data());
 		setLoading(false);
 	};
 
-	const updateNote = async json => {
-		const noteDoc = await doc(db, `notes/${id}`);
-		await updateDoc(noteDoc, { content: json });
-		alert('Saved!');
+	const addToRecents = async () => {
+		const col = collection(db, `users/${user.displayName}/recentNotes`);
+		const q = query(col, orderBy('visited', 'desc'));
+		const docs = await getDocs(q);
+		for (let i = 0; i < docs.docs.length; i++) {
+			const noteData = docs.docs[i].data();
+			if (noteData.noteId === id) {
+				await updateDoc(
+					doc(db, `users/${user.displayName}/recentNotes/${docs.docs[i].id}`),
+					{ visited: serverTimestamp() }
+				);
+				return;
+			}
+			if (i >= 4) {
+				await deleteDoc(
+					doc(db, `users/${user.displayName}/recentNotes/${docs.docs[i].id}`)
+				);
+			}
+		}
+		await addDoc(col, {
+			noteId: id,
+			owner: data.owner,
+			title: data.title,
+			visited: serverTimestamp(),
+		});
 	};
 
 	const addCollaborator = async e => {
 		e.preventDefault();
 		const col = collection(db, `notes/${id}/access`);
 		await addDoc(col, {
-			user: inviteInput,
+			user: inviteInput.toLowerCase(),
 			type: 'collaborator',
 			added: serverTimestamp(),
 		});
@@ -94,16 +101,12 @@ const Note = () => {
 		fetchNote();
 	}, [user]);
 
-	if (loading) return <CircularProgress />;
+	useEffect(() => {
+		if (!data) return;
+		addToRecents();
+	}, [data]);
 
-	if (!authorized)
-		return (
-			<Box>
-				<CssBaseline />
-				<Typography variant='h4'>Not Authorized</Typography>
-				<Typography>Did the owner add you as a collaborator?</Typography>
-			</Box>
-		);
+	if (loading) return <CircularProgress />;
 
 	if (!data)
 		return (
@@ -120,20 +123,36 @@ const Note = () => {
 				{data.title}
 			</Typography>
 			<Card sx={{ width: 1, pb: 3, mb: 5, p: 1 }}>
-				<Editor content={data.content} updateNote={updateNote} />
-			</Card>
-			<Card component={'form'} sx={{ p: 2 }} noValidate>
-				<TextField
-					// variant='standard'
-					label='User to invite'
-					value={inviteInput}
-					onChange={e => setInviteInput(e.target.value)}
-					fullWidth
+				<Editor
+					content={data.content}
+					authorized={authorized}
+					id={id}
+					user={user.displayName}
 				/>
-				<Button type='submit' onClick={addCollaborator}>
-					Invite Collaborator
-				</Button>
 			</Card>
+			{authorized ? (
+				<Card component={'form'} sx={{ p: 2 }} noValidate>
+					<TextField
+						// variant='standard'
+						label='User to invite'
+						value={inviteInput}
+						onChange={e => setInviteInput(e.target.value)}
+						fullWidth
+					/>
+					<Button type='submit' onClick={addCollaborator}>
+						Invite Collaborator
+					</Button>
+				</Card>
+			) : (
+				<Card sx={{ p: 3 }}>
+					<Typography variant='h6' sx={{ mb: 2, fontWeight: 'bold' }}>
+						Want to edit this note?
+					</Typography>
+					<Typography>
+						Ask {data.owner} to add you as a collaborator.
+					</Typography>
+				</Card>
+			)}
 		</Container>
 	);
 };

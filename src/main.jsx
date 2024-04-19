@@ -27,7 +27,6 @@ import Quiz from './routes/quiz.jsx';
 //import Chatbot from './components/ChatBot.jsx';
 import MusicChatBot from './components/MusicChatBot';
 
-
 const theme = createTheme({
 	palette: {
 		primary: {
@@ -50,7 +49,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					element={
 						<>
 							<Navbar />
-							<App />
+							<Tasklists />
 						</>
 					}
 				/>
@@ -118,7 +117,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					}
 				/>
 				<Route
-					path="flashcards/generate-quiz"
+					path='flashcards/generate-quiz'
 					element={
 						<>
 							<Quiz />

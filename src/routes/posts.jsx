@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import CreatePost from '../components/posts/CreatePost';
 import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend, ArcElement } from 'chart.js';
+import {
+	Chart as ChartJS,
+	CategoryScale,
+	LinearScale,
+	BarElement,
+	Tooltip,
+	Legend,
+	ArcElement,
+} from 'chart.js';
 //import UserStudyChart from '../routes/UserStudyChart';
 import {
 	Accordion,
@@ -17,6 +25,7 @@ import {
 	Card,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { AddCircleOutline } from '@mui/icons-material';
 import {
 	collection,
 	collectionGroup,
@@ -45,12 +54,17 @@ import TagSearch from '../components/posts/TagSearch';
 import MyNotes from '../components/MyNotes';
 import TreeDisplayBanner from '../components/treeDisplayBanner';
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
-
+ChartJS.register(
+	ArcElement,
+	Tooltip,
+	Legend,
+	CategoryScale,
+	LinearScale,
+	BarElement
+);
 
 const Posts = () => {
 	const [posts, setPosts] = useState([]);
-	const [noteCount, setNoteCount] = useState('...');
 	const user = useUser();
 	const [loading, setLoading] = useState(true);
 	const [totalTimeStudied, setTotalTimeStudied] = useState([]);
@@ -61,7 +75,7 @@ const Posts = () => {
 	const [chartData, setChartData] = useState({});
 	const db = getFirestore(app);
 
-	const getDataMap = async (path) => {
+	const getDataMap = async path => {
 		let dataMap = {};
 		try {
 			const times = await getDocs(collectionGroup(db, path));
@@ -74,20 +88,20 @@ const Posts = () => {
 				}
 				if (username === user.displayName.toLowerCase()) {
 					dataMap[username].push({
-						durationMs: Math.round(userData.durationMs / 1000) || 0
+						durationMs: Math.round(userData.durationMs / 1000) || 0,
 					});
 				}
 			});
 		} catch (error) {
-			console.error("Error fetching data:", error);
+			console.error('Error fetching data:', error);
 		}
 
-		console.log("made data map: ", dataMap)
+		console.log('made data map: ', dataMap);
 		return dataMap;
 	};
 
 	const fetchData = async () => {
-		console.log("Starting data fetch...");
+		console.log('Starting data fetch...');
 		setLoading(true);
 		try {
 			const flashcardData = await getDataMap('flashcardsStudied');
@@ -97,64 +111,66 @@ const Posts = () => {
 			const combinedData = {
 				flashcards: Object.values(flashcardData).flat(),
 				pomodoro: Object.values(pomodoroData).flat(),
-				studyRoom: Object.values(studyRoomData).flat()
+				studyRoom: Object.values(studyRoomData).flat(),
 			};
 
-			console.log("Combined data prepared for chart:", combinedData);
+			console.log('Combined data prepared for chart:', combinedData);
 			updateChartData(combinedData);
 		} catch (error) {
-			console.error("Error fetching data:", error);
+			console.error('Error fetching data:', error);
 		}
 		setLoading(false);
 	};
 
-
-	const updateChartData = (data) => {
-		console.log("Updating chart data with:", data);
+	const updateChartData = data => {
+		console.log('Updating chart data with:', data);
 		const labels = ['Flashcards', 'Pomodoro', 'Study Room'];
 		const times = [
 			calculateTotalTime(data.flashcards),
 			calculateTotalTime(data.pomodoro),
-			calculateTotalTime(data.studyRoom)
+			calculateTotalTime(data.studyRoom),
 		];
-		console.log("Calculated times for chart:", times);
+		console.log('Calculated times for chart:', times);
 
 		const totalTime = times.reduce((acc, curr) => acc + curr, 0);
 
 		// Calculate percentages
-		const percentages = times.map(time => ((time / totalTime) * 100).toFixed(0));
+		const percentages = times.map(time =>
+			((time / totalTime) * 100).toFixed(0)
+		);
 
 		// Check if any of the times are NaN (which indicates missing data)
 		if (times.some(isNaN)) {
-			console.error("Some time data is missing.");
+			console.error('Some time data is missing.');
 			return;
 		}
 
 		setChartData({
 			labels,
-			datasets: [{
-				data: percentages,
-				backgroundColor: ['#FFD8D8', '#D8FFD8', '#D8D8FF'], // Pastel colors
-				hoverBackgroundColor: ['#FFB8B8', '#B8FFB8', '#B8B8FF'],
-				percent: true,
-			}]
+			datasets: [
+				{
+					data: percentages,
+					backgroundColor: ['#FFD8D8', '#D8FFD8', '#D8D8FF'], // Pastel colors
+					hoverBackgroundColor: ['#FFB8B8', '#B8FFB8', '#B8B8FF'],
+					percent: true,
+				},
+			],
 		});
 	};
 
-	const calculateTotalTime = (data) => {
+	const calculateTotalTime = data => {
 		if (!Array.isArray(data)) {
-			console.error("Data is not an array:", data);
+			console.error('Data is not an array:', data);
 			return 0;
 		}
 		const total = data.reduce((acc, curr) => acc + (curr.durationMs || 0), 0);
-		console.log("Total time calculated from data:", total);
+		console.log('Total time calculated from data:', total);
 		return total;
 	};
 
 	useEffect(() => {
 		fetchData();
 	}, [user]);
-
 
 	const userStatsCol = user
 		? collection(db, `userStats/${user?.uid}/flashcardsStudied`)
@@ -224,7 +240,7 @@ const Posts = () => {
 		const res = await addDoc(col, note);
 		col = collection(db, `notes/${res.id}/access`);
 		await addDoc(col, {
-			user: user.displayName,
+			user: user.displayName.toLowerCase(),
 			type: 'owner',
 			added: serverTimestamp(),
 		});
@@ -257,21 +273,26 @@ const Posts = () => {
 
 			<TreeDisplayBanner />
 
-			<Box sx={{ width: '80%', maxWidth: 400, margin: 'auto', paddingBottom: '20px' }}>
+			<Box
+				sx={{
+					width: '80%',
+					maxWidth: 400,
+					margin: 'auto',
+					paddingBottom: '20px',
+				}}
+			>
 				<Typography variant='h4' sx={{ mb: 2, mt: 6 }}>
 					Time Studied by Percentage
 				</Typography>
 
-				{chartData.labels && chartData.datasets && (
-					<Pie data={chartData} />
-				)}
+				{chartData.labels && chartData.datasets && <Pie data={chartData} />}
 			</Box>
 
 			<Typography variant='h4' sx={{ mb: 2 }}>
 				Notes
 			</Typography>
 			<Accordion sx={{ mt: 3 }}>
-				<AccordionSummary expandIcon={<ExpandMoreIcon />}>
+				<AccordionSummary expandIcon={<AddCircleOutline />}>
 					<Typography variant='h6'>Make a new note</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
@@ -288,12 +309,21 @@ const Posts = () => {
 				</AccordionDetails>
 			</Accordion>
 
-			<Accordion sx={{ mt: 3, mb: 5 }}>
+			<Accordion sx={{ mt: 3 }}>
 				<AccordionSummary expandIcon={<ExpandMoreIcon />}>
-					<Typography variant='h6'>{`Your notes (${noteCount})`}</Typography>
+					<Typography variant='h6'>Your notes</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
-					<MyNotes setNoteCount={setNoteCount} />
+					<MyNotes variant='owned' />
+				</AccordionDetails>
+			</Accordion>
+
+			<Accordion sx={{ mt: 3, mb: 5 }}>
+				<AccordionSummary expandIcon={<ExpandMoreIcon />}>
+					<Typography variant='h6'>Recently viewed notes</Typography>
+				</AccordionSummary>
+				<AccordionDetails>
+					<MyNotes variant='visited' />
 				</AccordionDetails>
 			</Accordion>
 
