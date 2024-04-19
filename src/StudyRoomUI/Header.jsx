@@ -12,7 +12,7 @@ import FormHelperText from '@mui/material/FormHelperText';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, doc, getDoc, serverTimestamp, updateDoc, setDoc, deleteDoc} from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, doc, getDoc, serverTimestamp, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 
 
@@ -40,11 +40,11 @@ const Header = () => {
     measurementId: 'G-TS13EWHRMB',
   };
 
-   // Initialize Firebase
-   const app = initializeApp(firebaseConfig);
-   const db = getFirestore(app);
-   const auth = getAuth(app);
- 
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
 
   useEffect(() => {
     // Function to fetch usernames from Firestore
@@ -60,7 +60,7 @@ const Header = () => {
     fetchUsernames();
   }, [db]); // Run once when the component mounts
 
- 
+
   useEffect(() => {
     if (invitations.length > 0) {
       // Assuming you want to show the first invitation for simplicity
@@ -90,20 +90,20 @@ const Header = () => {
       const userDisplayName = auth.currentUser.displayName;
       const uid = currentInvitation.inviterUid;
       const collectionName = `${uid}_studyrooms`;
-    
+
       try {
         // Add the current user to the room's subcollection 'roomUsers'
         await addUserToRoom(collectionName, roomId, userDisplayName);
-  
+
         // Optionally delete the accepted invitation from the 'invitations' collection
         // This requires you to know the document ID of the invitation
         const invitationRef = doc(db, "invitations", currentInvitation.id);
         await deleteDoc(invitationRef);
-  
+
         // Navigate to the room
         navigate(`/room/${roomId}`, { state: { inviterUid: invitation.inviterUid, videoCategory: invitation.videoCategory } });
 
-        
+
         setInvitationDialogOpen(false); // Close the dialog upon accepting
       } catch (error) {
         console.error("Error handling the invitation:", error);
@@ -111,23 +111,23 @@ const Header = () => {
       }
     }
   };
-  
+
 
 
   const handleCloseInvitationDialog = () => {
     setInvitationDialogOpen(false);
   };
 
-  
+
   useEffect(() => {
     const currentUser = auth.currentUser;
     console.log("Current User:", currentUser); // Debug current user
     if (!currentUser || !currentUser.displayName) return;
-  
+
     // Adjust this query to use display names
     const invitationsQuery = query(collection(db, "invitations"), where("invitedUserDisplayName", "==", currentUser.displayName));
     console.log("Invitations Query:", invitationsQuery); // Debug the query
-  
+
     const unsubscribe = onSnapshot(invitationsQuery, (querySnapshot) => {
       const fetchedInvitations = [];
       querySnapshot.forEach((doc) => {
@@ -136,26 +136,26 @@ const Header = () => {
       });
       setInvitations(fetchedInvitations);
     });
-  
+
     return () => unsubscribe();
   }, [auth.currentUser]);
-  
-  
 
-const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
-  // Correct path to target a document within the roomUsers subcollection
-  const userRef = doc(db, `${collectionName}/${roomId}/roomUsers/${userDisplayName}`);
 
-  try {
-    await setDoc(userRef, {
-      displayName: userDisplayName,
-      joinTime: serverTimestamp(),
-    });
-    console.log(`Successfully added ${userDisplayName} to room ${roomId}`);
-  } catch (error) {
-    console.error(userRef)
-  }
-};
+
+  const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
+    // Correct path to target a document within the roomUsers subcollection
+    const userRef = doc(db, `${collectionName}/${roomId}/roomUsers/${userDisplayName}`);
+
+    try {
+      await setDoc(userRef, {
+        displayName: userDisplayName,
+        joinTime: serverTimestamp(),
+      });
+      console.log(`Successfully added ${userDisplayName} to room ${roomId}`);
+    } catch (error) {
+      console.error(userRef)
+    }
+  };
 
 
   const handleClickOpen = () => setOpen(true);
@@ -163,24 +163,24 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
 
   const handleFormSubmit = async () => {
     const user = auth.currentUser; // Use 'user' throughout this function
-  
+
     if (user) {
       const collectionName = `${user.uid}_studyrooms`;
       const studyRoomData = {
         creator_id: user.displayName,
         videoCategory,
-        videoUrl: null, 
+        videoUrl: null,
         inviterUid: user.uid
       };
 
-    
+
       //try to add the invitiations to the invitations in the database
       try {
         const docRef = await addDoc(collection(db, collectionName), studyRoomData);
         // Send invitations using displayName
         friendInvites.forEach(async (friendDisplayName) => {
           await addDoc(collection(db, "invitations"), {
-            invitedUserDisplayName: friendDisplayName, 
+            invitedUserDisplayName: friendDisplayName,
             roomId: docRef.id,
             inviterUserId: user.displayName, // Correctly using 'user' here
             videoUrl: null, //include the video url from the original room
@@ -191,7 +191,7 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
 
         // also add the user to the room.
         addUserToRoom(collectionName, docRef.id, user.displayName);
-        
+
         //navigate to the new room after all the data has been added to the firebase
         navigate(`/room/${docRef.id}`, { state: { ...studyRoomData } });
       } catch (error) {
@@ -201,10 +201,10 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
     } else {
       setErrorMessage('You must be signed in to create a study room.');
     }
-  
+
     handleClose(); // Close the dialog after handling form submission
   };
-  
+
 
   const handleInviteChange = (event) => {
     const {
@@ -222,7 +222,7 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
         // Delete the declined invitation from the 'invitations' collection
         const invitationRef = doc(db, "invitations", invitation.id);
         await deleteDoc(invitationRef);
-  
+
         console.log("Invitation declined and deleted from the database.");
         setInvitationDialogOpen(false); // Close the dialog upon declining
       } catch (error) {
@@ -231,8 +231,8 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
       }
     }
   };
-  
-  
+
+
 
   // Customized button styles
   const customButtonStyles = {
@@ -256,11 +256,11 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
         </button>
 
         {invitations.map(invitation => (
-        <div key={invitation.id} onClick={() => handleAcceptInvitation(invitation)}>
-          You've been invited by {invitation.inviterUserId} to join a study room.
-        </div>
+          <div key={invitation.id} onClick={() => handleAcceptInvitation(invitation)}>
+            You've been invited by {invitation.inviterUserId} to join a study room.
+          </div>
         ))}
-   
+
 
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>Create a New Study Room</DialogTitle>
@@ -285,23 +285,23 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
             </FormControl>
 
             <FormControl fullWidth margin="normal">
-          <InputLabel id="invite-friends-label">Invite Friends</InputLabel>
-          <Select
-            labelId="invite-friends-label"
-            id="invite-friends"
-            multiple
-            value={friendInvites}
-            onChange={handleInviteChange}
-            renderValue={(selected) => selected.join(', ')}
-          >
-            {usernames.map((username) => (
-              <MenuItem key={username} value={username}>
-                {username}
-              </MenuItem>
-            ))}
-          </Select>
-          <FormHelperText>Invite friends by username.</FormHelperText>
-        </FormControl>
+              <InputLabel id="invite-friends-label">Invite Friends</InputLabel>
+              <Select
+                labelId="invite-friends-label"
+                id="invite-friends"
+                multiple
+                value={friendInvites}
+                onChange={handleInviteChange}
+                renderValue={(selected) => selected.join(', ')}
+              >
+                {usernames.map((username) => (
+                  <MenuItem key={username} value={username}>
+                    {username}
+                  </MenuItem>
+                ))}
+              </Select>
+              <FormHelperText>Invite friends by username.</FormHelperText>
+            </FormControl>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
@@ -311,16 +311,16 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
       </div>
 
       <Dialog open={invitationDialogOpen} onClose={handleCloseInvitationDialog}>
-<DialogTitle>Invitation to Join Study Room</DialogTitle>
-<DialogContent>
-  <p>{currentInvitation ? `You've been invited by ${currentInvitation.inviterUserId} to join a study room.` : ''}</p>
-</DialogContent>
-<DialogActions>
-  <Button onClick={() => handleDeclineInvitation(currentInvitation)}>Decline</Button>
-  <Button onClick={() => handleAcceptInvitation(currentInvitation)} color="primary">Join Room</Button>
-</DialogActions>
+        <DialogTitle>Invitation to Join Study Room</DialogTitle>
+        <DialogContent>
+          <p>{currentInvitation ? `You've been invited by ${currentInvitation.inviterUserId} to join a study room.` : ''}</p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => handleDeclineInvitation(currentInvitation)}>Decline</Button>
+          <Button onClick={() => handleAcceptInvitation(currentInvitation)} color="primary">Join Room</Button>
+        </DialogActions>
 
-</Dialog>
+      </Dialog>
 
     </header>
 

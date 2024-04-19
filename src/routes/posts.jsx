@@ -45,7 +45,6 @@ import TagSearch from '../components/posts/TagSearch';
 import MyNotes from '../components/MyNotes';
 import TreeDisplayBanner from '../components/treeDisplayBanner';
 
-// Register the necessary chart components
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
 
@@ -58,7 +57,7 @@ const Posts = () => {
 	const [totalFlashcardsStudied, setTotalFlashcardsStudied] = useState([]);
 	const [avgTimeStudied, setAvgTimeStudied] = useState([]);
 	//const [stats, setStats] = useState({ labels: [], datasets: [] });
-	const [data, setData] = useState([]);  // Initialize as an empty array
+	const [data, setData] = useState([]);
 	const [chartData, setChartData] = useState({});
 	const db = getFirestore(app);
 
@@ -137,7 +136,7 @@ const Posts = () => {
 				data: percentages,
 				backgroundColor: ['#FFD8D8', '#D8FFD8', '#D8D8FF'], // Pastel colors
 				hoverBackgroundColor: ['#FFB8B8', '#B8FFB8', '#B8B8FF'],
-				percent: true, // Set to true to display percentages
+				percent: true,
 			}]
 		});
 	};

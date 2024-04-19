@@ -16,19 +16,6 @@ import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import app from '../firebase';
 
-// // Your web app's Firebase configuration
-// const firebaseConfig = {
-//   apiKey: 'AIzaSyAOLFu9q6gvdcDoOJ0oPuQKPgDyOye_2uM',
-//   authDomain: 'studysync-3fbd7.firebaseapp.com',
-//   projectId: 'studysync-3fbd7',
-//   storageBucket: 'studysync-3fbd7.appspot.com',
-//   messagingSenderId: '885216959280',
-//   appId: '1:885216959280:web:917a7216776b36e904c6f5',
-//   measurementId: 'G-TS13EWHRMB',
-// };
-
-// Initialize Firebase
-//const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
@@ -41,8 +28,6 @@ ChartJS.register(
   Tooltip,
   Legend
 );
-
-
 
 // Categories and their associated video URLs
 export const videoCategories = {
@@ -69,7 +54,6 @@ export const videoCategories = {
   Speedrun: [
     '-XFJoMRMM4k', 'b3TOVBNSJDA',
   ]
-  // Add more categories and videos as needed
 };
 
 
@@ -170,7 +154,7 @@ const LeaderboardDialog = ({ roomId, inviterUid, isLightMode }) => {
 
   const dialogTheme = {
     backgroundColor: isLightMode ? '#FFF' : '#333', // Light or dark background
-    color: isLightMode ? '#000' : '#FFF', // Text color based on the theme
+    color: isLightMode ? '#000' : '#FFF',
   };
 
   // Helper function to calculate time spent
@@ -330,18 +314,18 @@ const RoomDetailsPage = () => {
   const iframeRef = useRef(null);
   const [showPomodoro, setShowPomodoro] = useState(false);
   //const [showEditMenu, setShowEditMenu] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null); // For category menu
+  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
   const [currentVideoUrl, setCurrentVideoUrl] = useState('');
-  const [isLightMode, setIsLightMode] = useState(true); // Theme state
+  const [isLightMode, setIsLightMode] = useState(true);
   const togglePomodoro = () => setShowPomodoro(!showPomodoro);
-  const { roomId } = useParams(); // Using useParams to get roomId from the route
+  const { roomId } = useParams();
   const [roomDocRef, setRoomDocRef] = useState(null);
-  const [roomData, setRoomData] = useState(null); // State to hold room data
+  const [roomData, setRoomData] = useState(null);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedFriends, setSelectedFriends] = useState([]);
-  const [allUsers, setAllUsers] = useState([]); // Assuming you fetch all users for inviting
+  const [allUsers, setAllUsers] = useState([]);
   const location = useLocation();
   const { inviterUid, setinviterUid } = location.state || {};
   const [roomUsers, setRoomUsers] = useState([]);
@@ -401,10 +385,10 @@ const RoomDetailsPage = () => {
 
           // Assuming `joinTime` is stored as a Firebase timestamp in the document
           const timeSpent = calculateTimeSpent(userData.joinTime);
-          usersWithTime.push({ displayName: userData.displayName, timeSpent }); // Ensure you're pushing the correct user identifier
+          usersWithTime.push({ displayName: userData.displayName, timeSpent });
         });
 
-        setRoomUsers(usersWithTime); // Update your state to render the UI with fetched data
+        setRoomUsers(usersWithTime);
       } catch (error) {
         console.error("Error fetching room users:", error);
       }
@@ -412,8 +396,7 @@ const RoomDetailsPage = () => {
 
     fetchAndUpdateTimeSpent();
 
-    // You might not need to set this interval if you only want to fetch data once when the component mounts
-    const intervalId = setInterval(fetchAndUpdateTimeSpent, 60000); // Refresh every minute if needed
+    const intervalId = setInterval(fetchAndUpdateTimeSpent, 60000);
 
     return () => clearInterval(intervalId); // Cleanup on unmount
   }, []); // Ensure the useEffect dependencies are correctly set
@@ -434,7 +417,7 @@ const RoomDetailsPage = () => {
       const querySnapshot = await getDocs(collection(db, "users")); // Adjust path as necessary
       const users = [];
       querySnapshot.forEach((doc) => {
-        users.push(doc.data().username); // Or whatever field you're using
+        users.push(doc.data().username);
       });
       setAllUsers(users);
     };
@@ -449,9 +432,9 @@ const RoomDetailsPage = () => {
         await addDoc(collection(db, "invitations"), {
           invitedUserDisplayName: friendDisplayName,
           roomId: roomId,
-          inviterUserId: user.displayName, // Correctly using 'user' here
-          videoUrl: null, //include the video url from the original room
-          inviterUid: user.uid,// Or UID, depending on your preference
+          inviterUserId: user.displayName,
+          videoUrl: null,
+          inviterUid: user.uid,
         });
       });
       // Reset state and close dialog after sending invitations
@@ -466,7 +449,6 @@ const RoomDetailsPage = () => {
 
 
   useEffect(() => {
-    // Example usage of inviterUid to fetch room data or any other required data
     const fetchRoomData = async () => {
       const currentUser = auth.currentUser;
       if (!currentUser) {
@@ -474,7 +456,6 @@ const RoomDetailsPage = () => {
         navigate('/');
         return;
       }
-      // Use inviterUid if present, otherwise fall back to the current user's UID
       const userId = inviterUid || currentUser.uid;
       try {
         const roomRef = doc(db, `${userId}_studyrooms/${roomId}`);
@@ -484,10 +465,6 @@ const RoomDetailsPage = () => {
           setRoomData(docSnap.data())
 
 
-
-          // Logic to select a random video from the category
-          //setInviterUid(docSnap.inviterUid);
-
           const categoryVideos = videoCategories[docSnap.data().videoCategory];
           if (categoryVideos) {
             const randomIndex = Math.floor(Math.random() * categoryVideos.length);
@@ -496,11 +473,9 @@ const RoomDetailsPage = () => {
 
         } else {
           console.error("No such room exists");
-          // Handle the error - maybe redirect to a "room not found" page or back to dashboard
         }
       } catch (error) {
         console.error("Error fetching room data:", error);
-        // Handle the error appropriately
       }
     };
 
@@ -735,8 +710,8 @@ const RoomDetailsPage = () => {
               boxShadow: '0px -2px 10px rgba(0,0,0,0.3)', // Shadow for depth, adjusted for upward direction
               borderTopLeftRadius: '20px', // Slightly larger rounded corners for the top
               borderTopRightRadius: '20px',
-              p: 2, // Padding around the content
-              color: (theme) => theme.palette.text.primary, // Text color from theme
+              p: 2,
+              color: (theme) => theme.palette.text.primary,
             }}>
             <Typography variant="h6" sx={{ textAlign: 'center', mb: 2, fontWeight: 'bold' }}>
               Select a Video Category
@@ -747,7 +722,7 @@ const RoomDetailsPage = () => {
                   key={category}
                   onClick={() => handleSelectCategory(category)}
                   variant="contained" // Using contained for a more pronounced look
-                  startIcon={<VideoLibraryIcon />} // Assuming you have an icon for categories
+                  startIcon={<VideoLibraryIcon />}
                   sx={{
                     boxShadow: '0px 4px 10px rgba(0,0,0,0.2)', // Button shadow for depth
                     textTransform: 'none', // Avoid uppercase text
