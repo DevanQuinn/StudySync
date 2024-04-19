@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import CreatePost from '../components/posts/CreatePost';
-import UserStudyChart from './UserStudyChart';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend, ArcElement} from 'chart.js';
+//import UserStudyChart from '../routes/UserStudyChart';
 import {
 	Accordion,
 	AccordionSummary,
@@ -17,6 +19,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
 	collection,
+	collectionGroup,
 	getDocs,
 	getFirestore,
 	orderBy,
@@ -42,6 +45,10 @@ import TagSearch from '../components/posts/TagSearch';
 import MyNotes from '../components/MyNotes';
 import TreeDisplayBanner from '../components/treeDisplayBanner';
 
+// Register the necessary chart components
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
+
+
 const Posts = () => {
 	const [posts, setPosts] = useState([]);
 	const [noteCount, setNoteCount] = useState('...');
@@ -50,7 +57,96 @@ const Posts = () => {
 	const [totalTimeStudied, setTotalTimeStudied] = useState([]);
 	const [totalFlashcardsStudied, setTotalFlashcardsStudied] = useState([]);
 	const [avgTimeStudied, setAvgTimeStudied] = useState([]);
+	//const [stats, setStats] = useState({ labels: [], datasets: [] });
+	const [data, setData] = useState([]);  // Initialize as an empty array
+	const [chartData, setChartData] = useState({});
 	const db = getFirestore(app);
+
+	const getDataMap = async (path) => {
+		let dataMap = {};
+		try {
+			const times = await getDocs(collectionGroup(db, path));
+			times.forEach(doc => {
+				const userData = doc.data();
+				const username = userData.username || 'unknown';
+
+				console.log("Username" + username); 
+				if (!dataMap[username]) {
+					dataMap[username] = [];
+				}
+				dataMap[username].push({
+					durationMs: userData.durationMs || 0
+				});
+			});
+		} catch (error) {
+			console.error("Error fetching data:", error);
+		}
+		return dataMap;
+	};
+	
+	const fetchData = async () => {
+		console.log("Starting data fetch...");
+		setLoading(true);
+		try {
+			const flashcardData = await getDataMap('flashcardsStudied');
+			const pomodoroData = await getDataMap('pomodoroTimes');
+			const studyRoomData = await getDataMap('studyRoomTimes');
+	
+			const combinedData = {
+				flashcards: Object.values(flashcardData).flat(),
+				pomodoro: Object.values(pomodoroData).flat(),
+				studyRoom: Object.values(studyRoomData).flat()
+			};
+	
+			console.log("Combined data prepared for chart:", combinedData);
+			updateChartData(combinedData);
+		} catch (error) {
+			console.error("Error fetching data:", error);
+		}
+		setLoading(false);
+	};
+	
+	
+	const updateChartData = (data) => {
+		console.log("Updating chart data with:", data);
+		const labels = ['Flashcards', 'Pomodoro', 'Study Room'];
+		const times = [
+			calculateTotalTime(data.flashcards),
+			calculateTotalTime(data.pomodoro),
+			calculateTotalTime(data.studyRoom)
+		];
+		console.log("Calculated times for chart:", times);
+		
+		// Check if any of the times are NaN (which indicates missing data)
+		if (times.some(isNaN)) {
+			console.error("Some time data is missing.");
+			return;
+		}
+		
+		setChartData({
+			labels,
+			datasets: [{
+				data: times,
+				backgroundColor: ['#FFD8D8', '#D8FFD8', '#D8D8FF'], // Pastel colors
+                hoverBackgroundColor: ['#FFB8B8', '#B8FFB8', '#B8B8FF']
+			}]
+		});
+	};
+	
+	const calculateTotalTime = (data) => {
+		if (!Array.isArray(data)) {
+			console.error("Data is not an array:", data);
+			return 0;
+		}
+		const total = data.reduce((acc, curr) => acc + (curr.durationMs || 0), 0);
+		console.log("Total time calculated from data:", total);
+		return total;
+	};
+	
+	useEffect(() => {
+		fetchData();
+	}, []);
+	
 
 	const userStatsCol = user
 		? collection(db, `userStats/${user?.uid}/flashcardsStudied`)
@@ -235,6 +331,19 @@ const Posts = () => {
 					</TableBody>
 				</Table>
 			</TableContainer>
+
+			<Box sx={{ width: '80%', maxWidth: 400, margin: 'auto', paddingBottom: '20px' }}>
+    <Typography variant='h6' align='center' gutterBottom>
+        Time Studied
+    </Typography>
+    {chartData.labels && chartData.datasets && (
+        <Pie data={chartData} />
+    )}
+</Box>
+
+
+
+
 
 			<Typography variant='h4' sx={{ mb: 2 }}>
 				Notes
