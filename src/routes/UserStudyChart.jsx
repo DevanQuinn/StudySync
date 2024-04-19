@@ -1,25 +1,39 @@
 import React from 'react';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
+import { Box } from '@mui/material';
+// Register the necessary chart components for Bar chart
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-// Register the necessary chart components
-ChartJS.register(ArcElement, Tooltip, Legend);
-
-const UserStudyChart = ({ data }) => {
+const UserStudyChart = ({ data, chartType = 'bar' }) => {
   const options = {
-    maintainAspectRatio: true,
-    aspectRatio: 1.5,
     plugins: {
       legend: {
+        display: true,
         position: 'top',
       }
     },
     responsive: true,
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Categories'
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Values'
+        }
+      }
+    }
   };
 
   return (
-    <Box sx={{ width: 400, height: 400 }}>
-      <Pie data={data} options={options} />
+    <Box sx={{ width: '100%', height: '400px' }}>
+      {chartType === 'bar' && <Bar data={data} options={options} />}
+      {/* Add other chart types if needed */}
     </Box>
   );
 };
