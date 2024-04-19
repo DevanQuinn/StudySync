@@ -108,7 +108,7 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 		>
 			{flipped ? (
 				<>
-					<Typography variant='h6'>{data.answer}</Typography>
+					<Typography variant='h6' whiteSpace={"pre-wrap"}>{data.answer}</Typography>
 					{(() => {
 						if (answerImageBlob) {
 							return (
@@ -137,7 +137,7 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 				</>
 			) : (
 				<>
-					<Typography variant='h6'>{data.question}</Typography>
+					<Typography variant='h6' whiteSpace={"pre-wrap"}>{data.question}</Typography>
 					{(() => {
 						if (questionImageBlob) {
 							return (
@@ -152,13 +152,13 @@ const FlashCard = ({ data, deleteFlashcard, cardStudied, isUserCards }) => {
 						if (questionAudioBlob) {
 							return (
 								<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-									{ <ReactPlayer
+									{<ReactPlayer
 										url={URL.createObjectURL(questionAudioBlob)}
 										type='audio/mpeg'
 										controls
 										width="320px"
 										height="30px"
-									/> }
+									/>}
 								</Box>
 							);
 						}
