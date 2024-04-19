@@ -391,7 +391,6 @@ const Flashcards = () => {
 	};
 
 	const handleGenerateQuiz = () => {
-		console.log("test button", flashcardList);
 		navigate('generate-quiz', { state: { flashcardList } });
 	};
 
@@ -503,7 +502,7 @@ const Flashcards = () => {
 				</TextField>
 
 				<Button variant="contained" color="primary" onClick={handleGenerateQuiz} sx={{ mb: 6, mt: 2 }}>
-					Generate Quiz
+					Generate Quiz From Flashcards
 				</Button>
 
 				<Typography component='h1' variant='h5' align='center'>
