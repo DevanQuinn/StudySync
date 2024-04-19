@@ -23,7 +23,6 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
-// Register the necessary chart components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Leaderboard = () => {
@@ -51,7 +50,6 @@ const Leaderboard = () => {
     return milliseconds;
   };
 
-  // Function to handle sorting
   const handleSortTime = (key) => {
     let direction = 'desc'; // Start with descending order
     if (sortConfig.key === key && sortConfig.direction === 'desc') {
@@ -219,12 +217,12 @@ const Leaderboard = () => {
 
     // Helper function to sum up durations and count occurrences for each username
     const calcUserStatsEach = (map, mapType) => {
-      console.log("mapType: ", mapType);
-      console.log("map: ", map);
+      //console.log("mapType: ", mapType);
+      //console.log("map: ", map);
 
       Object.keys(map).forEach((username) => {
         const userData = map[username];
-        console.log(`userData for user ${username}: `, userData);
+        //console.log(`userData for user ${username}: `, userData);
 
         const totalDurationEach = userData.reduce((acc, curr) => acc + curr.durationMs, 0);
         const countEach = userData.length;
@@ -294,8 +292,8 @@ const Leaderboard = () => {
   };
 
   const options = {
-    maintainAspectRatio: true, // This can also be false to ignore container size
-    aspectRatio: 1.5, // Default is 2 (wider), lower for more square
+    maintainAspectRatio: true,
+    aspectRatio: 1.5,
     plugins: {
       legend: {
         position: 'top',
@@ -436,10 +434,10 @@ const Leaderboard = () => {
                 >Username</TableCell>
                 <SortableHeader
                   label="Total Number of Cards Studied"
-                  sortKey="numCardsStudied" // Use the appropriate key from your data
+                  sortKey="numCardsStudied"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
-                  onClick={handleSortCount} // Use the new sorting handler
+                  onClick={handleSortCount}
                 />
                 <SortableHeader
                   label="Avgerage Study Time Per Card"
