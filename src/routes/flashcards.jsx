@@ -28,6 +28,8 @@ import { v4 as uuid } from 'uuid';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { LinearProgress } from '@mui/material';
 import moment from 'moment';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 // variable to count number of cards studied (flipped)
 let numCardsStudied = 0;
@@ -56,8 +58,8 @@ const Flashcards = () => {
 	const user = useUser(true);
 	const db = getFirestore(app);
 	const storage = getStorage();
-
 	const progress = ((currentIndex + 1) / flashcardList.length) * 100;
+	const navigate = useNavigate();
 
 	const col = user
 		? collection(db, `flashcards/${user?.email}/card-data`)
@@ -388,6 +390,10 @@ const Flashcards = () => {
 		setNewAnswerAudio(file)
 	};
 
+	const handleGenerateQuiz = () => {
+		navigate('generate-quiz', { state: { flashcardList } });
+	};
+
 	return (
 		<Container component='main' maxWidth='sm' sx={{ mt: 10 }}>
 			<CssBaseline />
@@ -482,7 +488,7 @@ const Flashcards = () => {
 					</Box>
 				)}
 
-				<TextField sx={{ mb: 6, mt: -1 }}
+				<TextField sx={{ mb: 2, mt: -1 }}
 					select
 					label="Load flashcard sets"
 					value={selectedOption}
@@ -494,6 +500,10 @@ const Flashcards = () => {
 						<MenuItem key={option} value={option}>{option}</MenuItem>
 					))}
 				</TextField>
+
+				<Button variant="contained" color="primary" onClick={handleGenerateQuiz} sx={{ mb: 6, mt: 2 }}>
+					Generate Quiz From Flashcards
+				</Button>
 
 				<Typography component='h1' variant='h5' align='center'>
 					Create Flashcards
@@ -574,7 +584,7 @@ const Flashcards = () => {
 
 					<br />
 
-					<Button type='submit' variant='contained' sx={{ mt: 2, mb: 4 }}>
+					<Button type='submit' variant='contained' sx={{ mt: 4, mb: 2 }}>
 						Add Flashcard
 					</Button>
 				</Box>

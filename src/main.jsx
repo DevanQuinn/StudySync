@@ -23,6 +23,7 @@ import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 import Posts from './routes/posts.jsx';
 import UserPosts from './routes/userposts.jsx';
 import Note from './routes/note.jsx';
+import Quiz from './routes/quiz.jsx';
 //import Chatbot from './components/ChatBot.jsx';
 import MusicChatBot from './components/MusicChatBot';
 
@@ -42,7 +43,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 	// <React.StrictMode>
 	<ThemeProvider theme={theme}>
 		<BrowserRouter>
-		<MusicChatBot />
+			<MusicChatBot />
 			<Routes>
 				<Route
 					path='/'
@@ -50,6 +51,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 						<>
 							<Navbar />
 							<App />
+							<center><h1>Welcome to Study Sync!</h1></center>
 						</>
 					}
 				/>
@@ -113,6 +115,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 						<>
 							<Navbar />
 							<Flashcards />
+						</>
+					}
+				/>
+				<Route
+					path="flashcards/generate-quiz"
+					element={
+						<>
+							<Quiz />
 						</>
 					}
 				/>

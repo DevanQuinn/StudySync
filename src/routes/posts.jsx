@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import CreatePost from '../components/posts/CreatePost';
 import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend, ArcElement} from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend, ArcElement } from 'chart.js';
 //import UserStudyChart from '../routes/UserStudyChart';
 import {
 	Accordion,
@@ -45,7 +45,6 @@ import TagSearch from '../components/posts/TagSearch';
 import MyNotes from '../components/MyNotes';
 import TreeDisplayBanner from '../components/treeDisplayBanner';
 
-// Register the necessary chart components
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
 
@@ -58,7 +57,7 @@ const Posts = () => {
 	const [totalFlashcardsStudied, setTotalFlashcardsStudied] = useState([]);
 	const [avgTimeStudied, setAvgTimeStudied] = useState([]);
 	//const [stats, setStats] = useState({ labels: [], datasets: [] });
-	const [data, setData] = useState([]);  // Initialize as an empty array
+	const [data, setData] = useState([]);
 	const [chartData, setChartData] = useState({});
 	const db = getFirestore(app);
 
@@ -70,20 +69,23 @@ const Posts = () => {
 				const userData = doc.data();
 				const username = userData.username || 'unknown';
 
-				console.log("Username" + username); 
 				if (!dataMap[username]) {
 					dataMap[username] = [];
 				}
-				dataMap[username].push({
-					durationMs: userData.durationMs || 0
-				});
+				if (username === user.displayName.toLowerCase()) {
+					dataMap[username].push({
+						durationMs: Math.round(userData.durationMs / 1000) || 0
+					});
+				}
 			});
 		} catch (error) {
 			console.error("Error fetching data:", error);
 		}
+
+		console.log("made data map: ", dataMap)
 		return dataMap;
 	};
-	
+
 	const fetchData = async () => {
 		console.log("Starting data fetch...");
 		setLoading(true);
@@ -91,13 +93,13 @@ const Posts = () => {
 			const flashcardData = await getDataMap('flashcardsStudied');
 			const pomodoroData = await getDataMap('pomodoroTimes');
 			const studyRoomData = await getDataMap('studyRoomTimes');
-	
+
 			const combinedData = {
 				flashcards: Object.values(flashcardData).flat(),
 				pomodoro: Object.values(pomodoroData).flat(),
 				studyRoom: Object.values(studyRoomData).flat()
 			};
-	
+
 			console.log("Combined data prepared for chart:", combinedData);
 			updateChartData(combinedData);
 		} catch (error) {
@@ -105,8 +107,8 @@ const Posts = () => {
 		}
 		setLoading(false);
 	};
-	
-	
+
+
 	const updateChartData = (data) => {
 		console.log("Updating chart data with:", data);
 		const labels = ['Flashcards', 'Pomodoro', 'Study Room'];
@@ -116,23 +118,29 @@ const Posts = () => {
 			calculateTotalTime(data.studyRoom)
 		];
 		console.log("Calculated times for chart:", times);
-		
+
+		const totalTime = times.reduce((acc, curr) => acc + curr, 0);
+
+		// Calculate percentages
+		const percentages = times.map(time => ((time / totalTime) * 100).toFixed(0));
+
 		// Check if any of the times are NaN (which indicates missing data)
 		if (times.some(isNaN)) {
 			console.error("Some time data is missing.");
 			return;
 		}
-		
+
 		setChartData({
 			labels,
 			datasets: [{
-				data: times,
+				data: percentages,
 				backgroundColor: ['#FFD8D8', '#D8FFD8', '#D8D8FF'], // Pastel colors
-                hoverBackgroundColor: ['#FFB8B8', '#B8FFB8', '#B8B8FF']
+				hoverBackgroundColor: ['#FFB8B8', '#B8FFB8', '#B8B8FF'],
+				percent: true,
 			}]
 		});
 	};
-	
+
 	const calculateTotalTime = (data) => {
 		if (!Array.isArray(data)) {
 			console.error("Data is not an array:", data);
@@ -142,11 +150,11 @@ const Posts = () => {
 		console.log("Total time calculated from data:", total);
 		return total;
 	};
-	
+
 	useEffect(() => {
 		fetchData();
-	}, []);
-	
+	}, [user]);
+
 
 	const userStatsCol = user
 		? collection(db, `userStats/${user?.uid}/flashcardsStudied`)
@@ -249,101 +257,15 @@ const Posts = () => {
 
 			<TreeDisplayBanner />
 
-			<Typography variant='h4' sx={{ mb: 2, mt: 6 }}>
-				User's Flashcard Statistics
-			</Typography>
-
-			<TableContainer
-				component={Paper}
-				sx={{
-					mb: 5,
-					maxWidth: 400,
-					marginLeft: 'auto',
-					marginRight: 'auto',
-					mt: 2,
-					borderTop: '1px solid lightgrey',
-				}}
-			>
-				<Table sx={{ maxWidth: 400 }}>
-					<TableHead>
-						<TableRow>
-							<TableCell
-								sx={{
-									fontWeight: 'bold',
-									textAlign: 'center',
-									borderBottom: '2px solid lightgrey',
-									borderRight: '1px solid lightgrey',
-								}}
-							>
-								Statistic
-							</TableCell>
-							<TableCell
-								sx={{
-									fontWeight: 'bold',
-									textAlign: 'center',
-									borderBottom: '2px solid lightgrey',
-								}}
-							>
-								Value
-							</TableCell>
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						<TableRow>
-							<TableCell
-								sx={{
-									borderBottom: '1px solid lightgrey',
-									borderRight: '1px solid lightgrey',
-								}}
-							>
-								Total flashcards studied
-							</TableCell>
-							<TableCell sx={{ borderBottom: '1px solid lightgrey' }}>
-								{totalFlashcardsStudied} flashcards
-							</TableCell>
-						</TableRow>
-						<TableRow>
-							<TableCell
-								sx={{
-									borderBottom: '1px solid lightgrey',
-									borderRight: '1px solid lightgrey',
-								}}
-							>
-								Total time studied
-							</TableCell>
-							<TableCell sx={{ borderBottom: '1px solid lightgrey' }}>
-								{totalTimeStudied}
-							</TableCell>
-						</TableRow>
-						<TableRow>
-							<TableCell
-								sx={{
-									borderBottom: '1px solid lightgrey',
-									borderRight: '1px solid lightgrey',
-								}}
-							>
-								Average time spent per card
-							</TableCell>
-							<TableCell sx={{ borderBottom: '1px solid lightgrey' }}>
-								{avgTimeStudied}
-							</TableCell>
-						</TableRow>
-					</TableBody>
-				</Table>
-			</TableContainer>
-
 			<Box sx={{ width: '80%', maxWidth: 400, margin: 'auto', paddingBottom: '20px' }}>
-    <Typography variant='h6' align='center' gutterBottom>
-        Time Studied
-    </Typography>
-    {chartData.labels && chartData.datasets && (
-        <Pie data={chartData} />
-    )}
-</Box>
+				<Typography variant='h4' sx={{ mb: 2, mt: 6 }}>
+					Time Studied by Percentage
+				</Typography>
 
-
-
-
+				{chartData.labels && chartData.datasets && (
+					<Pie data={chartData} />
+				)}
+			</Box>
 
 			<Typography variant='h4' sx={{ mb: 2 }}>
 				Notes
