@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, } from 'react';
-import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link, TextField, Typography } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Checkbox, Container, CssBaseline, FormControlLabel, Grid, Link, Switch, TextField, Typography } from '@mui/material';
 import useUser from '../hooks/useUser';
 import {
     getFirestore,
@@ -11,44 +11,51 @@ import { getAuth, reauthenticateWithCredential, updatePassword, EmailAuthProvide
 import { getStorage, getBlob, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import app from '../firebase';
 import { v4 as uuid } from 'uuid';
+import TreeDisplaySelector from '../components/treeDisplaySelector';
 
 const EditProfile = () => {
     const auth = getAuth(app);
     const user = useUser(true);
     const db = getFirestore(app);
     const docRef = user ? doc(db, `users`, user.displayName) : null;
+
     const fetchProfileDataCalled = useRef(false);
     const storage = getStorage();
     const [userEmail, setUserEmail] = useState('');
     const [imageBlob, setImageBlob] = useState(null);
-    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', pfpID: 'unset', aboutMe: '' });
+    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', pfpID: 'unset', aboutMe: '', profileVisibility: true });
     const [studyGoals, setStudyGoals] = useState('');
-    const [aboutMe, setAboutMe] = useState('');
     const [selectedFavorites, setSelectedFavorites] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageUrl, setImageUrl] = useState(null);
-    const favoritesOptions = ['Leaderboard', 'Study Room', 'Timer', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards'];
+    const [aboutMe, setAboutMe] = useState('');
+    const favoritesOptions = ['Leaderboard', 'StudyRoom', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards', 'Posts'];
     const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
+    const [profileVisibility, setProfileVisibility] = useState(true);
 
-    // Load profile visibility setting from localStorage on component mount
     useEffect(() => {
-        const storedVisibility = localStorage.getItem('isPublicProfile');
+        const storedVisibility = localStorage.getItem('profileVisibility');
+        console.log("storedVisibility setting to localStorage", storedVisibility);
         if (storedVisibility !== null) {
-            setIsPublicProfile(JSON.parse(storedVisibility));
+            try {
+                setProfileVisibility(JSON.parse(storedVisibility));
+                console.log("in try", JSON.parse(storedVisibility));
+            } catch (error) {
+                // Handle error parsing JSON
+                console.error('Error parsing JSON:', error);
+            }
+        } else {
+            console.log("storedVisibility is null or undefined");
         }
     }, []);
 
+
     // Save profile visibility setting to localStorage whenever it changes
     useEffect(() => {
-        localStorage.setItem('isPublicProfile', JSON.stringify(isPublicProfile));
-    }, [isPublicProfile]);
-    const uploadPublicProfileData = async profile => {
-        await addDoc(col, profile);
-        //fetchProfileData();
-    };
+        localStorage.setItem('profileVisibility', JSON.stringify(profileVisibility));
+    }, [profileVisibility]);
 
     const fetchProfileData = async () => {
-
         if (docRef && !fetchProfileDataCalled.current) {
             fetchProfileDataCalled.current = true;
             console.log('docRef:', docRef);
@@ -57,6 +64,11 @@ const EditProfile = () => {
                 const docData = docSnapshot.data();
                 setProfileData(docData);
                 console.log('fetched data:', docData);
+                if (docData.hasOwnProperty('profileVisibility')) {
+                    setProfileVisibility(docData.profileVisibility);
+                } else {
+                    setProfileVisibility(true); // Assuming true if profileVisibility is missing
+                }
             }
         }
     };
@@ -64,6 +76,7 @@ const EditProfile = () => {
     useEffect(() => {
         fetchProfileData();
     }, [docRef]);
+
 
     useEffect(() => {
         if (user) {
@@ -75,11 +88,10 @@ const EditProfile = () => {
     useEffect(() => {
         setStudyGoals(profileData.studyGoals || '');
         setSelectedFavorites(profileData.favorites || []);
-        setAboutMe(profileData.aboutMe|| '');
+        setAboutMe(profileData.aboutMe || '');
 
         const loadImageBlob = async () => {
             if (profileData.pfpID && profileData.pfpID != 'unset') {
-
                 const storage = getStorage();
                 const pathReference = ref(storage, `profile-pictures/${profileData.pfpID}`);
                 try {
@@ -91,7 +103,6 @@ const EditProfile = () => {
                 }
             }
         };
-
 
         loadImageBlob();
     }, [profileData]);
@@ -145,8 +156,8 @@ const EditProfile = () => {
             favorites: selectedFavorites,
             studyGoals: data.get('studyGoals'),
             pfpID: data.get('profilePicture'),
-            isPublicProfile: isPublicProfile, // Include the value of isPublicProfile in the form data
-            aboutMe : data.get('aboutMe')
+            profileVisibility: profileVisibility, // Include the value of isPublicProfile in the form data
+            aboutMe: data.get('aboutMe')
         });
     };
 
@@ -154,6 +165,7 @@ const EditProfile = () => {
         const imageId = uuid();
         const storageRef = ref(storage, `profile-pictures/${imageId}`);
         await uploadBytes(storageRef, imageToUpload);
+
         return imageId;
     };
 
@@ -193,9 +205,10 @@ const EditProfile = () => {
             pfpID: imagePath,
             userID: user.uid,
             username: user.displayName.toLowerCase(),
-            aboutMe: aboutMe
+            aboutMe: aboutMe,
+            //Add profile visibility
+            profileVisibility: profileVisibility // Add profileVisibility to newData
         }
-        console.log("uploading newData: ", newData)
 
         await uploadProfileData(newData);
         setProfileData(newData);
@@ -204,7 +217,7 @@ const EditProfile = () => {
     };
 
     return (
-        <Container component="main" maxWidth="xs" sx={{ mt: 10 }}>
+        <Container component="main" maxWidth="lg" sx={{ mt: 10 }}>
             <CssBaseline />
             <div
                 sx={{
@@ -341,21 +354,16 @@ const EditProfile = () => {
                             </Grid>
                         ))}
                     </Grid>
+                    {/* <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
+                        Profile Visibility
+                    </Typography> */}
                     <Typography component="h6" variant="h6" sx={{ mt: 3, mb: 1, textAlign: 'left' }}>
                         Profile Visibility
                     </Typography>
-                    {/* <FormControlLabel
-                        control={<Switch checked={isPublicProfile} onChange={() => setIsPublicProfile(!isPublicProfile)} />}
-                        label={isPublicProfile ? 'Public' : 'Private'}
-                    /> */}
-                    {/* <FormControlLabel
-                        control={<Switch checked={isPublicProfile} onChange={() => {
-                            const newVisibility = !isPublicProfile;
-                            console.log('New Profile Visibility:', newVisibility);
-                            setIsPublicProfile(newVisibility);
-                        }} />}
-                        label={isPublicProfile ? 'Public' : 'Private'}
-                    /> */}
+                    <FormControlLabel
+                        control={<Switch checked={profileVisibility} onChange={() => setProfileVisibility(!profileVisibility)} />}
+                        label={profileVisibility ? 'Public' : 'Private'}
+                    />
                     <Button
                         type="submit"
                         fullWidth
@@ -365,6 +373,11 @@ const EditProfile = () => {
                         Save Changes
                     </Button>
                 </form>
+                <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
+                    Tree Garden
+                    {/* There should be a function to display a current tree inventory. Consider refactoring a whole garden page?*/}
+                    <TreeDisplaySelector />
+                </Typography>
                 <Grid container>
                     <Grid item xs>
                         <Link href="/" variant="body2" paddingBottom="10pt">

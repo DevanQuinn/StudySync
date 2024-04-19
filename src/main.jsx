@@ -5,7 +5,7 @@ import { ThemeProvider, createTheme } from '@mui/material';
 import './index.css';
 import App from './App';
 import Navbar from './components/Navbar.jsx';
-import Dashboard from './routes/dashboard.jsx';
+import Tasklists from './routes/tasklistPage.jsx';
 import Leaderboard from './routes/leaderboard.jsx';
 import SignIn from './routes/signin.jsx';
 import SignUp from './routes/signup.jsx';
@@ -17,12 +17,15 @@ import Pomodoro from './routes/pomodoro.jsx';
 import Firebase from './firebase.js';
 import EditProfile from './routes/editprofile.jsx';
 import Flashcards from './routes/flashcards.jsx';
-import ProfilePage from './routes/userpage.jsx';
+import ProfilePage from './routes/profilepage.jsx';
 import StudyRoomUI from './routes/StudyRoomUI.jsx';
 import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 import Posts from './routes/posts.jsx';
 import UserPosts from './routes/userposts.jsx';
 import Note from './routes/note.jsx';
+//import Chatbot from './components/ChatBot.jsx';
+import MusicChatBot from './components/MusicChatBot';
+
 
 const theme = createTheme({
 	palette: {
@@ -39,6 +42,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 	// <React.StrictMode>
 	<ThemeProvider theme={theme}>
 		<BrowserRouter>
+		<MusicChatBot />
 			<Routes>
 				<Route
 					path='/'
@@ -50,11 +54,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					}
 				/>
 				<Route
-					path='dashboard'
+					path='tasklists'
 					element={
 						<>
 							<Navbar />
-							<Dashboard />
+							<Tasklists />
 						</>
 					}
 				/>
@@ -206,6 +210,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 				/>{' '}
 				{/* New route for AddFriend */}
 			</Routes>
+			<MusicChatBot />
 		</BrowserRouter>
 	</ThemeProvider>
 	// </React.StrictMode>
