@@ -30,6 +30,7 @@ const Leaderboard = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [boardData, setBoardData] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('General');
+  const [isInitialSortDone, setIsInitialSortDone] = useState(false);
 
   const db = getFirestore(app);
 
@@ -94,6 +95,33 @@ const Leaderboard = () => {
   useEffect(() => {
     fetchStats();
   }, []);
+
+  useEffect(() => {
+    if (!isInitialSortDone && boardData.length > 0) {
+      // Sort the boardData by "Total Time Studied" in descending order
+      handleSortTime("studyTime");
+      setIsInitialSortDone(true); // Set the flag to true after the initial sorting
+    }
+  }, [boardData, isInitialSortDone]);
+
+  useEffect(() => {
+    if (selectedCategory === "General") {
+      handleSortTime("studyTime");
+    }
+
+    if (selectedCategory === "Flashcards") {
+      handleSortCount("numCardsStudied");
+    }
+
+    if (selectedCategory === "Pomodoro") {
+      handleSortCount("longestSessionDuration");
+    }
+
+    if (selectedCategory === "StudyRoom") {
+      handleSortCount("engagement");
+    }
+
+  }, [selectedCategory]);
 
   const fetchStats = async () => {
     const usersFlashcardTimesMap = await getDataMap('flashcardsStudied');
@@ -281,8 +309,15 @@ const Leaderboard = () => {
     const isAscending = currentSortDirection === 'asc';
 
     return (
-      <TableCell onClick={() => onClick(sortKey)} sx={{ cursor: 'pointer' }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+      <TableCell onClick={() => onClick(sortKey)} sx={{
+        cursor: 'pointer', borderBottom: '2px solid lightgrey'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontWeight: 'bold',
+          textAlign: 'center',
+        }}>
           <span>{label}</span>
           {isCurrentSortKey && (
             isAscending ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />
@@ -316,13 +351,26 @@ const Leaderboard = () => {
           </Button>
         </Box>
       </Box>
+
       <TableContainer component={Paper} sx={{ mt: 1, mb: 10 }}>
         {selectedCategory === 'General' &&
-          <Table>
+          <Table sx={{ borderTop: '1px solid lightgrey' }}>
             <TableHead>
               <TableRow>
-                <TableCell>Rank</TableCell>
-                <TableCell>Username</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Rank</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Username</TableCell>
                 <SortableHeader
                   label="Total Time Studied"
                   sortKey="studyTime"
@@ -331,21 +379,21 @@ const Leaderboard = () => {
                   onClick={handleSortTime}
                 />
                 <SortableHeader
-                  label="Flashcards Study Time"
+                  label="Total Flashcards Time"
                   sortKey="flashcardTime"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
                   onClick={handleSortTime}
                 />
                 <SortableHeader
-                  label="Pomodoro Study Time"
+                  label="Total Pomodoro Time"
                   sortKey="pomodoroTime"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
                   onClick={handleSortTime}
                 />
                 <SortableHeader
-                  label="Study Room Time"
+                  label="Total Study Room Time"
                   sortKey="studyRoomTime"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
@@ -365,23 +413,36 @@ const Leaderboard = () => {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>}
+          </Table>
+        }
 
         {selectedCategory === 'Flashcards' &&
-          <Table>
+          <Table sx={{ borderTop: '1px solid lightgrey' }}>
             <TableHead>
               <TableRow>
-                <TableCell>Rank</TableCell>
-                <TableCell>Username</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Rank</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Username</TableCell>
                 <SortableHeader
-                  label="Avg. Time per Card"
+                  label="Avgerage Study Time Per Card"
                   sortKey="avgTimePerCard"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
                   onClick={handleSortTime}
                 />
                 <SortableHeader
-                  label="Num Cards Studied"
+                  label="Total Number of Cards Studied"
                   sortKey="numCardsStudied" // Use the appropriate key from your data
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
@@ -403,20 +464,32 @@ const Leaderboard = () => {
         }
 
         {selectedCategory === 'Pomodoro' &&
-          <Table>
+          <Table sx={{ borderTop: '1px solid lightgrey' }}>
             <TableHead>
               <TableRow>
-                <TableCell>Rank</TableCell>
-                <TableCell>Username</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Rank</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Username</TableCell>
                 <SortableHeader
-                  label="Num Study Sessions"
+                  label="Total Number of Pomodoro Sessions"
                   sortKey="numPomodoroSessions"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
                   onClick={handleSortCount}
                 />
                 <SortableHeader
-                  label="Longest Duration of Session"
+                  label="Longest Duration of Pomodoro Session"
                   sortKey="longestSessionDuration"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
@@ -438,20 +511,32 @@ const Leaderboard = () => {
         }
 
         {selectedCategory === 'StudyRoom' &&
-          <Table>
+          <Table sx={{ borderTop: '1px solid lightgrey' }}>
             <TableHead>
               <TableRow>
-                <TableCell>Rank</TableCell>
-                <TableCell>Username</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Rank</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Username</TableCell>
                 <SortableHeader
-                  label="Time Studied"
+                  label="Total Time Spent in Study Rooms"
                   sortKey="totalRoomTime"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
                   onClick={handleSortTime}
                 />
                 <SortableHeader
-                  label="Engagement in Chat"
+                  label="Total Engagement in Study Room Chats"
                   sortKey="engagement"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
@@ -471,7 +556,6 @@ const Leaderboard = () => {
             </TableBody>
           </Table>
         }
-
 
       </TableContainer>
     </Container>
