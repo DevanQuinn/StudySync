@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import CreatePost from '../components/posts/CreatePost';
 import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend, ArcElement} from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend, ArcElement } from 'chart.js';
 //import UserStudyChart from '../routes/UserStudyChart';
 import {
 	Accordion,
@@ -70,7 +70,7 @@ const Posts = () => {
 				const userData = doc.data();
 				const username = userData.username || 'unknown';
 
-				console.log("Username" + username); 
+				console.log("Username" + username);
 				if (!dataMap[username]) {
 					dataMap[username] = [];
 				}
@@ -83,7 +83,7 @@ const Posts = () => {
 		}
 		return dataMap;
 	};
-	
+
 	const fetchData = async () => {
 		console.log("Starting data fetch...");
 		setLoading(true);
@@ -91,13 +91,13 @@ const Posts = () => {
 			const flashcardData = await getDataMap('flashcardsStudied');
 			const pomodoroData = await getDataMap('pomodoroTimes');
 			const studyRoomData = await getDataMap('studyRoomTimes');
-	
+
 			const combinedData = {
 				flashcards: Object.values(flashcardData).flat(),
 				pomodoro: Object.values(pomodoroData).flat(),
 				studyRoom: Object.values(studyRoomData).flat()
 			};
-	
+
 			console.log("Combined data prepared for chart:", combinedData);
 			updateChartData(combinedData);
 		} catch (error) {
@@ -105,8 +105,8 @@ const Posts = () => {
 		}
 		setLoading(false);
 	};
-	
-	
+
+
 	const updateChartData = (data) => {
 		console.log("Updating chart data with:", data);
 		const labels = ['Flashcards', 'Pomodoro', 'Study Room'];
@@ -116,23 +116,23 @@ const Posts = () => {
 			calculateTotalTime(data.studyRoom)
 		];
 		console.log("Calculated times for chart:", times);
-		
+
 		// Check if any of the times are NaN (which indicates missing data)
 		if (times.some(isNaN)) {
 			console.error("Some time data is missing.");
 			return;
 		}
-		
+
 		setChartData({
 			labels,
 			datasets: [{
 				data: times,
 				backgroundColor: ['#FFD8D8', '#D8FFD8', '#D8D8FF'], // Pastel colors
-                hoverBackgroundColor: ['#FFB8B8', '#B8FFB8', '#B8B8FF']
+				hoverBackgroundColor: ['#FFB8B8', '#B8FFB8', '#B8B8FF']
 			}]
 		});
 	};
-	
+
 	const calculateTotalTime = (data) => {
 		if (!Array.isArray(data)) {
 			console.error("Data is not an array:", data);
@@ -142,11 +142,11 @@ const Posts = () => {
 		console.log("Total time calculated from data:", total);
 		return total;
 	};
-	
+
 	useEffect(() => {
 		fetchData();
 	}, []);
-	
+
 
 	const userStatsCol = user
 		? collection(db, `userStats/${user?.uid}/flashcardsStudied`)
@@ -333,13 +333,13 @@ const Posts = () => {
 			</TableContainer>
 
 			<Box sx={{ width: '80%', maxWidth: 400, margin: 'auto', paddingBottom: '20px' }}>
-    <Typography variant='h6' align='center' gutterBottom>
-        Time Studied
-    </Typography>
-    {chartData.labels && chartData.datasets && (
-        <Pie data={chartData} />
-    )}
-</Box>
+				<Typography variant='h6' align='center' gutterBottom>
+					Time Studied
+				</Typography>
+				{chartData.labels && chartData.datasets && (
+					<Pie data={chartData} />
+				)}
+			</Box>
 
 
 
