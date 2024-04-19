@@ -51,6 +51,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 						<>
 							<Navbar />
 							<App />
+							<center><h1>Welcome to Study Sync!</h1></center>
 						</>
 					}
 				/>
