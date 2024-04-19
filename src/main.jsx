@@ -23,8 +23,10 @@ import RoomDetailsPage from './routes/RoomDetailsPage.jsx';
 import Posts from './routes/posts.jsx';
 import UserPosts from './routes/userposts.jsx';
 import Note from './routes/note.jsx';
-import Chatbot from './components/ChatBot.jsx';
 import Quiz from './routes/quiz.jsx';
+//import Chatbot from './components/ChatBot.jsx';
+import MusicChatBot from './components/MusicChatBot';
+
 
 const theme = createTheme({
 	palette: {
@@ -41,6 +43,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 	// <React.StrictMode>
 	<ThemeProvider theme={theme}>
 		<BrowserRouter>
+			<MusicChatBot />
 			<Routes>
 				<Route
 					path='/'
@@ -216,6 +219,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 				/>{' '}
 				{/* New route for AddFriend */}
 			</Routes>
+			<MusicChatBot />
 		</BrowserRouter>
 	</ThemeProvider>
 	// </React.StrictMode>
