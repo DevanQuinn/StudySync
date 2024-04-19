@@ -61,7 +61,7 @@ jest.mock('firebase/auth', () => {
 
     // Simulate user input for email
     fireEvent.change(getByLabelText(/email address/i), { target: { value: 'test@example.com' } });
-    console.log('After email input:', getByLabelText(/email address/i).value);
+    
 
     // Fetch all elements with the text "Sign In" and filter for buttons
     const signInButtons = getAllByText(/sign in/i).filter(item => item.tagName === 'BUTTON');
@@ -69,18 +69,18 @@ jest.mock('firebase/auth', () => {
     // Assuming the first button is the one we want (should only be one)
     const signInButton = signInButtons[0];
     if (!signInButton) {
-        console.error('Sign In button not found!');
+        
         return;
     }
 
     // Simulate user input for password
     fireEvent.change(getByPlaceholderText('Password'), { target: { value: 'password123' } });
-    console.log('After password input:', getByPlaceholderText('Password').value);
+    
 
     await act(async () => {
         // Click the "Sign In" button
         fireEvent.click(signInButton);
-        console.log('Clicked Sign In button');
+       
     });
   
     // Assertions for expected outcomes post-sign-in
@@ -90,25 +90,14 @@ jest.mock('firebase/auth', () => {
 test('signs up a new user successfully', async () => {
     const { getByLabelText, getByText, getByPlaceholderText, getByTestId } = render(<SignUp />);
     
-    console.log('Initial render:');
-    // Log the form elements
-    console.log('Username input exists:', !!getByLabelText(/username/i));
-    console.log('Email input exists:', !!getByLabelText(/email address/i));
-    console.log('Password input exists:', !!getByPlaceholderText('Password'));
-    console.log('Confirm password input exists:', !!getByLabelText(/confirm password/i));
-
+    
     // Fill in the form
     fireEvent.change(getByLabelText(/username/i), { target: { value: 'newUser' } });
     fireEvent.change(getByLabelText(/email address/i), { target: { value: 'newuser@example.com' } });
     fireEvent.change(getByPlaceholderText('Password'), { target: { value: 'password123' } });
     fireEvent.change(getByLabelText(/confirm password/i), { target: { value: 'password123' } });
 
-    console.log('After filling in the form:');
-    console.log('Username input value:', getByLabelText(/username/i).value);
-    console.log('Email input value:', getByLabelText(/email address/i).value);
-    console.log('Password input value:', getByPlaceholderText('Password').value);
-    console.log('Confirm password input value:', getByLabelText(/confirm password/i).value);
-
+    
     // Mock file input for profile picture
     // Note: Handling file uploads in tests can be complex and may require mocking the file input more extensively.
     
@@ -117,16 +106,14 @@ test('signs up a new user successfully', async () => {
         fireEvent.click(getByTestId('sign-up-button'));
     });
 
-    console.log('After submitting the form');
+   
     // Assertions to verify the interactions
     expect(createUserWithEmailAndPassword).toHaveBeenCalledWith(expect.anything(), 'newuser@example.com', 'password123');
-    console.log('createUserWithEmailAndPassword was called');
-
+    
     expect(updateProfile).toHaveBeenCalled();
-    console.log('updateProfile was called');
-
+    
     expect(setDoc).toHaveBeenCalled();
-    console.log('setDoc was called');
+  
 
     // Log any additional information here
 });

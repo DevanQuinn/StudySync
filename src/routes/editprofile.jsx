@@ -28,70 +28,69 @@ const EditProfile = () => {
     const [selectedFavorites, setSelectedFavorites] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageUrl, setImageUrl] = useState(null);
-    const favoritesOptions = ['Leaderboard', 'Study Room', 'Timer', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards'];
-    //const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
-    const [profileVisibility, setProfileVisibility] = useState(true); // State for profile visibility
+    const favoritesOptions = ['Leaderboard', 'StudyRoom', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards', 'Posts'];
+    const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
 
 
-// useEffect(() => {
-//     const storedVisibility = localStorage.getItem('profileVisibility');
-//     console.log("storedVisibility setting to localStorage", storedVisibility);
-//     if (storedVisibility !== null) {
-//         try {
-//             setIsPublicProfile(JSON.parse(storedVisibility));
-//             console.log("in try", JSON.parse(storedVisibility));
-//         } catch (error) {
-//             // Handle error parsing JSON
-//             console.error('Error parsing JSON:', error);
-//         }
-//     } else {
-//         console.log("storedVisibility is null or undefined");
-//     }
-// }, []);
+    // useEffect(() => {
+    //     const storedVisibility = localStorage.getItem('profileVisibility');
+    //     console.log("storedVisibility setting to localStorage", storedVisibility);
+    //     if (storedVisibility !== null) {
+    //         try {
+    //             setIsPublicProfile(JSON.parse(storedVisibility));
+    //             console.log("in try", JSON.parse(storedVisibility));
+    //         } catch (error) {
+    //             // Handle error parsing JSON
+    //             console.error('Error parsing JSON:', error);
+    //         }
+    //     } else {
+    //         console.log("storedVisibility is null or undefined");
+    //     }
+    // }, []);
 
-useEffect(() => {
-    const storedVisibility = localStorage.getItem('profileVisibility');
-    console.log("storedVisibility setting to localStorage", storedVisibility);
-    if (storedVisibility !== null) {
-        try {
-            setProfileVisibility(JSON.parse(storedVisibility));
-            console.log("in try", JSON.parse(storedVisibility));
-        } catch (error) {
-            // Handle error parsing JSON
-            console.error('Error parsing JSON:', error);
+    useEffect(() => {
+        const storedVisibility = localStorage.getItem('profileVisibility');
+        console.log("storedVisibility setting to localStorage", storedVisibility);
+        if (storedVisibility !== null) {
+            try {
+                setProfileVisibility(JSON.parse(storedVisibility));
+                console.log("in try", JSON.parse(storedVisibility));
+            } catch (error) {
+                // Handle error parsing JSON
+                console.error('Error parsing JSON:', error);
+            }
+        } else {
+            console.log("storedVisibility is null or undefined");
         }
-    } else {
-        console.log("storedVisibility is null or undefined");
-    }
-}, []);
+    }, []);
 
 
-// Save profile visibility setting to localStorage whenever it changes
-useEffect(() => {
-    localStorage.setItem('profileVisibility', JSON.stringify(profileVisibility));
-}, [profileVisibility]);
+    // Save profile visibility setting to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('profileVisibility', JSON.stringify(profileVisibility));
+    }, [profileVisibility]);
 
-const fetchProfileData = async () => {
-    if (docRef && !fetchProfileDataCalled.current) {
-        fetchProfileDataCalled.current = true;
-        console.log('docRef:', docRef);
-        const docSnapshot = await getDoc(docRef);
-        if (docSnapshot.exists()) {
-            const docData = docSnapshot.data();
-            setProfileData(docData);
-            console.log('fetched data:', docData);
-            if (docData.hasOwnProperty('profileVisibility')) {
-                setProfileVisibility(docData.profileVisibility);
-            } else {
-                setProfileVisibility(true); // Assuming true if profileVisibility is missing
+    const fetchProfileData = async () => {
+        if (docRef && !fetchProfileDataCalled.current) {
+            fetchProfileDataCalled.current = true;
+            console.log('docRef:', docRef);
+            const docSnapshot = await getDoc(docRef);
+            if (docSnapshot.exists()) {
+                const docData = docSnapshot.data();
+                setProfileData(docData);
+                console.log('fetched data:', docData);
+                if (docData.hasOwnProperty('profileVisibility')) {
+                    setProfileVisibility(docData.profileVisibility);
+                } else {
+                    setProfileVisibility(true); // Assuming true if profileVisibility is missing
+                }
             }
         }
-    }
-};
+    };
 
-useEffect(() => {
-    fetchProfileData();
-}, [docRef]);
+    useEffect(() => {
+        fetchProfileData();
+    }, [docRef]);
 
 
     useEffect(() => {
@@ -368,7 +367,7 @@ useEffect(() => {
                 <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
                     Tree Garden
                     {/* There should be a function to display a current tree inventory. Consider refactoring a whole garden page?*/}
-                    <TreeDisplaySelector/>
+                    <TreeDisplaySelector />
                 </Typography>
                 <Grid container>
                     <Grid item xs>
