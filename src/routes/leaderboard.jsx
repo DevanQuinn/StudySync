@@ -249,11 +249,27 @@ const Leaderboard = () => {
     <Container component="main" maxWidth="md">
       <CssBaseline />
       <Box sx={{ mb: 3, mt: 11, textAlign: 'center' }}>
-        <Typography component="h1" variant="h3">
+        <Typography component="h1" variant="h3" sx={{ mt: 1, mb: 1 }}>
           Leaderboards
         </Typography>
       </Box>
-      <TableContainer component={Paper}>
+      <Box sx={{ mt: 3, textAlign: 'center' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 4 }}>
+          <Button variant="contained">
+            General
+          </Button>
+          <Button variant="contained">
+            Flashcards
+          </Button>
+          <Button variant="contained">
+            Pomodoro
+          </Button>
+          <Button variant="contained">
+            Study Rooms
+          </Button>
+        </Box>
+      </Box>
+      <TableContainer component={Paper} sx={{ mt: 1, mb: 10 }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -303,22 +319,6 @@ const Leaderboard = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      <Box sx={{ mt: 3, textAlign: 'center' }}>
-        <Typography variant="h5" sx={{ mb: 3, mt: 2 }}>
-          Leaderboards by Category
-        </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 4 }}>
-          <Button variant="contained">
-            Flashcards
-          </Button>
-          <Button variant="contained">
-            Pomodoro
-          </Button>
-          <Button variant="contained">
-            Study Rooms
-          </Button>
-        </Box>
-      </Box>
     </Container>
   );
 };
