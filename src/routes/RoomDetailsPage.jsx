@@ -499,7 +499,7 @@ const RoomDetailsPage = () => {
           username: user.displayName
         };
         try {
-          if (statsData.durationMs < 3600000) {
+          if (statsData.durationMs < 36000000) {
             await addDoc(studyRoomCol, statsData);
           }
         } catch (error) {
