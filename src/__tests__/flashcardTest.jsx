@@ -23,6 +23,31 @@ jest.mock("firebase/storage", () => ({
     answerImage: 'path/to/answerImage.jpg',
     answerAudio: 'path/to/answerAudio.mp3'
   };
+
+
+  /*
+  it('renders correctly with initial question and button text', async () => {
+    render(<FlashCard data={testData} deleteFlashcard={() => {}} cardStudied={() => {}} isUserCards={true} />);
+    const questionText = await screen.findByText(testData.question);
+    expect(questionText).toBeInTheDocument();
+    const revealButton = await screen.findByRole('button', { name: 'Reveal Answer' });
+    expect(revealButton).toBeInTheDocument();
+});
+
+
+it('toggles flip state on button click', () => {
+  render(<FlashCard data={testData} deleteFlashcard={() => {}} cardStudied={() => {}} isUserCards={true} />);
+  const flipButton = screen.getByRole('button', { name: 'Reveal Answer' });
+  fireEvent.click(flipButton);
+  expect(flipButton.textContent).toBe('Show Question');
+  expect(screen.getByText(testData.answer)).toBeInTheDocument(); // Assuming the answer becomes visible
+  // Click again to toggle back
+  fireEvent.click(flipButton);
+  expect(flipButton.textContent).toBe('Reveal Answer');
+  expect(screen.queryByText(testData.answer)).not.toBeInTheDocument(); // Assuming the answer hides
+});
+*/
+
   
   describe('FlashCard Component', () => {
     /*
@@ -60,3 +85,4 @@ jest.mock("firebase/storage", () => ({
       });
       */
   });
+

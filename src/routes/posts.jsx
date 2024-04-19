@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import CreatePost from '../components/posts/CreatePost';
+import UserStudyChart from './UserStudyChart'; 
 import {
 	Accordion,
 	AccordionSummary,
@@ -39,6 +40,7 @@ import moment from 'moment';
 import Post from '../components/posts/Post';
 import TagSearch from '../components/posts/TagSearch';
 import MyNotes from '../components/MyNotes';
+import TreeDisplayBanner from '../components/treeDisplayBanner';
 
 const Posts = () => {
 	const [posts, setPosts] = useState([]);
@@ -144,6 +146,13 @@ const Posts = () => {
 	return (
 		<Container component='main' maxWidth='lg' sx={{ mt: 14, mb: 10 }}>
 			<CssBaseline />
+
+			<Typography variant='h4' sx={{ mb : 2}}>
+				User's Tree Garden
+			</Typography>
+
+			<TreeDisplayBanner/>
+
 			<Typography variant='h4' sx={{ mb: 2 }}>
 				User's Flashcard Statistics
 			</Typography>

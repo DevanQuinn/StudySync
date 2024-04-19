@@ -16,10 +16,6 @@ import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, do
 import { initializeApp } from 'firebase/app';
 
 
-/*
-TODO
-- Multiple invitations work.
-*/
 
 const Header = () => {
   const [open, setOpen] = useState(false);
@@ -174,6 +170,7 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
         creator_id: user.displayName,
         videoCategory,
         videoUrl: null, 
+        inviterUid: user.uid
       };
 
     
@@ -183,7 +180,7 @@ const addUserToRoom = async (collectionName, roomId, userDisplayName) => {
         // Send invitations using displayName
         friendInvites.forEach(async (friendDisplayName) => {
           await addDoc(collection(db, "invitations"), {
-            invitedUserDisplayName: friendDisplayName, // Assuming this matches exactly with users' displayNames
+            invitedUserDisplayName: friendDisplayName, 
             roomId: docRef.id,
             inviterUserId: user.displayName, // Correctly using 'user' here
             videoUrl: null, //include the video url from the original room

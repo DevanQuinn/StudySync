@@ -11,32 +11,87 @@ import RoomDetailsPage from '../routes/RoomDetailsPage';
 import { videoCategories } from '../constants/videoCategories';
 // Mock the Firestore directly within the jest.mock() call
 
+// jest.mock('firebase/firestore', () => ({
+//   getFirestore: jest.fn().mockReturnValue({
+//     collection: jest.fn().mockReturnThis(),
+//     doc: jest.fn().mockReturnThis(),
+//     get: jest.fn().mockResolvedValue({
+//       exists: true,
+//       data: jest.fn().mockReturnValue({ creator_id: 'test-user', videoCategory: 'Lofi', videoUrl: 'url' }),
+//     }),
+//     add: jest.fn().mockResolvedValue({
+//       get: jest.fn().mockResolvedValue({
+//         exists: true,
+//         data: () => ({ creator_id: 'test-user', videoCategory: 'Lofi', videoUrl: 'url' }),
+//       }),
+//     }),
+//     delete: jest.fn().mockResolvedValue({}),
+//     update: jest.fn().mockResolvedValue({}),
+//     where: jest.fn().mockReturnThis(),
+//     // Ensure get() after where() returns a mock QuerySnapshot
+//     get: jest.fn().mockResolvedValue({
+//       docs: [{
+//         data: () => ({ invitedUserDisplayName: 'friend1', roomId: 'mock-room-id', inviterUserId: 'test-user' }),
+//         exists: true,
+//       }],
+//     }),
+//   }),
+// }));
+
+// Mocking firebase/app for Auth related functionalities
+jest.mock('firebase/app', () => {
+  const actualFirebaseApp = jest.requireActual('firebase/app');
+  return {
+    ...actualFirebaseApp,
+    getAuth: jest.fn(() => ({
+      currentUser: {
+        uid: 'test-user-id',
+        displayName: 'Test User',
+      },
+    })),
+  };
+});
+
+// Mocking firebase/firestore for Firestore database interactions
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn().mockReturnValue({
     collection: jest.fn().mockReturnThis(),
     doc: jest.fn().mockReturnThis(),
-    get: jest.fn().mockResolvedValue({
-      exists: true,
-      data: jest.fn().mockReturnValue({ creator_id: 'test-user', videoCategory: 'Lofi', videoUrl: 'url' }),
+    get: jest.fn().mockImplementation(path => {
+      if (path === 'studyrooms') {
+        return Promise.resolve({
+          exists: true,
+          data: () => ({ creator_id: 'test-user', videoCategory: 'Lofi', videoUrl: 'url' })
+        });
+      }
+      return Promise.resolve({
+        docs: [
+          {
+            data: () => ({ invitedUserDisplayName: 'friend1', roomId: 'mock-room-id', inviterUserId: 'test-user' }),
+            exists: true,
+          }
+        ]
+      });
     }),
-    add: jest.fn().mockResolvedValue({
+    add: jest.fn().mockImplementation(data => Promise.resolve({
       get: jest.fn().mockResolvedValue({
         exists: true,
-        data: () => ({ creator_id: 'test-user', videoCategory: 'Lofi', videoUrl: 'url' }),
-      }),
-    }),
+        data: () => data,
+      })
+    })),
     delete: jest.fn().mockResolvedValue({}),
     update: jest.fn().mockResolvedValue({}),
     where: jest.fn().mockReturnThis(),
-    // Ensure get() after where() returns a mock QuerySnapshot
-    get: jest.fn().mockResolvedValue({
-      docs: [{
-        data: () => ({ invitedUserDisplayName: 'friend1', roomId: 'mock-room-id', inviterUserId: 'test-user' }),
-        exists: true,
-      }],
+    orderBy: jest.fn().mockReturnThis(),
+    onSnapshot: jest.fn((callback) => {
+      const docs = [{ id: 'doc1', data: () => ({ content: 'Mock data' }) }];
+      callback({ docs });
+      return { unsubscribe: jest.fn() };
     }),
   }),
 }));
+
+
 
 
 
@@ -110,3 +165,48 @@ test('deletes an invitation from the db successfully', async () => {
 
   expect(deletedDoc.exists).toBeFalsy();
 });
+
+
+// Testing that all chats are retrievable from the Firestore database
+test('retrieves all chat messages successfully from Firestore', async () => {
+  // Setup: Mock chat data
+  const mockChatData = [
+      { id: 'msg1', sender: 'user1', message: 'Hello!', timestamp: new Date() },
+      { id: 'msg2', sender: 'user2', message: 'Hi there!', timestamp: new Date() }
+  ];
+
+  // Mock the query and onSnapshot methods to simulate fetching data
+  const mockOnSnapshot = jest.fn((callback) => {
+      const snapshot = {
+          docs: mockChatData.map(data => ({
+              id: data.id,
+              data: () => data,
+              exists: true
+          }))
+      };
+      callback(snapshot);
+  });
+
+  // Mocking the collection and query calls
+  jest.requireMock('firebase/firestore').getFirestore.mockReturnValue({
+      collection: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      onSnapshot: mockOnSnapshot
+  });
+
+  // Action: Retrieve chat messages from the mocked Firestore
+  const roomId = 'mock-room-id';
+  const inviterUid = 'test-user';
+  const db = jest.requireMock('firebase/firestore').getFirestore();
+  let retrievedMessages = [];
+  db.collection('chats').where('roomId', '==', roomId).orderBy('timestamp').onSnapshot(snapshot => {
+      retrievedMessages = snapshot.docs.map(doc => doc.data());
+  });
+
+  // Assertion: Verify that all messages are retrieved and data matches
+  expect(retrievedMessages.length).toBe(mockChatData.length);
+  expect(retrievedMessages).toEqual(expect.arrayContaining(mockChatData));
+});
+
+

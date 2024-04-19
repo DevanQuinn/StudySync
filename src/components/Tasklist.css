@@ -5,59 +5,20 @@
         background: white(41, 33, 33);
         width: 20em;
         height: 15em;
-        margin: 1em auto;
+        margin: .5em auto;
         border-radius: 15px;
-        padding: 20px 10px;
+        padding: 5px 5px;
         border: 3px solid rgb(36, 110, 194);
         overflow-y: scroll;
         overflow-wrap: break-word;
       }
 
-      input[type='checkbox'] {
-        display: none;
+      .Collapsible {
+        border: 1px solid black;
       }
 
-      .lbl-toggle {
-        display: block;
-        color: black;
-      }
-
-      .lbl-toggle:hover {
-        color: #7C5A08
-      }
-
-      .collapsible-content {
-        max-height: 0px;
-        overflow: hidden;
-        transition: max-height .25s ease-in-out;
-      }
-
-      .toggle:checked + .lbl-toggle + .collapsible-content {
-        max-height: 100vh;
-      }
-
-      .toggle:checked + .lbl-toggle::before {
-        transform: rotate(90deg) translateX(-3px);
-      }
-      
-      .toggle:checked + .lbl-toggle {
-        border-bottom-right-radius: 0;
-        border-bottom-left-radius: 0;
-      }
-
-      .lbl-toggle::before {
-        content: ' ';
-        display: inline-block;
-      
-        border-top: 5px solid transparent;
-        border-bottom: 5px solid transparent;
-        border-left: 5px solid currentColor;
-      
-        vertical-align: middle;
-        margin-right: .7rem;
-        transform: translateY(-2px);
-      
-        transition: transform .2s ease-out;
+      .Collapsible__trigger {
+        cursor: pointer;
       }
 
       .task {
@@ -82,7 +43,7 @@
       }
 
       .header {
-        margin: 0.5em;
+        margin: 0.25em;
         font-size: 2em;
         text-align: center;
       }

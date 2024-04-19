@@ -5,18 +5,27 @@ import RoomPomodoro from '../components/RoomPomodoro.jsx';
 import AddIcon from '@mui/icons-material/Add';
 import { Fab, Box, Slide } from '@mui/material';
 import Menu from '@mui/material/Menu';
+import { Link } from 'react-router-dom';
 import MenuItem from '@mui/material/MenuItem';
 import {
 	query,
 	where,
 	getFirestore,
 	collection,
-	getDocs,
+	getDoc,
 	setDoc,
 	doc,
 	addDoc,
 	deleteDoc,
 } from 'firebase/firestore';
+import {
+	TableContainer,
+	Table,
+	TableHead,
+	TableRow,
+	TableCell,
+	Paper,
+} from '@mui/material';
 import app from '../firebase.js';
 import useUser from '../hooks/useUser';
 import '../components/tasklistlist.css';
@@ -34,6 +43,7 @@ function Dashboard() {
 	const defaultPreferences = {color:"#FFFFFF"};
 	//should load preferences from user doc and reflect them
 	const [preferences, setPreferences] = useState(defaultPreferences);
+	const [favorites, setFavorites] = useState([]);
 	const [anchorEl, setAnchorEl] = useState(null);
   	const open = Boolean(anchorEl);
   	const handleClick = (event) => {   
@@ -51,14 +61,26 @@ function Dashboard() {
     	setAnchorEl(null);
   	};
 	const db = getFirestore(app)
-	const user = useUser(false);
+	const user = useUser();
 
+	const fetchFav = async () => {
+		const docRef = doc(db, "users", user.displayName);
+		const q = await getDoc(docRef);
+		const data = q.data();
+		const favArr = data.favorites;
+		setFavorites(favArr);
+	};
+	
 	const updatePreferences = prefObj => {
 		setPreferences(prefObj);
 	};
 
 	useEffect(() => {
 		//load user preferences into local state
+	}, [user])
+	
+	useEffect(() => {
+		fetchFav();
 	}, [user])
 
 	useEffect(() => {
@@ -70,6 +92,51 @@ function Dashboard() {
 
 	return (
 		<div>
+		<Box
+		sx={{
+			position: 'fixed',
+			top: 60, 
+			left: 10
+		}}>
+			<TableContainer
+				component={Paper}
+				sx={{
+					mb: 5,
+					maxWidth: 400,
+					marginLeft: 'auto',
+					marginRight: 'auto',
+					mt: 2,
+					borderTop: '1px solid lightgrey',
+				}}
+			>
+				<Table sx={{ minWidth: 200 }}>
+					<TableHead>
+							<TableCell
+								sx={{
+									fontWeight: 'bold',
+									textAlign: 'center',
+									borderBottom: '2px solid lightgrey',
+									borderRight: '1px solid lightgrey',
+								}}
+							>
+								Favorites
+							</TableCell>
+				{favorites.map(favorite => (
+					<TableRow
+						component={Link} to ={"/" + favorite.toLowerCase()}
+						sx={{
+							borderBottom: '1px solid lightgrey',
+							borderRight: '1px solid lightgrey',
+							minWidth: 200,
+						}}
+							>
+							{favorite}
+						</TableRow>
+				))}
+					</TableHead>
+				</Table>
+			</TableContainer>
+			</Box>
 			<Fab color="primary" aria-label="add"    id="basic-button"
 				aria-controls={open ? 'basic-menu' : undefined}
 				aria-haspopup="true"
