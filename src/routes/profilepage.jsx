@@ -28,49 +28,49 @@ import {
 	TableCell,
 	TableBody,
 	Paper,
-  Card,
+	Card,
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 export default function ProfilePage() {
-  const [data, setData] = useState({aboutMe: '', studyGoals: ''});
-  const [image, setImage] = useState();
-  const { username } = useParams();
-  const storage = getStorage(app);
-  const db = getFirestore(app);
-  
-  const fetchData = async () => {
-    const docRef = doc(db, "users", username);
-    const q = await getDoc(docRef);
-    const data = q.data();
-    const pathReference = ref(storage, `profile-pictures/${data.pfpID}`);
-    const url = await getDownloadURL(pathReference);
-    setData(data);
-    setImage(url);
-  };
+	const [data, setData] = useState({ aboutMe: '', studyGoals: '' });
+	const [image, setImage] = useState();
+	const { username } = useParams();
+	const storage = getStorage(app);
+	const db = getFirestore(app);
 
-  useEffect(() => {
-      fetchData();
-    }, [username]);
+	const fetchData = async () => {
+		const docRef = doc(db, "users", username);
+		const q = await getDoc(docRef);
+		const data = q.data();
+		const pathReference = ref(storage, `profile-pictures/${data.pfpID}`);
+		const url = await getDownloadURL(pathReference);
+		setData(data);
+		setImage(url);
+	};
+
+	useEffect(() => {
+		fetchData();
+	}, [username]);
 
 
-  return (
-      <Container component="main" maxWidth="xs">
-      <Box>
-        <Card>
-          <CardMedia
-            component="img"
-            height="140"
-            src={image}
-          />
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
-              {username}
-            </Typography>
-          </CardContent>
-          </Card>
-      </Box>
-      <TableContainer
+	return (
+		<Container component="main" maxWidth="xs" sx={{ mt: 10 }}>
+			<Box>
+				<Card>
+					<CardMedia
+						component="img"
+						height="200"
+						src={image}
+					/>
+					<CardContent>
+						<Typography gutterBottom variant="h5" component="div">
+							{username}
+						</Typography>
+					</CardContent>
+				</Card>
+			</Box>
+			<TableContainer
 				component={Paper}
 				sx={{
 					mb: 5,
@@ -83,29 +83,29 @@ export default function ProfilePage() {
 			>
 				<Table sx={{ minWidth: 400 }}>
 					<TableHead>
-							<TableCell
-								sx={{
-									fontWeight: 'bold',
-									textAlign: 'center',
-									borderBottom: '2px solid lightgrey',
-									borderRight: '1px solid lightgrey',
-								}}
-							>
-								About Me
-							</TableCell>
-              <TableRow
-              	sx={{
-									borderBottom: '1px solid lightgrey',
-									borderRight: '1px solid lightgrey',
-                  minWidth: 500
-								}}
-							>
-								{data.aboutMe}
-							</TableRow>
+						<TableCell
+							sx={{
+								fontWeight: 'bold',
+								textAlign: 'center',
+								borderBottom: '2px solid lightgrey',
+								borderRight: '1px solid lightgrey',
+							}}
+						>
+							About Me
+						</TableCell>
+						<TableRow
+							sx={{
+								borderBottom: '1px solid lightgrey',
+								borderRight: '1px solid lightgrey',
+								minWidth: 500
+							}}
+						>
+							{data.aboutMe}
+						</TableRow>
 					</TableHead>
 				</Table>
 			</TableContainer>
-      <TableContainer
+			<TableContainer
 				component={Paper}
 				sx={{
 					mb: 5,
@@ -118,29 +118,29 @@ export default function ProfilePage() {
 			>
 				<Table sx={{ minWidth: 400 }}>
 					<TableHead>
-							<TableCell
-								sx={{
-									fontWeight: 'bold',
-									textAlign: 'center',
-									borderBottom: '2px solid lightgrey',
-									borderRight: '1px solid lightgrey',
-								}}
-							>
-                Study Goals
-							</TableCell>
-              <TableRow
-              	sx={{
-									borderBottom: '1px solid lightgrey',
-									borderRight: '1px solid lightgrey',
-                  minWidth: 500
-								}}
-							>
-								{data.studyGoals}
-							</TableRow>
+						<TableCell
+							sx={{
+								fontWeight: 'bold',
+								textAlign: 'center',
+								borderBottom: '2px solid lightgrey',
+								borderRight: '1px solid lightgrey',
+							}}
+						>
+							Study Goals
+						</TableCell>
+						<TableRow
+							sx={{
+								borderBottom: '1px solid lightgrey',
+								borderRight: '1px solid lightgrey',
+								minWidth: 500
+							}}
+						>
+							{data.studyGoals}
+						</TableRow>
 					</TableHead>
 				</Table>
 			</TableContainer>
-      <Copyright sx={{ mt: 8, mb: 4 }} />
-      </Container>
-  );
+			<Copyright sx={{ mt: 8, mb: 4 }} />
+		</Container>
+	);
 }

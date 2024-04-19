@@ -165,7 +165,7 @@ export default function Pomodoro() {
   }, [timer, breakTime, startTime, count]);
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs" sx={{ mt: 10 }}>
       <CssBaseline />
       <Box
         component={"form"}
@@ -218,7 +218,7 @@ export default function Pomodoro() {
         <Button
           fullWidth
           variant="contained"
-          sx={{ mt: 3, mb: 2 }}
+          sx={{ mt: 3, mb: 6 }}
           type='submit'
         >
           Set
