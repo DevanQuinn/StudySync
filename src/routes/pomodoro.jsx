@@ -14,7 +14,7 @@ import app from '../firebase';
 
 
 export default function Pomodoro() {
-  const [timer] = useState(create('3'));
+  const [timer] = useState(create('10:00'));
   const [time, setTime] = useState(timer.getFt());
   const [breakTime, setBreakTime] = useState(timer.getFt());
   const [startTime, setStartTime] = useState(timer.getFt());

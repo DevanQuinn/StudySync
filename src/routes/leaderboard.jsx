@@ -112,12 +112,14 @@ const Leaderboard = () => {
         userData.pomodoro = {}
         userData.pomodoro.countEach = 0
         userData.pomodoro.totalDurationEach = 0
+        userData.pomodoro.longestSessionDuration = 0
       }
       if (!userData.studyRoom) {
         userData.studyRoom = {}
         userData.studyRoom.countEach = 0
         userData.studyRoom.totalDurationEach = 0
         userData.studyRoom.totalChatCount = 0
+        userData.studyRoom.engagement = 0;
       }
 
       const userStats = {
@@ -126,7 +128,12 @@ const Leaderboard = () => {
         flashcardTime: formatDuration(userData.flashcard.totalDurationEach),
         pomodoroTime: formatDuration(userData.pomodoro.totalDurationEach),
         studyRoomTime: formatDuration(userData.studyRoom.totalDurationEach),
-        avgTimePerCard: formatDuration(userData.flashcard.totalDurationEach / (userData.flashcard.totalNumCards + 1))
+        avgTimePerCard: formatDuration(userData.flashcard.totalDurationEach / (userData.flashcard.totalNumCards + 1)),
+        numCardsStudied: userData.flashcard.totalNumCards,
+        numPomodoroSessions: userData.pomodoro.countEach,
+        longestSessionDuration: formatDuration(userData.pomodoro.longestSessionDuration),
+        totalRoomTime: formatDuration(userData.studyRoom.totalDurationEach),
+        engagement: userData.studyRoom.totalChatCount
       };
 
       // Push the created object into the jsonArray
@@ -164,15 +171,16 @@ const Leaderboard = () => {
 
     // Helper function to sum up durations and count occurrences for each username
     const calcUserStatsEach = (map, mapType) => {
-      console.log("mapType: ", mapType)
-      console.log("map: ", map)
+      console.log("mapType: ", mapType);
+      console.log("map: ", map);
 
-      Object.keys(map).forEach(username => {
+      Object.keys(map).forEach((username) => {
         const userData = map[username];
-        console.log(`userData for user ${username}: `, userData)
+        console.log(`userData for user ${username}: `, userData);
 
         const totalDurationEach = userData.reduce((acc, curr) => acc + curr.durationMs, 0);
         const countEach = userData.length;
+        const longestSessionDuration = Math.max(...userData.map((session) => session.durationMs));
 
         if (!statisticsMap[username]) {
           statisticsMap[username] = {};
@@ -180,42 +188,43 @@ const Leaderboard = () => {
         // Set totalDuration and totalCount for each map type
         statisticsMap[username][mapType] = {
           totalDurationEach,
-          countEach
+          countEach,
+          longestSessionDuration
         };
 
-        if (mapType === 'flashcard') {
+        if (mapType === "flashcard") {
           statisticsMap[username][mapType].totalNumCards = userData.reduce((acc, curr) => acc + curr.numCardsStudied, 0);
         }
 
-        if (mapType === 'studyRoom') {
-          statisticsMap[username][mapType].totalChatCount = userData.reduce((acc, curr) => acc + curr.numCardsStudied, 0);
+        if (mapType === "studyRoom") {
+          statisticsMap[username][mapType].totalChatCount = userData.reduce((acc, curr) => acc + curr.chatCount, 0);
         }
       });
     };
 
     // Calculate stats for each type of map
-    calcUserStatsEach(usersFlashcardTimesMap, 'flashcard');
-    calcUserStatsEach(usersPomodoroTimesMap, 'pomodoro');
-    calcUserStatsEach(usersStudyRoomTimesMap, 'studyRoom');
+    calcUserStatsEach(usersFlashcardTimesMap, "flashcard");
+    calcUserStatsEach(usersPomodoroTimesMap, "pomodoro");
+    calcUserStatsEach(usersStudyRoomTimesMap, "studyRoom");
 
     // Calculate totalDuration and totalCount across all maps for each user
-    Object.keys(statisticsMap).forEach(username => {
+    Object.keys(statisticsMap).forEach((username) => {
       const userData = statisticsMap[username];
       userData.totalDuration = Object.values(userData).reduce((acc, curr) => {
-        if (typeof curr === 'object' && curr.totalDurationEach) {
+        if (typeof curr === "object" && curr.totalDurationEach) {
           return acc + curr.totalDurationEach;
         }
         return acc;
       }, 0);
       userData.totalCount = Object.values(userData).reduce((acc, curr) => {
-        if (typeof curr === 'object' && curr.countEach) {
+        if (typeof curr === "object" && curr.countEach) {
           return acc + curr.countEach;
         }
         return acc;
       }, 0);
     });
 
-    return statisticsMap
+    return statisticsMap;
   };
 
   const formatDuration = (milliseconds) => {
@@ -383,7 +392,7 @@ const Leaderboard = () => {
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{user.username}</TableCell>
-                  <TableCell align="center">{user.numStudySessions}</TableCell>
+                  <TableCell align="center">{user.numPomodoroSessions}</TableCell>
                   <TableCell align="center">{user.longestSessionDuration}</TableCell>
                 </TableRow>
               ))}
@@ -407,7 +416,7 @@ const Leaderboard = () => {
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{user.username}</TableCell>
-                  <TableCell align="center">{user.timeStudied}</TableCell>
+                  <TableCell align="center">{user.totalRoomTime}</TableCell>
                   <TableCell align="center">{user.engagement}</TableCell>
                 </TableRow>
               ))}
