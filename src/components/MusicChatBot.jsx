@@ -37,6 +37,8 @@ const MusicChatBot = () => {
           color: #fff;
           width: 95px;
           height: 95px;
+          margin-bottom: 60px;
+          margin-right: -10px;
           border-radius: 50%;
           cursor: pointer;
           z-index: 9999;
