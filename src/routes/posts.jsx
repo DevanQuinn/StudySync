@@ -70,17 +70,20 @@ const Posts = () => {
 				const userData = doc.data();
 				const username = userData.username || 'unknown';
 
-				console.log("Username" + username);
 				if (!dataMap[username]) {
 					dataMap[username] = [];
 				}
-				dataMap[username].push({
-					durationMs: userData.durationMs || 0
-				});
+				if (username === user.displayName.toLowerCase()) {
+					dataMap[username].push({
+						durationMs: Math.round(userData.durationMs / 1000) || 0
+					});
+				}
 			});
 		} catch (error) {
 			console.error("Error fetching data:", error);
 		}
+
+		console.log("made data map: ", dataMap)
 		return dataMap;
 	};
 
@@ -117,6 +120,11 @@ const Posts = () => {
 		];
 		console.log("Calculated times for chart:", times);
 
+		const totalTime = times.reduce((acc, curr) => acc + curr, 0);
+
+		// Calculate percentages
+		const percentages = times.map(time => ((time / totalTime) * 100).toFixed(0));
+
 		// Check if any of the times are NaN (which indicates missing data)
 		if (times.some(isNaN)) {
 			console.error("Some time data is missing.");
@@ -126,9 +134,10 @@ const Posts = () => {
 		setChartData({
 			labels,
 			datasets: [{
-				data: times,
+				data: percentages,
 				backgroundColor: ['#FFD8D8', '#D8FFD8', '#D8D8FF'], // Pastel colors
-				hoverBackgroundColor: ['#FFB8B8', '#B8FFB8', '#B8B8FF']
+				hoverBackgroundColor: ['#FFB8B8', '#B8FFB8', '#B8B8FF'],
+				percent: true, // Set to true to display percentages
 			}]
 		});
 	};
@@ -249,101 +258,15 @@ const Posts = () => {
 
 			<TreeDisplayBanner />
 
-			<Typography variant='h4' sx={{ mb: 2, mt: 6 }}>
-				User's Flashcard Statistics
-			</Typography>
-
-			<TableContainer
-				component={Paper}
-				sx={{
-					mb: 5,
-					maxWidth: 400,
-					marginLeft: 'auto',
-					marginRight: 'auto',
-					mt: 2,
-					borderTop: '1px solid lightgrey',
-				}}
-			>
-				<Table sx={{ maxWidth: 400 }}>
-					<TableHead>
-						<TableRow>
-							<TableCell
-								sx={{
-									fontWeight: 'bold',
-									textAlign: 'center',
-									borderBottom: '2px solid lightgrey',
-									borderRight: '1px solid lightgrey',
-								}}
-							>
-								Statistic
-							</TableCell>
-							<TableCell
-								sx={{
-									fontWeight: 'bold',
-									textAlign: 'center',
-									borderBottom: '2px solid lightgrey',
-								}}
-							>
-								Value
-							</TableCell>
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						<TableRow>
-							<TableCell
-								sx={{
-									borderBottom: '1px solid lightgrey',
-									borderRight: '1px solid lightgrey',
-								}}
-							>
-								Total flashcards studied
-							</TableCell>
-							<TableCell sx={{ borderBottom: '1px solid lightgrey' }}>
-								{totalFlashcardsStudied} flashcards
-							</TableCell>
-						</TableRow>
-						<TableRow>
-							<TableCell
-								sx={{
-									borderBottom: '1px solid lightgrey',
-									borderRight: '1px solid lightgrey',
-								}}
-							>
-								Total time studied
-							</TableCell>
-							<TableCell sx={{ borderBottom: '1px solid lightgrey' }}>
-								{totalTimeStudied}
-							</TableCell>
-						</TableRow>
-						<TableRow>
-							<TableCell
-								sx={{
-									borderBottom: '1px solid lightgrey',
-									borderRight: '1px solid lightgrey',
-								}}
-							>
-								Average time spent per card
-							</TableCell>
-							<TableCell sx={{ borderBottom: '1px solid lightgrey' }}>
-								{avgTimeStudied}
-							</TableCell>
-						</TableRow>
-					</TableBody>
-				</Table>
-			</TableContainer>
-
 			<Box sx={{ width: '80%', maxWidth: 400, margin: 'auto', paddingBottom: '20px' }}>
-				<Typography variant='h6' align='center' gutterBottom>
-					Time Studied
+				<Typography variant='h4' sx={{ mb: 2, mt: 6 }}>
+					Time Studied by Percentage
 				</Typography>
+
 				{chartData.labels && chartData.datasets && (
 					<Pie data={chartData} />
 				)}
 			</Box>
-
-
-
-
 
 			<Typography variant='h4' sx={{ mb: 2 }}>
 				Notes
