@@ -27,7 +27,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Leaderboard = () => {
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState({ key: 'studyTime', direction: 'desc' });
   const [boardData, setBoardData] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('General');
   const [isInitialSortDone, setIsInitialSortDone] = useState(false);
@@ -114,7 +114,7 @@ const Leaderboard = () => {
     }
 
     if (selectedCategory === "Pomodoro") {
-      handleSortCount("longestSessionDuration");
+      handleSortTime("longestSessionDuration");
     }
 
     if (selectedCategory === "StudyRoom") {
@@ -482,7 +482,7 @@ const Leaderboard = () => {
                   }}
                 >Username</TableCell>
                 <SortableHeader
-                  label="Longest Duration of Pomodoro Session"
+                  label="Longest Duration of Pomodoro Sessions"
                   sortKey="longestSessionDuration"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
