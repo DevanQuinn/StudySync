@@ -30,7 +30,7 @@ const EditProfile = () => {
     const [imageUrl, setImageUrl] = useState(null);
     const favoritesOptions = ['Leaderboard', 'StudyRoom', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards', 'Posts'];
     const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
-
+    const [profileVisibility, setProfileVisibility] = useState(false);
 
     // useEffect(() => {
     //     const storedVisibility = localStorage.getItem('profileVisibility');
