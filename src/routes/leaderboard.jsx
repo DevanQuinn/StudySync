@@ -71,6 +71,26 @@ const Leaderboard = () => {
     setBoardData(sortedData);
   };
 
+  const handleSortCount = (key) => {
+    let direction = 'desc'; // Start with descending order
+    if (sortConfig.key === key && sortConfig.direction === 'desc') {
+      direction = 'asc'; // Toggle to ascending order if already descending
+    }
+    console.log('Sorting key:', key);
+    console.log('Sorting direction:', direction);
+    const sortedData = [...boardData].sort((a, b) => {
+      const valueA = a[key];
+      const valueB = b[key];
+      if (direction === 'asc') {
+        return valueA - valueB;
+      } else {
+        return valueB - valueA;
+      }
+    });
+    setSortConfig({ key, direction });
+    setBoardData(sortedData);
+  };
+
   useEffect(() => {
     fetchStats();
   }, []);
@@ -355,12 +375,18 @@ const Leaderboard = () => {
                 <TableCell>Username</TableCell>
                 <SortableHeader
                   label="Avg. Time per Card"
-                  sortKey="avgCardTime"
+                  sortKey="avgTimePerCard"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
                   onClick={handleSortTime}
                 />
-                <TableCell>Num Cards Studied</TableCell>
+                <SortableHeader
+                  label="Num Cards Studied"
+                  sortKey="numCardsStudied" // Use the appropriate key from your data
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortCount} // Use the new sorting handler
+                />
               </TableRow>
             </TableHead>
             <TableBody>
@@ -374,7 +400,6 @@ const Leaderboard = () => {
               ))}
             </TableBody>
           </Table>
-
         }
 
         {selectedCategory === 'Pomodoro' &&
@@ -383,8 +408,20 @@ const Leaderboard = () => {
               <TableRow>
                 <TableCell>Rank</TableCell>
                 <TableCell>Username</TableCell>
-                <TableCell>Num Study Sessions</TableCell>
-                <TableCell>Longest Duration of Session</TableCell>
+                <SortableHeader
+                  label="Num Study Sessions"
+                  sortKey="numPomodoroSessions"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortCount}
+                />
+                <SortableHeader
+                  label="Longest Duration of Session"
+                  sortKey="longestSessionDuration"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortTime}
+                />
               </TableRow>
             </TableHead>
             <TableBody>
@@ -398,17 +435,28 @@ const Leaderboard = () => {
               ))}
             </TableBody>
           </Table>
-
-
         }
+
         {selectedCategory === 'StudyRoom' &&
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Rank</TableCell>
                 <TableCell>Username</TableCell>
-                <TableCell>Time Studied</TableCell>
-                <TableCell>Engagement in Study Room Chat</TableCell>
+                <SortableHeader
+                  label="Time Studied"
+                  sortKey="totalRoomTime"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortTime}
+                />
+                <SortableHeader
+                  label="Engagement in Chat"
+                  sortKey="engagement"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortCount}
+                />
               </TableRow>
             </TableHead>
             <TableBody>
@@ -423,6 +471,7 @@ const Leaderboard = () => {
             </TableBody>
           </Table>
         }
+
 
       </TableContainer>
     </Container>
