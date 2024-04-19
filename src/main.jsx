@@ -24,6 +24,7 @@ import Posts from './routes/posts.jsx';
 import UserPosts from './routes/userposts.jsx';
 import Note from './routes/note.jsx';
 import Chatbot from './components/ChatBot.jsx';
+import Quiz from './routes/quiz.jsx';
 
 const theme = createTheme({
 	palette: {
@@ -110,6 +111,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 						<>
 							<Navbar />
 							<Flashcards />
+						</>
+					}
+				/>
+				<Route
+					path="flashcards/generate-quiz"
+					element={
+						<>
+							<Quiz />
 						</>
 					}
 				/>
