@@ -219,12 +219,12 @@ const Leaderboard = () => {
 
     // Helper function to sum up durations and count occurrences for each username
     const calcUserStatsEach = (map, mapType) => {
-      console.log("mapType: ", mapType);
-      console.log("map: ", map);
+      //console.log("mapType: ", mapType);
+      //console.log("map: ", map);
 
       Object.keys(map).forEach((username) => {
         const userData = map[username];
-        console.log(`userData for user ${username}: `, userData);
+        //console.log(`userData for user ${username}: `, userData);
 
         const totalDurationEach = userData.reduce((acc, curr) => acc + curr.durationMs, 0);
         const countEach = userData.length;

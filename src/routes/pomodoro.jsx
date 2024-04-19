@@ -38,6 +38,7 @@ export default function Pomodoro() {
   const [treeSelection, updateTreeSelection] = useState(0);
   const [disableStartButton, updateDisableStartButton] = useState(false);
   const [totalStudyTime, setTotalStudyTime] = useState(timer.currentTime);
+  const [finishedLoad, setFinishedLoad] = useState(false);
   const user = useUser(false);
   const db = getFirestore(app);
   const auth = getAuth(app);
@@ -159,9 +160,10 @@ export default function Pomodoro() {
       }
     });
 
-    if (count % 2 === 1) {
-      uploadData()
+    if (count % 2 === 1 && finishedLoad) {
+      uploadData();
     }
+    setFinishedLoad(true);
   }, [timer, breakTime, startTime, count]);
 
   return (
