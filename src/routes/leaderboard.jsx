@@ -180,7 +180,7 @@ const Leaderboard = () => {
         numCardsStudied: userData.flashcard.totalNumCards,
         numPomodoroSessions: userData.pomodoro.countEach,
         longestSessionDuration: formatDuration(userData.pomodoro.longestSessionDuration),
-        totalRoomTime: formatDuration(userData.studyRoom.totalDurationEach),
+        avgRoomTime: formatDuration(userData.studyRoom.totalDurationEach / (userData.studyRoom.countEach + 1)),
         engagement: userData.studyRoom.totalChatCount
       };
 
@@ -435,18 +435,18 @@ const Leaderboard = () => {
                   }}
                 >Username</TableCell>
                 <SortableHeader
-                  label="Avgerage Study Time Per Card"
-                  sortKey="avgTimePerCard"
-                  currentSortKey={sortConfig.key}
-                  currentSortDirection={sortConfig.direction}
-                  onClick={handleSortTime}
-                />
-                <SortableHeader
                   label="Total Number of Cards Studied"
                   sortKey="numCardsStudied" // Use the appropriate key from your data
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
                   onClick={handleSortCount} // Use the new sorting handler
+                />
+                <SortableHeader
+                  label="Avgerage Study Time Per Card"
+                  sortKey="avgTimePerCard"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortTime}
                 />
               </TableRow>
             </TableHead>
@@ -455,8 +455,8 @@ const Leaderboard = () => {
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{user.username}</TableCell>
-                  <TableCell align="center">{user.avgTimePerCard}</TableCell>
                   <TableCell align="center">{user.numCardsStudied}</TableCell>
+                  <TableCell align="center">{user.avgTimePerCard}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -482,18 +482,18 @@ const Leaderboard = () => {
                   }}
                 >Username</TableCell>
                 <SortableHeader
-                  label="Total Number of Pomodoro Sessions"
-                  sortKey="numPomodoroSessions"
-                  currentSortKey={sortConfig.key}
-                  currentSortDirection={sortConfig.direction}
-                  onClick={handleSortCount}
-                />
-                <SortableHeader
                   label="Longest Duration of Pomodoro Session"
                   sortKey="longestSessionDuration"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
                   onClick={handleSortTime}
+                />
+                <SortableHeader
+                  label="Total Number of Pomodoro Sessions"
+                  sortKey="numPomodoroSessions"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortCount}
                 />
               </TableRow>
             </TableHead>
@@ -502,8 +502,8 @@ const Leaderboard = () => {
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{user.username}</TableCell>
-                  <TableCell align="center">{user.numPomodoroSessions}</TableCell>
                   <TableCell align="center">{user.longestSessionDuration}</TableCell>
+                  <TableCell align="center">{user.numPomodoroSessions}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -529,18 +529,18 @@ const Leaderboard = () => {
                   }}
                 >Username</TableCell>
                 <SortableHeader
-                  label="Total Time Spent in Study Rooms"
-                  sortKey="totalRoomTime"
-                  currentSortKey={sortConfig.key}
-                  currentSortDirection={sortConfig.direction}
-                  onClick={handleSortTime}
-                />
-                <SortableHeader
                   label="Total Engagement in Study Room Chats"
                   sortKey="engagement"
                   currentSortKey={sortConfig.key}
                   currentSortDirection={sortConfig.direction}
                   onClick={handleSortCount}
+                />
+                <SortableHeader
+                  label="Average Time Spent in Study Rooms"
+                  sortKey="avgRoomTime"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortTime}
                 />
               </TableRow>
             </TableHead>
@@ -549,8 +549,8 @@ const Leaderboard = () => {
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{user.username}</TableCell>
-                  <TableCell align="center">{user.totalRoomTime}</TableCell>
                   <TableCell align="center">{user.engagement}</TableCell>
+                  <TableCell align="center">{user.avgRoomTime}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
