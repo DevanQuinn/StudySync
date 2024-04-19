@@ -175,7 +175,7 @@ function TasklistsPage() {
 				aria-haspopup="true"
 				aria-expanded={open ? 'true' : undefined}
 				onClick={handleClick} 
-				sx={{ position: 'fixed', top: 100, right:  100}}>
+				sx={{ position: 'fixed', bottom: 50, left:  50}}>
 				<AddIcon />
 			</Fab>
 			<Menu
@@ -190,7 +190,7 @@ function TasklistsPage() {
 				<MenuItem onClick={handleClosePomo}>Pomodoro Timer</MenuItem>
       		</Menu>
 			<Slide direction="up" in={showPomodoro} mountOnEnter unmountOnExit>
-       		 	<Box sx={{ position: 'fixed', bottom: 60, right: 0, zIndex: 1100 }}><RoomPomodoro /></Box>
+       		 	<Box sx={{ position: 'fixed', bottom: 0, right: 0, zIndex: 1100 }}><RoomPomodoro /></Box>
       		</Slide>
 			<DashboardConfigurator initialPreference={preferences} preferenceCallback={updatePreferences}/>
 			<Slide direction="up" in={showTask} mountOnEnter unmountOnExit>
