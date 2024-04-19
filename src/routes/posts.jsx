@@ -243,14 +243,14 @@ const Posts = () => {
 		<Container component='main' maxWidth='lg' sx={{ mt: 14, mb: 10 }}>
 			<CssBaseline />
 
-			<Typography variant='h4' sx={{ mb : 2}}>
+			<Typography variant='h4' sx={{ mb: 2 }}>
 				User's Tree Garden
 			</Typography>
 
-			<TreeDisplayBanner/>
+			<TreeDisplayBanner />
 
-			<Typography variant='h4' sx={{ mb: 2 }}>
-				User's Study Statistics
+			<Typography variant='h4' sx={{ mb: 2, mt: 6 }}>
+				User's Flashcard Statistics
 			</Typography>
 
 			<TableContainer

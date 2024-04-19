@@ -14,19 +14,11 @@ import {
   Button,
 } from '@mui/material';
 import {
-  collection,
   getDocs,
   getFirestore,
   collectionGroup,
-  orderBy,
-  query,
-  where,
-  addDoc,
-  serverTimestamp,
 } from 'firebase/firestore';
 import app from '../firebase';
-import { Pie } from 'react-chartjs-2';
-import useUser from '../hooks/useUser';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -35,8 +27,10 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Leaderboard = () => {
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-  const [boardData, setBoardData] = useState([])
+  const [sortConfig, setSortConfig] = useState({ key: 'studyTime', direction: 'desc' });
+  const [boardData, setBoardData] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('General');
+  const [isInitialSortDone, setIsInitialSortDone] = useState(false);
 
   const db = getFirestore(app);
 
@@ -58,7 +52,7 @@ const Leaderboard = () => {
   };
 
   // Function to handle sorting
-  const handleSort = (key) => {
+  const handleSortTime = (key) => {
     let direction = 'desc'; // Start with descending order
     if (sortConfig.key === key && sortConfig.direction === 'desc') {
       direction = 'asc'; // Toggle to ascending order if already descending
@@ -78,9 +72,56 @@ const Leaderboard = () => {
     setBoardData(sortedData);
   };
 
+  const handleSortCount = (key) => {
+    let direction = 'desc'; // Start with descending order
+    if (sortConfig.key === key && sortConfig.direction === 'desc') {
+      direction = 'asc'; // Toggle to ascending order if already descending
+    }
+    console.log('Sorting key:', key);
+    console.log('Sorting direction:', direction);
+    const sortedData = [...boardData].sort((a, b) => {
+      const valueA = a[key];
+      const valueB = b[key];
+      if (direction === 'asc') {
+        return valueA - valueB;
+      } else {
+        return valueB - valueA;
+      }
+    });
+    setSortConfig({ key, direction });
+    setBoardData(sortedData);
+  };
+
   useEffect(() => {
     fetchStats();
   }, []);
+
+  useEffect(() => {
+    if (!isInitialSortDone && boardData.length > 0) {
+      // Sort the boardData by "Total Time Studied" in descending order
+      handleSortTime("studyTime");
+      setIsInitialSortDone(true); // Set the flag to true after the initial sorting
+    }
+  }, [boardData, isInitialSortDone]);
+
+  useEffect(() => {
+    if (selectedCategory === "General") {
+      handleSortTime("studyTime");
+    }
+
+    if (selectedCategory === "Flashcards") {
+      handleSortCount("numCardsStudied");
+    }
+
+    if (selectedCategory === "Pomodoro") {
+      handleSortTime("longestSessionDuration");
+    }
+
+    if (selectedCategory === "StudyRoom") {
+      handleSortCount("engagement");
+    }
+
+  }, [selectedCategory]);
 
   const fetchStats = async () => {
     const usersFlashcardTimesMap = await getDataMap('flashcardsStudied');
@@ -113,16 +154,20 @@ const Leaderboard = () => {
         userData.flashcard = {}
         userData.flashcard.countEach = 0
         userData.flashcard.totalDurationEach = 0
+        userData.flashcard.totalNumCards = 0
       }
       if (!userData.pomodoro) {
         userData.pomodoro = {}
         userData.pomodoro.countEach = 0
         userData.pomodoro.totalDurationEach = 0
+        userData.pomodoro.longestSessionDuration = 0
       }
       if (!userData.studyRoom) {
         userData.studyRoom = {}
         userData.studyRoom.countEach = 0
         userData.studyRoom.totalDurationEach = 0
+        userData.studyRoom.totalChatCount = 0
+        userData.studyRoom.engagement = 0;
       }
 
       const userStats = {
@@ -131,6 +176,12 @@ const Leaderboard = () => {
         flashcardTime: formatDuration(userData.flashcard.totalDurationEach),
         pomodoroTime: formatDuration(userData.pomodoro.totalDurationEach),
         studyRoomTime: formatDuration(userData.studyRoom.totalDurationEach),
+        avgTimePerCard: formatDuration(userData.flashcard.totalDurationEach / (userData.flashcard.totalNumCards + 1)),
+        numCardsStudied: userData.flashcard.totalNumCards,
+        numPomodoroSessions: userData.pomodoro.countEach,
+        longestSessionDuration: formatDuration(userData.pomodoro.longestSessionDuration),
+        avgRoomTime: formatDuration(userData.studyRoom.totalDurationEach / (userData.studyRoom.countEach + 1)),
+        engagement: userData.studyRoom.totalChatCount
       };
 
       // Push the created object into the jsonArray
@@ -168,44 +219,60 @@ const Leaderboard = () => {
 
     // Helper function to sum up durations and count occurrences for each username
     const calcUserStatsEach = (map, mapType) => {
-      Object.keys(map).forEach(username => {
+      console.log("mapType: ", mapType);
+      console.log("map: ", map);
+
+      Object.keys(map).forEach((username) => {
         const userData = map[username];
+        console.log(`userData for user ${username}: `, userData);
+
         const totalDurationEach = userData.reduce((acc, curr) => acc + curr.durationMs, 0);
         const countEach = userData.length;
+        const longestSessionDuration = Math.max(...userData.map((session) => session.durationMs));
+
         if (!statisticsMap[username]) {
           statisticsMap[username] = {};
         }
         // Set totalDuration and totalCount for each map type
         statisticsMap[username][mapType] = {
           totalDurationEach,
-          countEach
+          countEach,
+          longestSessionDuration
         };
+
+        if (mapType === "flashcard") {
+          statisticsMap[username][mapType].totalNumCards = userData.reduce((acc, curr) => acc + curr.numCardsStudied, 0);
+        }
+
+        if (mapType === "studyRoom") {
+          statisticsMap[username][mapType].totalChatCount = userData.reduce((acc, curr) => acc + curr.chatCount, 0);
+        }
       });
     };
 
     // Calculate stats for each type of map
-    calcUserStatsEach(usersFlashcardTimesMap, 'flashcard');
-    calcUserStatsEach(usersPomodoroTimesMap, 'pomodoro');
-    calcUserStatsEach(usersStudyRoomTimesMap, 'studyRoom');
+    calcUserStatsEach(usersFlashcardTimesMap, "flashcard");
+    calcUserStatsEach(usersPomodoroTimesMap, "pomodoro");
+    calcUserStatsEach(usersStudyRoomTimesMap, "studyRoom");
 
     // Calculate totalDuration and totalCount across all maps for each user
-    Object.keys(statisticsMap).forEach(username => {
+    Object.keys(statisticsMap).forEach((username) => {
       const userData = statisticsMap[username];
       userData.totalDuration = Object.values(userData).reduce((acc, curr) => {
-        if (typeof curr === 'object' && curr.totalDurationEach) {
+        if (typeof curr === "object" && curr.totalDurationEach) {
           return acc + curr.totalDurationEach;
         }
         return acc;
       }, 0);
       userData.totalCount = Object.values(userData).reduce((acc, curr) => {
-        if (typeof curr === 'object' && curr.countEach) {
+        if (typeof curr === "object" && curr.countEach) {
           return acc + curr.countEach;
         }
         return acc;
       }, 0);
     });
 
-    return statisticsMap
+    return statisticsMap;
   };
 
   const formatDuration = (milliseconds) => {
@@ -242,8 +309,15 @@ const Leaderboard = () => {
     const isAscending = currentSortDirection === 'asc';
 
     return (
-      <TableCell onClick={() => onClick(sortKey)} sx={{ cursor: 'pointer' }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+      <TableCell onClick={() => onClick(sortKey)} sx={{
+        cursor: 'pointer', borderBottom: '2px solid lightgrey'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontWeight: 'bold',
+          textAlign: 'center',
+        }}>
           <span>{label}</span>
           {isCurrentSortKey && (
             isAscending ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />
@@ -257,76 +331,233 @@ const Leaderboard = () => {
     <Container component="main" maxWidth="md">
       <CssBaseline />
       <Box sx={{ mb: 3, mt: 11, textAlign: 'center' }}>
-        <Typography component="h1" variant="h3">
+        <Typography component="h1" variant="h3" sx={{ mt: 1, mb: 1 }}>
           Leaderboards
         </Typography>
       </Box>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Rank</TableCell>
-              <TableCell>Username</TableCell>
-              <SortableHeader
-                label="Total Time Studied"
-                sortKey="studyTime"
-                currentSortKey={sortConfig.key}
-                currentSortDirection={sortConfig.direction}
-                onClick={handleSort}
-              />
-              <SortableHeader
-                label="Flashcards Study Time"
-                sortKey="flashcardTime"
-                currentSortKey={sortConfig.key}
-                currentSortDirection={sortConfig.direction}
-                onClick={handleSort}
-              />
-              <SortableHeader
-                label="Pomodoro Study Time"
-                sortKey="pomodoroTime"
-                currentSortKey={sortConfig.key}
-                currentSortDirection={sortConfig.direction}
-                onClick={handleSort}
-              />
-              <SortableHeader
-                label="Study Room Time"
-                sortKey="studyRoomTime"
-                currentSortKey={sortConfig.key}
-                currentSortDirection={sortConfig.direction}
-                onClick={handleSort}
-              />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {boardData.map((user, index) => (
-              <TableRow key={index}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{user.username}</TableCell>
-                <TableCell align="center">{user.studyTime}</TableCell>
-                <TableCell align="center">{user.flashcardTime}</TableCell>
-                <TableCell align="center">{user.pomodoroTime}</TableCell>
-                <TableCell align="center">{user.studyRoomTime}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
       <Box sx={{ mt: 3, textAlign: 'center' }}>
-        <Typography variant="h5" sx={{ mb: 3, mt: 2 }}>
-          Leaderboards by Category
-        </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 4 }}>
-          <Button variant="contained">
+          <Button variant="contained" onClick={() => setSelectedCategory('General')}>
+            General
+          </Button>
+          <Button variant="contained" onClick={() => setSelectedCategory('Flashcards')}>
             Flashcards
           </Button>
-          <Button variant="contained">
+          <Button variant="contained" onClick={() => setSelectedCategory('Pomodoro')}>
             Pomodoro
           </Button>
-          <Button variant="contained">
+          <Button variant="contained" onClick={() => setSelectedCategory('StudyRoom')}>
             Study Rooms
           </Button>
         </Box>
       </Box>
+
+      <TableContainer component={Paper} sx={{ mt: 1, mb: 10 }}>
+        {selectedCategory === 'General' &&
+          <Table sx={{ borderTop: '1px solid lightgrey' }}>
+            <TableHead>
+              <TableRow>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Rank</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Username</TableCell>
+                <SortableHeader
+                  label="Total Time Studied"
+                  sortKey="studyTime"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortTime}
+                />
+                <SortableHeader
+                  label="Total Flashcards Time"
+                  sortKey="flashcardTime"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortTime}
+                />
+                <SortableHeader
+                  label="Total Pomodoro Time"
+                  sortKey="pomodoroTime"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortTime}
+                />
+                <SortableHeader
+                  label="Total Study Room Time"
+                  sortKey="studyRoomTime"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortTime}
+                />
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {boardData.map((user, index) => (
+                <TableRow key={index}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{user.username}</TableCell>
+                  <TableCell align="center">{user.studyTime}</TableCell>
+                  <TableCell align="center">{user.flashcardTime}</TableCell>
+                  <TableCell align="center">{user.pomodoroTime}</TableCell>
+                  <TableCell align="center">{user.studyRoomTime}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        }
+
+        {selectedCategory === 'Flashcards' &&
+          <Table sx={{ borderTop: '1px solid lightgrey' }}>
+            <TableHead>
+              <TableRow>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Rank</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Username</TableCell>
+                <SortableHeader
+                  label="Total Number of Cards Studied"
+                  sortKey="numCardsStudied" // Use the appropriate key from your data
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortCount} // Use the new sorting handler
+                />
+                <SortableHeader
+                  label="Avgerage Study Time Per Card"
+                  sortKey="avgTimePerCard"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortTime}
+                />
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {boardData.map((user, index) => (
+                <TableRow key={index}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{user.username}</TableCell>
+                  <TableCell align="center">{user.numCardsStudied}</TableCell>
+                  <TableCell align="center">{user.avgTimePerCard}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        }
+
+        {selectedCategory === 'Pomodoro' &&
+          <Table sx={{ borderTop: '1px solid lightgrey' }}>
+            <TableHead>
+              <TableRow>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Rank</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Username</TableCell>
+                <SortableHeader
+                  label="Longest Duration of Pomodoro Sessions"
+                  sortKey="longestSessionDuration"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortTime}
+                />
+                <SortableHeader
+                  label="Total Number of Pomodoro Sessions"
+                  sortKey="numPomodoroSessions"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortCount}
+                />
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {boardData.map((user, index) => (
+                <TableRow key={index}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{user.username}</TableCell>
+                  <TableCell align="center">{user.longestSessionDuration}</TableCell>
+                  <TableCell align="center">{user.numPomodoroSessions}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        }
+
+        {selectedCategory === 'StudyRoom' &&
+          <Table sx={{ borderTop: '1px solid lightgrey' }}>
+            <TableHead>
+              <TableRow>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Rank</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    borderBottom: '2px solid lightgrey',
+                  }}
+                >Username</TableCell>
+                <SortableHeader
+                  label="Total Engagement in Study Room Chats"
+                  sortKey="engagement"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortCount}
+                />
+                <SortableHeader
+                  label="Average Time Spent in Study Rooms"
+                  sortKey="avgRoomTime"
+                  currentSortKey={sortConfig.key}
+                  currentSortDirection={sortConfig.direction}
+                  onClick={handleSortTime}
+                />
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {boardData.map((user, index) => (
+                <TableRow key={index}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{user.username}</TableCell>
+                  <TableCell align="center">{user.engagement}</TableCell>
+                  <TableCell align="center">{user.avgRoomTime}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        }
+
+      </TableContainer>
     </Container>
   );
 };
