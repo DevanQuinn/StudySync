@@ -13,16 +13,16 @@ import { grey } from '@mui/material/colors';
 import TimerBar from '../components/TimerBar.jsx';
 import useUser from '../hooks/useUser.jsx';
 import {
-	query,
-	where,
-	getFirestore,
-	collection,
-	getDocs,
-	getDoc,
-	setDoc,
-	doc,
-	addDoc,
-	deleteDoc,
+  query,
+  where,
+  getFirestore,
+  collection,
+  getDocs,
+  getDoc,
+  setDoc,
+  doc,
+  addDoc,
+  deleteDoc,
 } from 'firebase/firestore';
 import app from '../firebase.js';
 import { getAuth } from 'firebase/auth';
@@ -79,7 +79,7 @@ export default function Pomodoro() {
       });
   }, [timer]);
 
-   const addTreeToGarden = (treeType, quantity, studySeconds) => {
+  const addTreeToGarden = (treeType, quantity, studySeconds) => {
     if (user) {
       var username;
       if (user) { //if logged in
@@ -94,29 +94,32 @@ export default function Pomodoro() {
           getDoc(doc(db, "users", username)).then(usersnapshot => {
             console.log(usersnapshot);
             if (usersnapshot.data().trees == undefined || usersnapshot.data().trees[treeType] == undefined) {
-              setDoc(doc(db, "users", username), 
-                {trees : {[treeType] : Number(quantity)},
+              setDoc(doc(db, "users", username),
+                {
+                  trees: { [treeType]: Number(quantity) },
                 },
-                {merge:true}
+                { merge: true }
               )
             } else {
-              setDoc(doc(db, "users", username), 
-                {trees : 
-                  {[treeType] : (Number(usersnapshot.data().trees[treeType]) + Number(quantity))}},
-                {merge:true}
+              setDoc(doc(db, "users", username),
+                {
+                  trees:
+                    { [treeType]: (Number(usersnapshot.data().trees[treeType]) + Number(quantity)) }
+                },
+                { merge: true }
               )
             }
-            if (usersnapshot.data().totalStudySeconds == undefined ) {
-              setDoc(doc(db, "users", username), {totalStudySeconds : {studySeconds}}, {merge:true});
+            if (usersnapshot.data().totalStudySeconds == undefined) {
+              setDoc(doc(db, "users", username), { totalStudySeconds: { studySeconds } }, { merge: true });
             } else {
-              setDoc(doc(db, "users", username), {totalStudySeconds : usersnapshot.data().totalStudySeconds + studySeconds}, {merge:true})
+              setDoc(doc(db, "users", username), { totalStudySeconds: usersnapshot.data().totalStudySeconds + studySeconds }, { merge: true })
             }
           })
         })
       }
     }
   }
-  
+
   useEffect(() => {
     const uploadData = async () => {
       console.log("calling finish, do upload with time: ", totalStudyTime * 1000)
@@ -162,7 +165,7 @@ export default function Pomodoro() {
   }, [timer, breakTime, startTime, count]);
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs" sx={{ mt: 10 }}>
       <CssBaseline />
       <Box
         component={"form"}
@@ -215,20 +218,20 @@ export default function Pomodoro() {
         <Button
           fullWidth
           variant="contained"
-          sx={{ mt: 3, mb: 2 }}
+          sx={{ mt: 3, mb: 6 }}
           type='submit'
         >
           Set
         </Button>
-        <TimerBar 
-            percentDone={percentDone} 
-            studyState={study} 
-            treeSelection={treeSelection} 
-            updateTreeSelection={updateTreeSelection} 
-            addTreeToGarden={addTreeToGarden} 
-            studyTime={timer.getStartTime()}
-            disableStartButtonFunc={(val) => updateDisableStartButton(val)}  
-          />
+        <TimerBar
+          percentDone={percentDone}
+          studyState={study}
+          treeSelection={treeSelection}
+          updateTreeSelection={updateTreeSelection}
+          addTreeToGarden={addTreeToGarden}
+          studyTime={timer.getStartTime()}
+          disableStartButtonFunc={(val) => updateDisableStartButton(val)}
+        />
       </Box>
     </Container>
   );

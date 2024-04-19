@@ -563,7 +563,9 @@ const RoomDetailsPage = () => {
           username: user.displayName
         };
         try {
-          await addDoc(studyRoomCol, statsData);
+          if (statsData.durationMs < 36000000) {
+            await addDoc(studyRoomCol, statsData);
+          }
         } catch (error) {
           console.error('Error uploading user statistics:', error);
         }
