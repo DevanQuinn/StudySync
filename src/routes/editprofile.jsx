@@ -8,7 +8,7 @@ import {
     setDoc,
 } from 'firebase/firestore';
 import { getAuth, reauthenticateWithCredential, updatePassword, EmailAuthProvider } from 'firebase/auth';
-import { getStorage, getBlob, ref, uploadBytes } from 'firebase/storage';
+import { getStorage, getBlob, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import app from '../firebase';
 import { v4 as uuid } from 'uuid';
 import TreeDisplaySelector from '../components/treeDisplaySelector';
@@ -17,36 +17,21 @@ const EditProfile = () => {
     const auth = getAuth(app);
     const user = useUser(true);
     const db = getFirestore(app);
-    const docRef = user ? doc(db, `profile-data`, user.uid) : null;
+    const docRef = user ? doc(db, `users`, user.displayName) : null;
 
     const fetchProfileDataCalled = useRef(false);
     const storage = getStorage();
     const [userEmail, setUserEmail] = useState('');
     const [imageBlob, setImageBlob] = useState(null);
-    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', profilePicture: 'unset', profileVisibility: true });
+    const [profileData, setProfileData] = useState({ favorites: [], studyGoals: '', pfpID: 'unset', aboutMe: '', profileVisibility: true });
     const [studyGoals, setStudyGoals] = useState('');
     const [selectedFavorites, setSelectedFavorites] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageUrl, setImageUrl] = useState(null);
+    const [aboutMe, setAboutMe] = useState('');
     const favoritesOptions = ['Leaderboard', 'StudyRoom', 'Pomodoro', 'SpotifyPlaylists', 'Flashcards', 'Posts'];
     const [isPublicProfile, setIsPublicProfile] = useState(true); // State for public profile toggle
-    const [profileVisibility, setProfileVisibility] = useState(false);
-
-    // useEffect(() => {
-    //     const storedVisibility = localStorage.getItem('profileVisibility');
-    //     console.log("storedVisibility setting to localStorage", storedVisibility);
-    //     if (storedVisibility !== null) {
-    //         try {
-    //             setIsPublicProfile(JSON.parse(storedVisibility));
-    //             console.log("in try", JSON.parse(storedVisibility));
-    //         } catch (error) {
-    //             // Handle error parsing JSON
-    //             console.error('Error parsing JSON:', error);
-    //         }
-    //     } else {
-    //         console.log("storedVisibility is null or undefined");
-    //     }
-    // }, []);
+    const [profileVisibility, setProfileVisibility] = useState(true);
 
     useEffect(() => {
         const storedVisibility = localStorage.getItem('profileVisibility');
@@ -101,13 +86,14 @@ const EditProfile = () => {
 
 
     useEffect(() => {
-        setStudyGoals(profileData.studyGoals);
-        setSelectedFavorites(profileData.favorites);
+        setStudyGoals(profileData.studyGoals || '');
+        setSelectedFavorites(profileData.favorites || []);
+        setAboutMe(profileData.aboutMe || '');
 
         const loadImageBlob = async () => {
-            if (profileData.profilePicture && profileData.profilePicture != 'unset') {
+            if (profileData.pfpID && profileData.pfpID != 'unset') {
                 const storage = getStorage();
-                const pathReference = ref(storage, profileData.profilePicture);
+                const pathReference = ref(storage, `profile-pictures/${profileData.pfpID}`);
                 try {
                     // getting the binary data from the StorageReference path
                     const blob = await getBlob(pathReference);
@@ -127,7 +113,7 @@ const EditProfile = () => {
 
     const uploadProfileData = async profile => {
         if (user) {
-            const docRef = doc(db, `profile-data/`, `${user.uid}`);
+            const docRef = doc(db, `users/`, `${user.displayName}`);
             await setDoc(docRef, profile);
         }
     };
@@ -169,17 +155,18 @@ const EditProfile = () => {
         console.log({
             favorites: selectedFavorites,
             studyGoals: data.get('studyGoals'),
-            profilePicture: data.get('profilePicture'),
+            pfpID: data.get('profilePicture'),
             profileVisibility: profileVisibility, // Include the value of isPublicProfile in the form data
+            aboutMe: data.get('aboutMe')
         });
     };
 
     const uploadImage = async imageToUpload => {
         const imageId = uuid();
-        const storageRef = ref(storage, `profile-images/${imageId}`);
+        const storageRef = ref(storage, `profile-pictures/${imageId}`);
         await uploadBytes(storageRef, imageToUpload);
 
-        return storageRef.fullPath;
+        return imageId;
     };
 
     const handleImageChange = (event) => {
@@ -198,6 +185,10 @@ const EditProfile = () => {
         setStudyGoals(event.target.value);
     }
 
+    const handleAboutMeChange = (event) => {
+        setAboutMe(event.target.value);
+    }
+
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -205,13 +196,16 @@ const EditProfile = () => {
         if (selectedImage != null) {
             imagePath = await uploadImage(selectedImage);
         } else {
-            imagePath = profileData.profilePicture;
+            imagePath = profileData.pfpID;
         }
 
         var newData = {
             favorites: selectedFavorites,
             studyGoals: studyGoals,
-            profilePicture: imagePath,
+            pfpID: imagePath,
+            userID: user.uid,
+            username: user.displayName.toLowerCase(),
+            aboutMe: aboutMe,
             //Add profile visibility
             profileVisibility: profileVisibility // Add profileVisibility to newData
         }
@@ -291,6 +285,21 @@ const EditProfile = () => {
                         placeholder={studyGoals ? '' : 'Edit your study goals'}
                         value={studyGoals}
                         onChange={handleStudyGoalsChange}
+                    />
+                    <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
+                        About Me
+                    </Typography>
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        multiline
+                        rows={4}
+                        name='aboutMe'
+                        label="About Me"
+                        id="aboutMe"
+                        placeholder={aboutMe ? '' : 'Edit your about me'}
+                        value={aboutMe}
+                        onChange={handleAboutMeChange}
                     />
                     <Typography component="h6" variant="h6" sx={{ mt: 3, textAlign: 'left' }}>
                         Change Profile Picture
