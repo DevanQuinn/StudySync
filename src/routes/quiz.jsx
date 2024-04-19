@@ -7,6 +7,7 @@ const Quiz = () => {
     const flashcards = location.state?.flashcardList || [];
     const [userAnswers, setUserAnswers] = useState(Array(flashcards.length).fill(''));
     const [percentage, setPercentage] = useState(null);
+    const [showAnswers, setShowAnswers] = useState(false);
 
     const handleUserAnswerChange = (index, value) => {
         setUserAnswers(prevAnswers => {
@@ -30,7 +31,11 @@ const Quiz = () => {
             }
         }
         const percentage = (correctCount / flashcards.length) * 100;
-        setPercentage(percentage);
+        setPercentage(Math.round(percentage));
+    };
+
+    const revealAnswers = () => {
+        setShowAnswers(true);
     };
 
     return (
@@ -50,6 +55,11 @@ const Quiz = () => {
                                 <Typography variant="body1" gutterBottom>
                                     {flashcard.question}
                                 </Typography>
+                                {showAnswers && (
+                                    <Typography variant="body1" gutterBottom>
+                                        Answer: {flashcard.answer}
+                                    </Typography>
+                                )}
                                 <TextField
                                     id={`answer-${index}`}
                                     label="Your Answer"
@@ -61,10 +71,15 @@ const Quiz = () => {
                             </Box>
                         ))}
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 6, marginBottom: 6 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, marginBottom: 6 }}>
                         <Button variant="contained" color="primary" onClick={calculateCorrectPercentage}>
                             Calculate Grade
                         </Button>
+                        {percentage !== null && (
+                            <Button variant="contained" color="secondary" onClick={revealAnswers}>
+                                Reveal Answers
+                            </Button>
+                        )}
                     </Box>
                     {percentage !== null && (
                         <Typography variant="h4" gutterBottom align="center" style={{ marginBottom: 6 }}>
