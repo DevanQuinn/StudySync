@@ -1,5 +1,9 @@
 .configurator-wrapper {
   box-sizing: border-box;
-  background-color:gray;
-  color: black;
+  background-color: rgba(255, 255, 255, 0.9); /* Light transparency for soft appearance */
+  color: #333; /* Dark grey for readability */
+  border-radius: 10px; /* Adding rounded corners for a softer look */
+  padding: 20px; /* Adequate padding for content spacing */
+  border: 1px solid #ccc; /* Soft border for slight definition */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }

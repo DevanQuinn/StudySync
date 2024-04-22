@@ -1,6 +1,7 @@
 import StudyRoomUI from "./routes/StudyRoomUI.jsx"; 
 import React, { useState, useEffect } from 'react';
 import './App.css'; // Make sure to import your CSS file
+import { createRoot } from 'react-dom/client';
 
 
 

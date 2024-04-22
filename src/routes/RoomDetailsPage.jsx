@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import "../index.css"
+
 import { useParams } from 'react-router-dom';
 import { Typography, Button, Stack, Box, Slide, Menu, MenuItem, TextField, withTheme, withStyles, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Select } from '@mui/material';
 import RoomPomodoro from '../components/RoomPomodoro';
