@@ -34,7 +34,6 @@ const Navbar = () => {
 		{ title: 'Leaderboard', path: '/leaderboard' },
 		// { title: 'Tasklists', path: '/tasklists'},
 		{ title: 'Study Room', path: '/studyroom' },
-		{ title: 'Pomodoro', path: '/pomodoro' },
 		{ title: 'Flash Cards', path: '/flashcards' },
 		{ title: 'AddFriend', path: '/AddFriend' },
 	];

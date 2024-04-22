@@ -71,7 +71,7 @@ export default function Pomodoro() {
 
   useEffect(() => {
     timer
-      .ticker(({ formattedTime }) => {
+      .ticker(({ formattedTime, percentDone }) => {
         setTime(formattedTime);
         setPercentDone(percentDone);
       })
