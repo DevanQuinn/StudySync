@@ -86,7 +86,7 @@ const Posts = () => {
 				if (!dataMap[username]) {
 					dataMap[username] = [];
 				}
-				if (username === user.displayName.toLowerCase()) {
+				if (username === user.displayName) {
 					dataMap[username].push({
 						durationMs: Math.round(userData.durationMs / 1000) || 0,
 					});
