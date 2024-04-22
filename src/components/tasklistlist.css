@@ -1,23 +1,40 @@
+.header {
+  margin: 0.5em;
+  color: #333; /* Subdued text color for better integration */
+  font-size: 2em;
+  text-align: center;
+}
 
-  .header {
-    margin: 0.5em;
-    color: black;
-    font-size: 2em;
-    text-align: center;
-  }
-  .component-wrapper {
-    box-sizing: border-box;
-    text-align: center;
-    margin: auto auto;
-    border: 5px solid blue;
-    border-radius: 10px;
-    height: 75vh;
-    overflow-y: scroll;
-    color: black;
-    background-color: gray;
-  }
+.component-wrapper {
+  box-sizing: border-box;
+  text-align: center;
+  margin: auto;
+  padding: 20px;
+  border: 2px solid #0056b3; /* Softer blue color for the border */
+  border-radius: 10px;
+  height: 75vh;
+  overflow-y: auto; /* Better scrolling support */
+  color: #333; /* Consistent text color */
+  background-color: rgba(255, 255, 255, 0.8); /* Light transparency to blend with any background */
+}
 
-  .tasklist-page-wrapper {
-    margin-top: 10vh;
-    margin-bottom: 10vh;
-  }
+.tasklist-page-wrapper {
+  margin-top: 10vh;
+  margin-bottom: 10vh;
+  padding: 20px; /* Adding padding for better layout */
+}
+
+/* Styling for form and input to integrate with the rest of your application */
+.form {
+  text-align: center;
+  padding: 20px;
+}
+
+.input {
+  width: 80%; /* Adjust width to fill form */
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid #ccc; /* Softer border */
+  border-radius: 4px;
+  outline: none; /* Remove outline on focus */
+}
