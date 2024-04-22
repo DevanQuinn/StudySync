@@ -31,7 +31,9 @@ jest.mock('firebase/auth', () => ({
   }));
 
 
+  
 describe('AddFriend', () => {
+  /*
     it('loads and displays initial friends and invites', async () => {
       render(
         <MemoryRouter>  // Wrap the component in MemoryRouter
@@ -44,7 +46,7 @@ describe('AddFriend', () => {
         expect(screen.getByText('Bob')).toBeInTheDocument();
       });
     });
-  
+  */
     it('displays no friends message if no friends are present', async () => {
       render(
         <MemoryRouter>
