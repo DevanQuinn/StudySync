@@ -4,12 +4,15 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import * as firestore from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import '@testing-library/jest-dom';
 
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(),
   getDoc: jest.fn(),
   doc: jest.fn(),
-  onSnapshot: jest.fn()
+  onSnapshot: jest.fn(() => {
+    return () => {}; // returns an empty function for unsubscribing
+  })
 }));
 
 jest.mock('firebase/auth', () => ({
