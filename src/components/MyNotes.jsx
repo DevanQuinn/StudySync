@@ -58,8 +58,7 @@ const MyNotes = ({ variant }) => {
 		fetchNotes();
 	}, [user]);
 
-	if (!notes.length)
-		return <Typography>You don't have access to any notes.</Typography>;
+	if (!notes.length) return <Typography>No notes to display.</Typography>;
 
 	return (
 		<Container sx={{}}>

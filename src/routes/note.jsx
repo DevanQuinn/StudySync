@@ -92,7 +92,7 @@ const Note = () => {
 			type: 'collaborator',
 			added: serverTimestamp(),
 		});
-		alert('Successful');
+		alert(`Successfully added ${inviteInput} as a collaborator!`);
 		setInviteInput('');
 	};
 
