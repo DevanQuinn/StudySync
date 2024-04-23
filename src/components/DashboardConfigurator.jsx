@@ -13,8 +13,8 @@ const DashboardConfigurator = ({ initialPreference, preferenceCallback }) => {
   return (
     <div className="configurator-wrapper" style={{
       position: 'fixed',
-      top: '90px', // to make sure it's below the nav bar
-      right: '20px',
+      top: '75px', // to make sure it's below the nav bar
+      right: '10px',
       zIndex: '1000',
     }}>
       <form onSubmit={savePreferences}>
