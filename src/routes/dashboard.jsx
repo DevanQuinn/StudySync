@@ -92,7 +92,6 @@ function Dashboard() {
 
 	return (
 		<div>
-			<h1 style={{ textAlign: 'center', marginTop: '60px' }}>Welcome to Study Sync</h1>
 			<Box
 				sx={{
 					position: 'fixed',
@@ -153,7 +152,8 @@ function Dashboard() {
 				onClose={handleClose}
 				MenuListProps={{
 					'aria-labelledby': 'basic-button',
-				}}>
+				}}
+			>
 				<MenuItem onClick={handleCloseTask}>Tasklist</MenuItem>
 				<MenuItem onClick={handleClosePomo}>Pomodoro Timer</MenuItem>
 			</Menu>

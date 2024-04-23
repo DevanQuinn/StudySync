@@ -13,14 +13,14 @@ const DashboardConfigurator = ({ initialPreference, preferenceCallback }) => {
   return (
     <div className="configurator-wrapper" style={{
       position: 'fixed',
-      top: '75px', // to make sure it's below the nav bar
-      right: '10px',
+      top: '100px', // to make sure it's below the nav bar
+      right: '40px',
       zIndex: '1000',
     }}>
       <form onSubmit={savePreferences}>
-        <label for="colorpicker">Select background color:</label>
+        <label for="colorpicker">Select background color:&nbsp;&nbsp;</label>
         <input type="color" id="colorpicker" name="colorpicker" value={localPreferences.color} onChange={(e) => (setLocalPreferences({ ...localPreferences, color: e.target.value }))} />
-        <button type="submit">Apply</button>
+        &nbsp;&nbsp;&nbsp;<button type="submit">Apply</button>
       </form>
     </div>
   )
