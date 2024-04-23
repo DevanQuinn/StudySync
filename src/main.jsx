@@ -49,6 +49,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 					element={
 						<>
 							<Navbar />
+							<h1 style={{ textAlign: 'center', mt: 20, mb: 10 }}>Welcome to<br />Study Sync!</h1>
 							<Tasklists />
 						</>
 					}

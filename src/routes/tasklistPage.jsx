@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import DashboardConfigurator from '../components/DashboardConfigurator.jsx'
 import TasklistList from '../components/TasklistList.jsx'
 import RoomPomodoro from '../components/RoomPomodoro.jsx';
@@ -38,28 +38,28 @@ function TasklistsPage() {
 	const togglePomodoro = () => setShowPomodoro(!showPomodoro);
 	const [showTask, setShowTask] = useState(false);
 	const toggleTask = () => setShowTask(!showTask);
-	const defaultPreferences = {color:"#FFFFFF"};
+	const defaultPreferences = { color: "#FFFFFF" };
 	//should load preferences from user doc and reflect them
 	const [preferences, setPreferences] = useState(defaultPreferences);
 	const db = getFirestore(app)
 	const user = useUser();
 	const [favorites, setFavorites] = useState([]);
 	const [anchorEl, setAnchorEl] = useState(null);
-  	const open = Boolean(anchorEl);
-  	const handleClick = (event) => {   
+	const open = Boolean(anchorEl);
+	const handleClick = (event) => {
 		setAnchorEl(event.currentTarget);
-  	};
-  	const handleClosePomo = () => {
+	};
+	const handleClosePomo = () => {
 		togglePomodoro();
-    	setAnchorEl(null);
-  	};
+		setAnchorEl(null);
+	};
 	const handleCloseTask = () => {
 		toggleTask();
-    	setAnchorEl(null);
-  	};
+		setAnchorEl(null);
+	};
 	const handleClose = () => {
-    	setAnchorEl(null);
-  	};
+		setAnchorEl(null);
+	};
 
 	const savePreferences = () => {
 		var username;
@@ -71,7 +71,7 @@ function TasklistsPage() {
 				})
 			}).then(() => { //with username
 				const docRef = doc(db, 'users', username); //find user object. Usernames should be unique.
-				setDoc(docRef, {preferences:preferences}, {merge:true}); //update preferences
+				setDoc(docRef, { preferences: preferences }, { merge: true }); //update preferences
 			})
 		}
 	}
@@ -100,10 +100,10 @@ function TasklistsPage() {
 				})
 			}).then(() => { //with username
 				const docRef = doc(db, 'users', username); //find user object. usernames should be unique
-				setDoc(docRef, {}, {merge:true}).then(() => { //ensure that user object exists before trying to write to its properties
+				setDoc(docRef, {}, { merge: true }).then(() => { //ensure that user object exists before trying to write to its properties
 					getDoc(docRef).then((doc) => { //get that users properties
 						if (doc.data().preferences != undefined) {
-							setPreferences({color:doc.data().preferences.color}); //set the frontends properties equal to the database properties
+							setPreferences({ color: doc.data().preferences.color }); //set the frontends properties equal to the database properties
 						}
 					})
 				})
@@ -121,29 +121,30 @@ function TasklistsPage() {
 	useEffect(() => {
 		fetchFav();
 	}, [user])
-	
+
 
 	return (
 		<div className="tasklist-page-wrapper">
-		<Box
-		sx={{
-			position: 'fixed',
-			top: 60, 
-			left: 10
-		}}>
-			<TableContainer
-				component={Paper}
+			<Box
 				sx={{
-					mb: 5,
-					maxWidth: 400,
-					marginLeft: 'auto',
-					marginRight: 'auto',
-					mt: 2,
-					borderTop: '1px solid lightgrey',
-				}}
-			>
-				<Table sx={{ minWidth: 200 }}>
-					<TableHead>
+					position: 'fixed',
+					top: 60,
+					left: 10
+				}}>
+				<TableContainer
+					component={Paper}
+					sx={{
+						mb: 5,
+						maxWidth: 400,
+						marginLeft: 'auto',
+						marginRight: 'auto',
+						mt: 5,
+						ml: 4,
+						borderTop: '1px solid lightgrey',
+					}}
+				>
+					<Table sx={{ minWidth: 200 }}>
+						<TableHead>
 							<TableCell
 								sx={{
 									fontWeight: 'bold',
@@ -152,30 +153,30 @@ function TasklistsPage() {
 									borderRight: '1px solid lightgrey',
 								}}
 							>
-								Favorites
+								<h2>Favorites</h2>
 							</TableCell>
-				{favorites.map(favorite => (
-					<TableRow
-						component={Link} to ={"/" + favorite.toLowerCase()}
-						sx={{
-							borderBottom: '1px solid lightgrey',
-							borderRight: '1px solid lightgrey',
-							minWidth: 200,
-						}}
-							>
-							{favorite}
-						</TableRow>
-				))}
-					</TableHead>
-				</Table>
-			</TableContainer>
+							{favorites.map(favorite => (
+								<TableRow
+									component={Link} to={"/" + favorite.toLowerCase()}
+									sx={{
+										borderBottom: '1px solid lightgrey',
+										borderRight: '1px solid lightgrey',
+										minWidth: 200,
+									}}
+								>
+									{favorite}
+								</TableRow>
+							))}
+						</TableHead>
+					</Table>
+				</TableContainer>
 			</Box>
-			<Fab color="primary" aria-label="add"    id="basic-button"
+			<Fab color="primary" aria-label="add" id="basic-button"
 				aria-controls={open ? 'basic-menu' : undefined}
 				aria-haspopup="true"
 				aria-expanded={open ? 'true' : undefined}
-				onClick={handleClick} 
-				sx={{ position: 'fixed', bottom: 50, left:  50}}>
+				onClick={handleClick}
+				sx={{ position: 'fixed', bottom: 50, left: 50 }}>
 				<AddIcon />
 			</Fab>
 			<Menu
@@ -184,20 +185,20 @@ function TasklistsPage() {
 				open={open}
 				onClose={handleClose}
 				MenuListProps={{
-				'aria-labelledby': 'basic-button',
+					'aria-labelledby': 'basic-button',
 				}}>
 				<MenuItem onClick={handleCloseTask}>Tasklist</MenuItem>
 				<MenuItem onClick={handleClosePomo}>Pomodoro Timer</MenuItem>
-      		</Menu>
+			</Menu>
 			<Slide direction="up" in={showPomodoro} mountOnEnter unmountOnExit>
-       		 	<Box sx={{ position: 'fixed', bottom: 0, right: 0, zIndex: 1100 }}><RoomPomodoro /></Box>
-      		</Slide>
-			<DashboardConfigurator initialPreference={preferences} preferenceCallback={updatePreferences}/>
+				<Box sx={{ position: 'fixed', bottom: 16, right: '33%', zIndex: 1050 }}><RoomPomodoro /></Box>
+			</Slide>
+			<DashboardConfigurator initialPreference={preferences} preferenceCallback={updatePreferences} />
 			<Slide direction="up" in={showTask} mountOnEnter unmountOnExit>
-       		 	<Box><TasklistList className="component-wrapper"/></Box>
-      		</Slide>
+				<Box><TasklistList className="component-wrapper" /></Box>
+			</Slide>
 		</div>
-		
+
 	)
 }
 

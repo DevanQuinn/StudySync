@@ -31,24 +31,22 @@ const MusicChatBot = () => {
           align-items: center;
           justify-content: center;
           position: fixed;
-          bottom: 20px;
-          right: 20px;
-          background-color: #007bff;
-          color: #fff;
+          bottom: -35px;
+          right: 30px;
+          background-color: #1ec997;
+          color: #000000;
           width: 95px;
           height: 95px;
-          margin-bottom: 60px;
-          margin-right: -10px;
-          border-radius: 50%;
+          margin-bottom: 80px;
+          margin-right: 10px;
           cursor: pointer;
-          z-index: 9999;
+          z-index: 1049;
           transition: width 0.5s, height 0.5s;  // Add transition for smooth animation
         }
 
         .chat-icon.expanded {
           width: 300px;  // Increase width when expanded
           height: 300px;  // Increase height when expanded
-          border-radius: 15px;  // Change border radius when expanded
           padding: 10px;  // Add some padding for the expanded content
           text-align: center;  // Center the expanded content
         }
