@@ -1,8 +1,8 @@
 import ProgressBar from "@ramonak/react-progress-bar";
 import treeImages from './treeImages.jsx'
-import {Button} from '@mui/material'
-import {useState, useEffect} from 'react'
-const TimerBar = ({percentDone, studyState, treeSelection, updateTreeSelection, addTreeToGarden, studyTime, disableStartButtonFunc}) => {
+import { Button } from '@mui/material'
+import { useState, useEffect } from 'react'
+const TimerBar = ({ percentDone, studyState, treeSelection, updateTreeSelection, addTreeToGarden, studyTime, disableStartButtonFunc }) => {
     const [disableButton, updateDisableButton] = useState(false); //lock for tree selections
     const [timerNeverStarted, updateTimerNeverStarted] = useState(true); //flag to help keep tree selection buttons unlocked on initial load
     const [treeProgress, updateTreeProgress] = useState(0); //state to control tree growth progress
@@ -43,14 +43,14 @@ const TimerBar = ({percentDone, studyState, treeSelection, updateTreeSelection, 
     }, [percentDone, studyState])
 
     return (
-        <div style={{position:"relative"}}>
-            <ProgressBar completed={percentDone}/>
-            <TreeSelectionSlide studyTime={studyTime} treeProgress={treeProgress} treeSelection={treeSelection} disableStartButtonFunc={disableStartButtonFunc}/>
+        <div style={{ position: "relative" }}>
+            <ProgressBar completed={percentDone} />
+            <TreeSelectionSlide studyTime={studyTime} treeProgress={treeProgress} treeSelection={treeSelection} disableStartButtonFunc={disableStartButtonFunc} />
             <div>
-                <Button variant="contained" disabled={disableButton} sx={{ fontSize: '0.75rem', padding: '6px 12px' }} onClick={decrementTreeSelection}>
+                <Button variant="contained" disabled={disableButton} sx={{ fontSize: '0.75rem', padding: '6px 12px', mb: 1 }} onClick={decrementTreeSelection}>
                     Previous Tree
-                </Button>
-                <Button variant="contained" disabled={disableButton} sx={{ fontSize: '0.75rem', padding: '6px 12px' }} onClick={incrementTreeSelection}>
+                </Button>&nbsp;&nbsp;&nbsp;
+                <Button variant="contained" disabled={disableButton} sx={{ fontSize: '0.75rem', padding: '6px 12px', mb: 1 }} onClick={incrementTreeSelection}>
                     Next Tree
                 </Button>
             </div>
@@ -59,20 +59,22 @@ const TimerBar = ({percentDone, studyState, treeSelection, updateTreeSelection, 
 }
 export default TimerBar
 
-const TreeSelectionSlide = ({studyTime, treeProgress, treeSelection, disableStartButtonFunc}) => {
+const TreeSelectionSlide = ({ studyTime, treeProgress, treeSelection, disableStartButtonFunc }) => {
     if (treeSelection * 10 * 60 > studyTime) {
         disableStartButtonFunc(true);
         return (
             <div>
-                You need to study for at least {treeSelection*15*60} seconds to grow this tree!
+                You need to study for at least {treeSelection * 15 * 60} seconds to grow this tree!
             </div>
         )
     }
     disableStartButtonFunc(false);
     return (
         <div>
-            <img src={treeImages[treeSelection].tree} style={{opacity:treeProgress / 100}}/>
-            <img src={treeImages[treeSelection].sapling} style={{opacity:(1 - (treeProgress/100)), position:"absolute", top:0, left:0,}}/>
+            <center>
+                <img src={treeImages[treeSelection].tree} style={{ opacity: treeProgress / 100, maxHeight: 200, margin: 0, position: 'relative' }} />
+                <img src={treeImages[treeSelection].sapling} style={{ opacity: (1 - (treeProgress / 100)), margin: 0, left: '25%', maxHeight: 200, position: 'absolute' }} />
+            </center>
         </div>
     )
 }

@@ -191,7 +191,7 @@ function TasklistsPage() {
 				<MenuItem onClick={handleClosePomo}>Pomodoro Timer</MenuItem>
 			</Menu>
 			<Slide direction="up" in={showPomodoro} mountOnEnter unmountOnExit>
-				<Box sx={{ position: 'fixed', bottom: 0, right: 0, zIndex: 1100 }}><RoomPomodoro /></Box>
+				<Box sx={{ position: 'fixed', bottom: 16, right: '33%', zIndex: 1050 }}><RoomPomodoro /></Box>
 			</Slide>
 			<DashboardConfigurator initialPreference={preferences} preferenceCallback={updatePreferences} />
 			<Slide direction="up" in={showTask} mountOnEnter unmountOnExit>

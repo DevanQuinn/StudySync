@@ -169,77 +169,81 @@ export default function Pomodoro() {
 
   return (
     <Draggable>
-    <Container component="main" maxWidth="xs" sx={{ mt: 10 }}>
-      <CssBaseline />
-      <Box
-        border={1}
-        component={"form"}
-        flexDirection={"row"}
-        justifyContent={"center"}
-        gap={"20px"}
-        onSubmit={handleSubmit}
-        bgcolor={"white"}
-      >
-        <Typography variant="h4">
-          {study}
-        </Typography>
-        <Typography variant="h5">
-          {time}
-        </Typography>
-        <Stack spacing={5} direction="row" justifyContent={"center"}>
-          <Button
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            onClick={() => timer.start()}
-            data-testid="start-button"
-          >
-            Start
-          </Button>
-          <Button
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            onClick={() => timer.pause()}
-          >
-            Pause
-          </Button>
-        </Stack>
-        <TextField
-          margin="normal"
-          name='start-time'
-          label="Study Time"
-          type="text"
-          id="study-time"
-          placeholder='10:00'
-          color='primary'
-        />
-        <TextField
-          margin='normal'
-          name='short-break-time'
-          label="Short Break Time"
-          type="text"
-          id="short-break-time"
-          placeholder='10:00'
-          color='primary'
-        />
-        <Button
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 6 }}
-          type='submit'
+      <Container component="main" maxWidth="xs" sx={{ mt: 10 }}>
+        <CssBaseline />
+        <Box
+          border={1}
+          component={"form"}
+          flexDirection={"row"}
+          justifyContent={"center"}
+          gap={"20px"}
+          onSubmit={handleSubmit}
+          bgcolor={"white"}
+          sx={{ padding: 2 }}
         >
-          Set
-        </Button>
-        <TimerBar
-          percentDone={percentDone}
-          studyState={study}
-          treeSelection={treeSelection}
-          updateTreeSelection={updateTreeSelection}
-          addTreeToGarden={addTreeToGarden}
-          studyTime={timer.getStartTime()}
-          disableStartButtonFunc={(val) => updateDisableStartButton(val)}
-        />
-      </Box>
-    </Container>
+          <Typography variant="h4">
+            {study}
+          </Typography>
+          <Typography variant="h5">
+            {time}
+          </Typography>
+          <Stack spacing={5} direction="row" justifyContent={"center"}>
+            <Button
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              onClick={() => timer.start()}
+              data-testid="start-button"
+            >
+              Start
+            </Button>
+            <Button
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              onClick={() => timer.pause()}
+            >
+              Pause
+            </Button>
+          </Stack>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: -1 }}>
+            <TextField
+              margin="normal"
+              name='start-time'
+              label="Study Time"
+              type="text"
+              id="study-time"
+              placeholder='10:00'
+              color='primary'
+              sx={{ mr: 1 }}
+            />
+            <TextField
+              margin='normal'
+              name='short-break-time'
+              label="Short Break Time"
+              type="text"
+              id="short-break-time"
+              placeholder='10:00'
+              color='primary'
+              sx={{ ml: 1 }}
+            />
+          </Box>
+          <Button
+            variant="contained"
+            sx={{ mt: 2, mb: 2 }}
+            type='submit'
+          >
+            Set
+          </Button>
+          <TimerBar
+            percentDone={percentDone}
+            studyState={study}
+            treeSelection={treeSelection}
+            updateTreeSelection={updateTreeSelection}
+            addTreeToGarden={addTreeToGarden}
+            studyTime={timer.getStartTime()}
+            disableStartButtonFunc={(val) => updateDisableStartButton(val)}
+          />
+        </Box>
+      </Container>
     </Draggable>
   );
 }

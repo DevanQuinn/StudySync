@@ -40,7 +40,7 @@ const MusicChatBot = () => {
           margin-bottom: 80px;
           margin-right: 10px;
           cursor: pointer;
-          z-index: 9999;
+          z-index: 1049;
           transition: width 0.5s, height 0.5s;  // Add transition for smooth animation
         }
 
