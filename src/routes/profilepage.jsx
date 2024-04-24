@@ -12,11 +12,7 @@ import Container from '@mui/material/Container';
 import Copyright from '../components/Copyright.jsx';
 import app from '../firebase.js';
 import CardContent from '@mui/material/CardContent';
-import {
-	getDownloadURL,
-	getStorage,
-	ref,
-} from 'firebase/storage';
+import { getDownloadURL, getStorage, ref } from 'firebase/storage';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import CardMedia from '@mui/material/CardMedia';
@@ -40,31 +36,28 @@ export default function ProfilePage() {
 	const db = getFirestore(app);
 
 	const fetchData = async () => {
-		const docRef = doc(db, "users", username);
+		const docRef = doc(db, 'users', username);
 		const q = await getDoc(docRef);
 		const data = q.data();
-		const pathReference = ref(storage, `profile-pictures/${data.pfpID}`);
-		const url = await getDownloadURL(pathReference);
+		if (data.pfpId) {
+			const pathReference = ref(storage, `profile-pictures/${data.pfpID}`);
+			const url = await getDownloadURL(pathReference);
+			setImage(url);
+		}
 		setData(data);
-		setImage(url);
 	};
 
 	useEffect(() => {
 		fetchData();
 	}, [username]);
 
-
 	return (
-		<Container component="main" maxWidth="xs" sx={{ mt: 10 }}>
+		<Container component='main' maxWidth='xs' sx={{ mt: 10 }}>
 			<Box>
 				<Card>
-					<CardMedia
-						component="img"
-						height="200"
-						src={image}
-					/>
+					<CardMedia component='img' height='200' src={image} />
 					<CardContent>
-						<Typography gutterBottom variant="h5" component="div">
+						<Typography gutterBottom variant='h5' component='div'>
 							{username}
 						</Typography>
 					</CardContent>
@@ -97,7 +90,7 @@ export default function ProfilePage() {
 							sx={{
 								borderBottom: '1px solid lightgrey',
 								borderRight: '1px solid lightgrey',
-								minWidth: 500
+								minWidth: 500,
 							}}
 						>
 							{data.aboutMe}
@@ -132,7 +125,7 @@ export default function ProfilePage() {
 							sx={{
 								borderBottom: '1px solid lightgrey',
 								borderRight: '1px solid lightgrey',
-								minWidth: 500
+								minWidth: 500,
 							}}
 						>
 							{data.studyGoals}
