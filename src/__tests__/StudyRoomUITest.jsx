@@ -142,7 +142,7 @@ test('adds a invitation to the database successfully', async () => {
   
     // Assertion: Verify the invitation exists in the database
     const querySnapshot = await db.collection('invitations').where('roomId', '==', 'mock-room-id').get();
-    expect(querySnapshot.docs.find(doc => doc.data().invitedUserDisplayName === 'friend1')).not.toBeUndefined();
+    expect(querySnapshot.docs.find(doc => doc.data().inviterUserId === 'friend1')).not.toBeUndefined();
   });
   
  //Testing single invitation deletion
